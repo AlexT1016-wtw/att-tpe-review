@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<data>
+  <row>
+    <att_atttestplanexecutionid>bc936de7-6444-f111-88b4-6045bdef4434</att_atttestplanexecutionid>
+    <att_clientref>dcdf1a89-274e-ef11-a317-6045bddb40df</att_clientref>
+    <att_clientrefname>Automated Testing Tool (H-BC4)</att_clientrefname>
+    <att_duedate />
+    <att_environment>QA</att_environment>
+    <att_executionend>2026-04-30 07:22:00.0000000</att_executionend>
+    <att_executionstart>2026-04-30 07:19:27.0000000</att_executionstart>
+    <att_executiontype>751530001</att_executiontype>
+    <att_executiontypename>Test Plan</att_executiontypename>
+    <att_id>TPE-2776</att_id>
+    <att_istestcaseadditioncomplete>1</att_istestcaseadditioncomplete>
+    <att_istestcaseadditioncompletename>Yes</att_istestcaseadditioncompletename>
+    <att_name>Test Plan - 01 - ATT-Automated Testing Tool (H-BC4)</att_name>
+    <att_overrideparameters>[{"ID":"","ParameterName":"","ParameterValue":"","TestCaseName":""}]</att_overrideparameters>
+    <att_planyear>2026</att_planyear>
+    <att_requestedby>c1f5e6fa-c213-f011-998a-000d3a109097</att_requestedby>
+    <att_requestedbyname>Alex Tonog</att_requestedbyname>
+    <att_requestedbyyominame>Alex Tonog</att_requestedbyyominame>
+    <att_reviewcomments />
+    <att_reviewdate />
+    <att_reviewedby />
+    <att_reviewedbyname />
+    <att_reviewedbyyominame />
+    <att_reviewer />
+    <att_reviewername />
+    <att_revieweryominame />
+    <att_reviewrequestedby />
+    <att_reviewrequestedbyname />
+    <att_reviewrequestedbyyominame />
+    <att_runtimeparameters>[{"CanShowTestcaseUI":"No","DataType":"SMALLINT","Description":null,"Name":"PlanYear","Value":"2026"},{"CanShowTestcaseUI":"No","DataType":"SMALLINT","Description":null,"Name":"SpecialGroupId","Value":"-1"},{"CanShowTestcaseUI":"No","DataType":"INT","Description":null,"Name":"PersonId","Value":"-1"}]</att_runtimeparameters>
+    <att_templatetype>804660001</att_templatetype>
+    <att_templatetypename>Multiple</att_templatetypename>
+    <att_testplan>f1353891-6444-f111-88b3-7c1e52813c79</att_testplan>
+    <att_testplanexecutionreference />
+    <att_testplanexecutionreferencename />
+    <att_testplanname>Test Plan - 01 - ATT</att_testplanname>
+    <att_testtrackerid />
+    <att_testtrackerurl />
+    <att_totalawaitingdecision>1</att_totalawaitingdecision>
+    <att_totalcompleted>5</att_totalcompleted>
+    <att_totalfailed>4</att_totalfailed>
+    <att_totalpassed>0</att_totalpassed>
+    <att_totaltestcases>5</att_totaltestcases>
+    <createdby>84ddd4fe-2223-ef11-840a-000d3a8c0bd7</createdby>
+    <createdbyname>BDAOUT-AUTOMATEDTESTINGTOOL-D-APPREG</createdbyname>
+    <createdbyyominame>BDAOUT-AUTOMATEDTESTINGTOOL-D-APPREG</createdbyyominame>
+    <createdon>2026-04-30 07:19:27.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>84ddd4fe-2223-ef11-840a-000d3a8c0bd7</modifiedby>
+    <modifiedbyname>BDAOUT-AUTOMATEDTESTINGTOOL-D-APPREG</modifiedbyname>
+    <modifiedbyyominame>BDAOUT-AUTOMATEDTESTINGTOOL-D-APPREG</modifiedbyyominame>
+    <modifiedon>2026-04-30 07:22:00.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>751530003</statuscode>
+    <statuscodename>Completed</statuscodename>
+    <timezoneruleversionnumber>4</timezoneruleversionnumber>
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+</data>

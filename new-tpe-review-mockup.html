@@ -1,0 +1,2204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>WTW • Execution Review</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Highlight.js (SQL) -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/languages/sql.min.js"></script>
+
+    <style>
+      :root {
+        --powerapps-purple: #742774;
+        --wtw-purple: #6f2dbd;
+        --wtw-purple-700: #5b239b;
+        --wtw-ink: #1f1f1f;
+        --wtw-muted: #6b7280;
+        --wtw-border: #e5e7eb;
+        --wtw-surface: #ffffff;
+        --wtw-bg: #f6f7fb;
+        --wtw-success: #14804a;
+        --wtw-danger: #b42318;
+        --wtw-warning: #b54708;
+        --radius: 14px;
+        --sidebar-width: 200px;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        background: var(--wtw-bg);
+        color: var(--wtw-ink);
+        font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+        margin: 0; padding: 0; overflow: hidden;
+      }
+
+      .powerapps-header {
+        background: var(--powerapps-purple);
+        color: white; height: 48px;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 16px; position: fixed; top: 0; left: 0; right: 0;
+        z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .powerapps-sidebar {
+        position: fixed; top: 48px; left: 0;
+        width: var(--sidebar-width); height: calc(100vh - 48px);
+        background: #f3f2f1; border-right: 1px solid #d1d1d1;
+        overflow-y: auto; z-index: 900; transition: transform 0.3s ease;
+      }
+      .powerapps-sidebar.collapsed { transform: translateX(calc(-1 * var(--sidebar-width))); }
+
+      .powerapps-sidebar-section { padding: 0; margin: 8px 0; }
+      .powerapps-sidebar-header { padding: 8px 16px; font-size: 11px; font-weight: 600; color: #605e5c; text-transform: uppercase; letter-spacing: 0.5px; }
+      .powerapps-sidebar-item { padding: 8px 16px 8px 32px; font-size: 13px; color: #323130; cursor: pointer; transition: background 0.15s ease; border-left: 3px solid transparent; }
+      .powerapps-sidebar-item:hover { background: #edebe9; }
+      .powerapps-sidebar-item.active { background: #e1dfdd; border-left-color: var(--powerapps-purple); font-weight: 600; }
+
+      .powerapps-main {
+        margin-top: 48px; margin-left: var(--sidebar-width);
+        height: calc(100vh - 48px); overflow: hidden; transition: margin-left 0.3s ease;
+      }
+      .powerapps-main.sidebar-collapsed { margin-left: 0; }
+
+      .btn-wtw { --bs-btn-bg: var(--wtw-purple); --bs-btn-border-color: var(--wtw-purple); --bs-btn-hover-bg: var(--wtw-purple-700); --bs-btn-hover-border-color: var(--wtw-purple-700); --bs-btn-color: #fff; --bs-btn-hover-color: #fff; }
+      .btn-wtw-outline { --bs-btn-color: var(--wtw-purple); --bs-btn-border-color: var(--wtw-purple); --bs-btn-hover-bg: rgba(111,45,189,0.08); --bs-btn-hover-border-color: var(--wtw-purple-700); }
+      .bg-wtw-purple { background-color: var(--wtw-purple) !important; color: #fff; }
+
+      .card { border: 1px solid var(--wtw-border); border-radius: var(--radius); box-shadow: 0 1px 0 rgba(16,24,40,0.02); }
+      .section-title { font-weight: 700; letter-spacing: 0.2px; }
+      .subtle { color: var(--wtw-muted); }
+
+      .app-shell { max-width: 100%; margin: 0; padding: 18px 14px; height: 100%; overflow-y: auto; }
+
+      #screenReview .header-fixed { position: sticky; top: 0; z-index: 100; background: var(--wtw-bg); padding-bottom: 14px; }
+      #reviewLayout { height: calc(100vh - 220px); overflow: hidden; }
+
+      .review-grid { display: grid; grid-template-columns: 36% 64%; height: 100%; align-items: stretch; }
+      .sidebar-collapsed .review-grid { grid-template-columns: 0 100%; }
+
+      .sidebar { height: 100%; overflow-y: scroll; overflow-x: hidden; transition: width 0.2s ease, opacity 0.2s ease; scrollbar-gutter: stable; }
+      .sidebar-collapsed .sidebar { opacity: 0; pointer-events: none; width: 0; }
+
+      .main-panel { height: 100%; overflow-y: scroll; overflow-x: hidden; scrollbar-gutter: stable; }
+
+      .sidebar, .main-panel { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.5) rgba(0,0,0,0.1); }
+      .sidebar::-webkit-scrollbar, .main-panel::-webkit-scrollbar { width: 10px; }
+      .sidebar::-webkit-scrollbar-track, .main-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 5px; }
+      .sidebar::-webkit-scrollbar-thumb, .main-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.4); border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+
+      .tc-row { border: 1px solid var(--wtw-border); border-radius: 12px; padding: 10px 12px; background: #fff; cursor: pointer; transition: transform 0.05s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
+      .tc-row:hover { border-color: rgba(111,45,189,0.35); box-shadow: 0 8px 20px rgba(16,24,40,0.06); }
+      .tc-row.active { border-color: var(--wtw-purple); box-shadow: 0 10px 24px rgba(111,45,189,0.12); outline: 2px solid rgba(111,45,189,0.1); }
+
+      .badge-soft { border: 1px solid var(--wtw-border); background: #fff; color: var(--wtw-muted); font-weight: 600; }
+      .badge-approved, .badge-passed { border-color: rgba(20,128,74,0.25); background: rgba(20,128,74,0.08); color: var(--wtw-success); }
+      .badge-rejected, .badge-failed { border-color: rgba(180,35,24,0.25); background: rgba(180,35,24,0.08); color: var(--wtw-danger); }
+      .badge-pending { border-color: rgba(181,71,8,0.25); background: rgba(181,71,8,0.08); color: var(--wtw-warning); }
+      .badge-overridden { border-color: rgba(111,45,189,0.25); background: rgba(111,45,189,0.08); color: var(--wtw-purple); }
+      .badge-reexecute { border-color: rgba(59,130,246,0.25); background: rgba(59,130,246,0.08); color: #2563eb; }
+      .badge-uservalidation { border-color: rgba(181,71,8,0.25); background: rgba(181,71,8,0.08); color: var(--wtw-warning); }
+
+      /* Code editor */
+      .code-editor { position: relative; border: 1px solid var(--wtw-border); border-radius: 12px; overflow: hidden; background: #0b1020; }
+      .code-editor pre { margin: 0; padding: 12px 14px; min-height: auto; max-height: 300px; overflow: auto; font-size: 13px; line-height: 1.5; background: transparent; }
+      .code-editor textarea { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; resize: none; padding: 12px 14px; font-size: 13px; line-height: 1.5; background: transparent; color: transparent; caret-color: #ffffff; outline: none; overflow: auto; white-space: pre; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+      .code-editor .hljs { background: transparent; color: #e5e7eb; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+      .language-sql { padding: 0 !important; margin: 0 !important; }
+
+      /* Fullscreen modal */
+      .fullscreen-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0); z-index: 9999; padding: 20px; overflow: auto; opacity: 0; transition: opacity 0.15s linear, background 0.15s linear; }
+      .fullscreen-modal.active { display: block; }
+      .fullscreen-modal.show { opacity: 1; background: rgba(0,0,0,0.95); }
+      .fullscreen-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: #fff; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+      .fullscreen-modal.show .fullscreen-modal-header { transform: scale(1); }
+      .fullscreen-modal-body { height: calc(100vh - 100px); transform: scale(0.9); opacity: 0; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s linear; }
+      .fullscreen-modal.show .fullscreen-modal-body { transform: scale(1); opacity: 1; }
+      .fullscreen-code-editor { position: relative; border: 1px solid #333; border-radius: 12px; overflow: hidden; background: #0b1020; height: 100%; }
+      .fullscreen-code-editor pre { margin: 0; padding: 20px; height: 100%; overflow: auto; font-size: 16px; line-height: 1.6; background: transparent !important; }
+      .fullscreen-code-editor pre code { background-color: transparent !important; }
+      .fullscreen-code-editor textarea { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; resize: none; padding: 20px; font-size: 16px; line-height: 1.6; background: transparent; color: transparent; caret-color: #ffffff; outline: none; overflow: auto; white-space: pre; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+      /* Completion / Sign-off Banner */
+      .completion-banner { display: none; background: linear-gradient(135deg, #14804a 0%, #16a34a 100%); color: white; border: none; border-radius: var(--radius); padding: 24px 28px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(20,128,74,0.25); }
+      .completion-banner.show { display: block; animation: slideDown 0.3s ease-out; }
+      @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+      .completion-banner h4 { font-weight: 600; color: white; font-size: 1.25rem; }
+      .completion-banner p { color: rgba(255,255,255,0.95); font-size: 0.95rem; }
+      .completion-banner .btn { font-weight: 600; min-width: 140px; border: 2px solid transparent; }
+
+      /* Filter/Sort active states */
+      .filter-btn.active { background: var(--powerapps-purple) !important; color: white !important; border-color: var(--powerapps-purple) !important; }
+      .sort-btn.active { background: var(--powerapps-purple) !important; color: white !important; border-color: var(--powerapps-purple) !important; }
+
+      /* Tabs styling */
+      .detail-tabs .nav-link { font-size: 0.85rem; font-weight: 500; color: var(--wtw-muted); border: none; padding: 8px 16px; }
+      .detail-tabs .nav-link.active { color: var(--wtw-purple); border-bottom: 3px solid var(--wtw-purple); font-weight: 600; background: transparent; }
+      .detail-tabs .nav-link:hover:not(.active) { color: var(--wtw-ink); border-bottom: 2px solid var(--wtw-border); }
+      .detail-tabs { border-bottom: 1px solid var(--wtw-border); }
+
+      /* General info grid */
+      .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+      .info-grid .info-left { border-right: 1px solid var(--wtw-border); padding-right: 20px; }
+      .info-grid .info-right { padding-left: 20px; }
+      .info-row { display: flex; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--wtw-border); }
+      .info-row:last-child { border-bottom: none; }
+      .info-label { font-weight: 600; color: var(--wtw-muted); min-width: 140px; font-size: 0.85rem; }
+      .info-value { font-size: 0.9rem; }
+      .info-value.text-danger { color: var(--wtw-danger) !important; font-weight: 600; }
+      .info-value.text-warning-custom { color: var(--wtw-warning) !important; font-weight: 600; }
+
+      /* Actions section */
+      .actions-section { border-top: 2px solid var(--wtw-border); padding-top: 16px; margin-top: 16px; }
+      .actions-section h6 { color: var(--wtw-purple); font-weight: 700; margin-bottom: 12px; }
+
+      /* Results table */
+      .results-table { font-size: 0.85rem; }
+      .results-table th { background: var(--wtw-bg); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.3px; }
+
+      /* Bulk action checkbox */
+      .tc-row .form-check-input { width: 16px; height: 16px; margin-top: 2px; }
+      .bulk-bar { background: var(--wtw-purple); color: white; border-radius: 8px; padding: 8px 14px; display: none; align-items: center; gap: 10px; }
+      .bulk-bar.show { display: flex; }
+
+      /* Sign-off disabled state */
+      .btn-signoff:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      /* History timeline */
+      .history-item { border-left: 3px solid var(--wtw-border); padding-left: 12px; margin-bottom: 12px; }
+      .history-item.current { border-left-color: var(--wtw-purple); }
+
+      @media (max-width: 992px) {
+        .review-grid { grid-template-columns: 1fr; }
+        .sidebar-collapsed .review-grid { grid-template-columns: 1fr; }
+        .info-grid { grid-template-columns: 1fr; }
+        .info-grid .info-left { border-right: none; padding-right: 0; border-bottom: 1px solid var(--wtw-border); padding-bottom: 12px; }
+        .info-grid .info-right { padding-left: 0; padding-top: 12px; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- PowerApps Sidebar -->
+    <aside class="powerapps-sidebar" id="powerappsSidebar">
+      <div class="powerapps-sidebar-section">
+        <div class="powerapps-sidebar-header">Test Plan Management</div>
+        <div class="powerapps-sidebar-item">Test Plans</div>
+      </div>
+      <div class="powerapps-sidebar-section">
+        <div class="powerapps-sidebar-header">Test Case Management</div>
+        <div class="powerapps-sidebar-item">Test Cases</div>
+        <div class="powerapps-sidebar-item">Create SQL Testcase</div>
+        <div class="powerapps-sidebar-item">Create Action Testcases</div>
+      </div>
+      <div class="powerapps-sidebar-section">
+        <div class="powerapps-sidebar-header">Test Case Execution</div>
+        <div class="powerapps-sidebar-item active">Test Plan Executions</div>
+      </div>
+      <div class="powerapps-sidebar-section">
+        <div class="powerapps-sidebar-header">Miscellaneous</div>
+        <div class="powerapps-sidebar-item">Announcements</div>
+        <div class="powerapps-sidebar-item">Submit Feedback</div>
+        <div class="powerapps-sidebar-item">Clear Cache</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="powerapps-main" id="powerappsMain">
+      <main class="app-shell" id="appRoot">
+
+        <!-- ========== SCREEN 1: Execution Entry Page (US2) ========== -->
+        <section id="screenWelcome">
+          <div class="row g-3 align-items-stretch">
+            <div class="col-12 col-lg-8">
+              <div class="card p-4 h-100">
+                <div class="d-flex align-items-start justify-content-between gap-3">
+                  <div>
+                    <h4 class="mb-1 section-title">Execution Review</h4>
+                    <p class="subtle mb-0">Review the test case executions in this plan execution. Investigate failures, override or re-execute as needed, then sign off.</p>
+                  </div>
+                </div>
+                <hr class="my-3" />
+                <div class="row g-3">
+                  <div class="col-12">
+                    <div class="subtle small">Test Plan Name</div>
+                    <div class="fw-semibold" id="welcomePlanName">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Execution ID</div>
+                    <div class="fw-semibold" id="welcomeExecId">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Executor</div>
+                    <div class="fw-semibold" id="welcomeExecutor">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Environment</div>
+                    <div class="fw-semibold" id="welcomeEnvironment">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Execution Date</div>
+                    <div class="fw-semibold" id="welcomeExecDate">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small"><i class="bi bi-check-circle text-success me-1"></i>Passed</div>
+                    <div class="fw-semibold text-success" id="welcomePassedCount">0</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small"><i class="bi bi-x-circle text-danger me-1"></i>Failed</div>
+                    <div class="fw-semibold text-danger" id="welcomeFailedCount">0</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small"><i class="bi bi-exclamation-circle text-warning me-1"></i>User Validation</div>
+                    <div class="fw-semibold" style="color:var(--wtw-warning)" id="welcomeUVCount">0</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small"># Test Cases</div>
+                    <div class="fw-semibold" id="welcomeTotalCount">0</div>
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                  <button class="btn btn-wtw px-4" id="btnStartReview">
+                    <i class="bi bi-play-fill me-1"></i>Start Review
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-4">
+              <div class="card p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h5 class="mb-0 section-title">What to expect</h5>
+                  <i class="bi bi-shield-check" style="color: var(--wtw-purple); font-size: 1.25rem"></i>
+                </div>
+                <ul class="mt-3 mb-0 subtle small">
+                  <li>Failed test cases are surfaced first for investigation.</li>
+                  <li>View execution results, parameters, and debug SQL inline.</li>
+                  <li>Override failed tests (with mandatory comment) or mark for re-execution.</li>
+                  <li>Bulk approve passed test cases for faster review.</li>
+                  <li>Sign off the execution once all test cases pass or are overridden.</li>
+                  <li>Send to Test Tracker only after successful sign-off.</li>
+                </ul>
+                <div class="mt-3">
+                  <div class="small subtle mb-2">Test Case Executions:</div>
+                  <div class="small" style="max-height: 120px; overflow-y: auto" id="testCaseNamesList">
+                    <div class="text-muted">Loading...</div>
+                  </div>
+                </div>
+                <hr class="my-3" />
+                <div class="small subtle">Tips:</div>
+                <ul class="small fw-semibold">
+                  <li>Use the <i class="bi bi-list"></i> button to collapse/expand the list.</li>
+                  <li>Use tabs to navigate between General Info, Results, Parameters, and Query.</li>
+                  <li>Copy SQL to clipboard from the Query tab for external validation.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== SCREEN 2: Review Workbench ========== -->
+        <section id="screenReview" class="d-none">
+          <!-- Sign-off Banner -->
+          <div class="completion-banner alert" id="completionBanner">
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <div class="flex-grow-1">
+                <h4 class="mb-2"><i class="bi bi-check-circle-fill me-2"></i>Ready for Sign-off!</h4>
+                <p class="mb-0">All test case executions have been reviewed. You can now sign off this execution.</p>
+                <div class="small mt-2" id="overriddenSummary" style="display:none">
+                  <i class="bi bi-exclamation-triangle me-1"></i><strong>Overridden tests:</strong> <span id="overriddenList"></span>
+                </div>
+              </div>
+              <div class="d-flex gap-2 flex-shrink-0">
+                <button class="btn btn-light fw-semibold" id="btnSignOffBanner">
+                  <i class="bi bi-pen me-1"></i>Sign Off Execution
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Header -->
+          <div class="header-fixed">
+            <div class="card p-3">
+              <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center gap-2">
+                  <button class="btn btn-sm btn-light border" id="btnToggleSidebar" title="Toggle test case list">
+                    <i class="bi bi-list"></i>
+                  </button>
+                  <div>
+                    <div class="subtle small">Execution Review</div>
+                    <div class="fw-bold" id="planTitleTop">—</div>
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span class="badge badge-soft px-3 py-2" id="progressBadge">0 / 0 reviewed</span>
+                  <button class="btn btn-sm btn-success btn-signoff" id="btnSignOff" disabled title="Sign off requires all tests passed or overridden">
+                    <i class="bi bi-pen me-1"></i>Sign Off
+                  </button>
+                  <button class="btn btn-sm btn-info text-white" id="btnSendTracker" disabled title="Send to Test Tracker (requires sign-off)">
+                    <i class="bi bi-send me-1"></i>Send to Tracker
+                  </button>
+                  <button class="btn btn-sm btn-light border" id="btnBackToWelcome" title="Back">
+                    <i class="bi bi-arrow-left"></i> Back
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="reviewLayout">
+            <div class="review-grid">
+              <!-- Left: Test Case Execution List (US3) -->
+              <aside class="sidebar me-2">
+                <div class="card p-3">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                      <div class="subtle small">Queue</div>
+                      <div class="section-title">Test Case Executions</div>
+                    </div>
+                    <span class="badge badge-soft" id="pendingCountBadge">Pending: 0</span>
+                  </div>
+
+                  <div class="mt-3 d-flex gap-2">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white border"><i class="bi bi-search"></i></span>
+                      <input class="form-control border" id="tcSearch" placeholder="Search test cases..." />
+                    </div>
+                    <button class="btn btn-sm btn-light border" id="btnClearSearch" title="Clear"><i class="bi bi-x-lg"></i></button>
+                  </div>
+
+                  <div class="mt-3 d-flex flex-wrap gap-2">
+                    <button class="btn btn-sm btn-light border filter-btn active" data-filter="ALL">All <span class="badge bg-secondary ms-1" id="countAll">0</span></button>
+                    <button class="btn btn-sm btn-light border filter-btn" data-filter="PENDING">Pending <span class="badge bg-warning text-dark ms-1" id="countPending">0</span></button>
+                    <button class="btn btn-sm btn-light border filter-btn" data-filter="FAILED">Failed <span class="badge bg-danger ms-1" id="countFailed">0</span></button>
+                    <button class="btn btn-sm btn-light border filter-btn" data-filter="APPROVED">Approved <span class="badge bg-success ms-1" id="countApproved">0</span></button>
+                    <button class="btn btn-sm btn-light border filter-btn" data-filter="OVERRIDDEN">Overridden <span class="badge ms-1" style="background:var(--wtw-purple);color:white" id="countOverridden">0</span></button>
+                  </div>
+
+                  <!-- Bulk action bar -->
+                  <div class="mt-2 bulk-bar" id="bulkBar">
+                    <span class="small"><span id="bulkCount">0</span> selected</span>
+                    <button class="btn btn-sm btn-light" id="btnBulkApprove"><i class="bi bi-check2-all me-1"></i>Bulk Approve</button>
+                    <button class="btn btn-sm btn-outline-light" id="btnBulkCancel"><i class="bi bi-x-lg"></i></button>
+                  </div>
+
+                  <div class="mt-3 d-grid gap-2" id="tcList"></div>
+                </div>
+              </aside>
+
+              <!-- Right: Detail Panel with Tabs (US4) -->
+              <section class="main-panel">
+                <div class="card p-3">
+                  <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
+                    <div>
+                      <div class="subtle small">Selected Test Case Execution</div>
+                      <h5 class="mb-0 section-title" id="tcNameHeading">—</h5>
+                    </div>
+                    <div class="d-flex gap-2" id="historyBtnContainer" style="display:none!important">
+                      <button class="btn btn-sm btn-light border" id="btnViewHistory" disabled><i class="bi bi-clock-history me-1"></i>History</button>
+                    </div>
+                  </div>
+
+                  <!-- Tab Navigation -->
+                  <div class="d-flex align-items-center">
+                    <ul class="nav detail-tabs flex-grow-1" id="detailTabs">
+                      <li class="nav-item"><a class="nav-link active" data-tab="general" href="#">General Information</a></li>
+                      <li class="nav-item tab-sql"><a class="nav-link" data-tab="results" href="#">Results</a></li>
+                      <li class="nav-item tab-action" style="display:none"><a class="nav-link" data-tab="verificationresults" href="#">Verification Results</a></li>
+                      <li class="nav-item tab-action" style="display:none"><a class="nav-link" data-tab="phaseresults" href="#">Phase Results</a></li>
+                      <li class="nav-item tab-sql"><a class="nav-link" data-tab="uservalidation" href="#">User Validation</a></li>
+                      <li class="nav-item"><a class="nav-link" data-tab="parameter" href="#">Parameter</a></li>
+                      <li class="nav-item tab-sql"><a class="nav-link" data-tab="condition" href="#">Condition</a></li>
+                      <li class="nav-item tab-sql"><a class="nav-link" data-tab="query" href="#">Query</a></li>
+                    </ul>
+                    <span class="badge bg-wtw-purple ms-2" id="badgeResolvingFail" style="display:none;font-size:0.8rem">Resolving Fail</span>
+                  </div>
+
+                  <!-- Tab Content -->
+                  <div class="tab-content mt-3" id="tabContent">
+                    <!-- General Information Tab -->
+                    <div class="tab-pane" id="tab-general" style="display:block">
+                      <div class="info-grid">
+                        <div class="info-left">
+                          <div class="info-row"><span class="info-label">Testcase name</span><span class="info-value" id="infoName">—</span></div>
+                          <div class="info-row"><span class="info-label">Template name</span><span class="info-value" id="infoTemplate">—</span></div>
+                          <div class="info-row"><span class="info-label">Environment</span><span class="info-value" id="infoEnvironment">—</span></div>
+                          <div class="info-row"><span class="info-label">Testcase ID</span><span class="info-value" id="infoTcId">—</span></div>
+                          <div class="info-row"><span class="info-label">Additional details</span><span class="info-value small" id="infoAdditional">—</span></div>
+                        </div>
+                        <div class="info-right">
+                          <div class="info-row"><span class="info-label">Execution status</span><span class="info-value" id="infoExecStatus">—</span></div>
+                          <div class="info-row"><span class="info-label">Execution result</span><span class="info-value" id="infoExecResult">—</span></div>
+                          <div class="info-row"><span class="info-label">Executed by</span><span class="info-value" id="infoExecutedBy">—</span></div>
+                          <div class="info-row"><span class="info-label">Execution date</span><span class="info-value" id="infoExecDate">—</span></div>
+                          <div class="info-row"><span class="info-label">Execution remarks</span><span class="info-value" id="infoRemarks">—</span></div>
+                        </div>
+                      </div>
+                      <div id="infoAdditionalDetails" style="display:none" class="mt-3">
+                        <div class="alert alert-danger border small mb-0">
+                          <div class="fw-semibold mb-1"><i class="bi bi-exclamation-triangle me-1"></i>Error Details</div>
+                          <pre class="detail-content mb-0" style="white-space:pre-wrap;font-size:0.8rem;max-height:200px;overflow:auto"></pre>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Results Tab (non-ActionBased) -->
+                    <div class="tab-pane" id="tab-results" style="display:none">
+                      <div class="table-responsive">
+                        <table class="table table-sm table-hover results-table align-middle">
+                          <thead><tr>
+                            <th style="color:var(--wtw-purple);font-weight:700">Name</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Expected Result</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Actual Result</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Remarks</th>
+                          </tr></thead>
+                          <tbody id="resultsTbody"><tr><td colspan="4" class="subtle">Select a test case to view results.</td></tr></tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <!-- Verification Results Tab (ActionBased) -->
+                    <div class="tab-pane" id="tab-verificationresults" style="display:none">
+                      <div class="table-responsive">
+                        <table class="table table-sm table-hover results-table align-middle">
+                          <thead><tr>
+                            <th style="color:var(--wtw-purple);font-weight:700">Name</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Expected Result</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Actual Result</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Remarks</th>
+                          </tr></thead>
+                          <tbody id="verificationResultsTbody"><tr><td colspan="4" class="subtle">Select a test case to view results.</td></tr></tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <!-- Phase Results Tab (ActionBased) -->
+                    <div class="tab-pane" id="tab-phaseresults" style="display:none">
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="chkShowVariables" checked>
+                        <label class="form-check-label small" for="chkShowVariables">Show Variables</label>
+                      </div>
+                      <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle" id="phaseResultsTable">
+                          <thead><tr>
+                            <th style="color:var(--wtw-purple);font-weight:700">Phase</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Step Name</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Result</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Remarks</th>
+                          </tr></thead>
+                          <tbody id="phaseResultsTbody"><tr><td colspan="4" class="subtle">Select a test case to view phase results.</td></tr></tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <!-- User Validation Tab -->
+                    <div class="tab-pane" id="tab-uservalidation" style="display:none">
+                      <div class="row g-3">
+                        <div class="col-12">
+                          <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                          <div class="d-flex gap-3">
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="uvStatus" id="uvStatusUV" value="User Validation" checked>
+                              <label class="form-check-label" for="uvStatusUV">User Validation</label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="uvStatus" id="uvStatusPass" value="Pass">
+                              <label class="form-check-label" for="uvStatusPass">Pass</label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="uvStatus" id="uvStatusFail" value="Failed">
+                              <label class="form-check-label" for="uvStatusFail">Failed</label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label fw-semibold">Comments <span class="text-danger">*</span></label>
+                          <textarea class="form-control" id="uvComments" rows="4" placeholder="Please provide comments"></textarea>
+                        </div>
+                        <div class="col-12 text-end">
+                          <button class="btn btn-sm btn-wtw" id="btnUVSave"><i class="bi bi-save me-1"></i>Save</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Parameter Tab -->
+                    <div class="tab-pane" id="tab-parameter" style="display:none">
+                      <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                          <thead>
+                            <tr>
+                              <th style="color:var(--wtw-purple);font-weight:700">Name</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Data type</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Value</th>
+                            </tr>
+                          </thead>
+                          <tbody id="paramTbody"><tr><td colspan="3" class="subtle">Select a test case to view parameters.</td></tr></tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <!-- Condition Tab -->
+                    <div class="tab-pane" id="tab-condition" style="display:none">
+                      <div class="subtle text-center py-4">
+                        <i class="bi bi-info-circle me-1"></i>No condition data available for this test case execution.
+                      </div>
+                    </div>
+
+                    <!-- Query Tab -->
+                    <div class="tab-pane" id="tab-query" style="display:none">
+                      <div class="d-flex justify-content-end gap-2 mb-2">
+                        <button class="btn btn-sm btn-light border" id="btnCopySQL" disabled><i class="bi bi-clipboard me-1"></i>Copy to Clipboard</button>
+                        <button class="btn btn-sm btn-light border" id="btnMaximizeQuery" disabled><i class="bi bi-arrows-fullscreen"></i></button>
+                      </div>
+                      <div class="code-editor">
+                        <pre id="queryPre"><code id="queryCode" class="language-sql"></code></pre>
+                        <textarea id="queryTextArea" spellcheck="false" aria-label="SQL query" disabled></textarea>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Actions Section (US5) -->
+                  <div class="actions-section" id="actionsSection" style="display:none">
+                    <h6><i class="bi bi-lightning me-1"></i>Actions</h6>
+                    <div class="row g-3">
+                      <div class="col-12">
+                        <label class="form-label fw-semibold">Review Status <span class="text-danger">*</span></label>
+                        <div class="d-flex flex-wrap gap-3" id="reviewStatusOptions">
+                          <!-- Dynamically populated based on execution result -->
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label fw-semibold">Review Remarks <span class="text-danger" id="remarksRequired" style="display:none">*</span></label>
+                        <textarea class="form-control" id="reviewRemarks" rows="3" placeholder="Enter review remarks"></textarea>
+                      </div>
+                      <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-wtw btn-sm" id="btnSubmitReview" disabled><i class="bi bi-check-lg me-1"></i>Submit Review</button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- /Actions -->
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== MODALS ========== -->
+
+        <!-- Sign-off Modal -->
+        <div class="modal fade" id="signOffModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-pen me-2"></i>Sign Off Execution</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Reviewer Name</label>
+                  <input class="form-control" id="signOffReviewer" value="Alex Tonog" />
+                </div>
+                <div class="mb-3" id="signOffOverridesSection" style="display:none">
+                  <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-1"></i><strong>Overridden Test Cases:</strong>
+                    <div class="small mt-1" id="signOffOverridesList"></div>
+                  </div>
+                </div>
+                <div class="alert alert-info small">
+                  <i class="bi bi-info-circle me-1"></i>Signing off confirms that all test case executions have been reviewed and the execution is ready for downstream processing.
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="btnConfirmSignOff"><i class="bi bi-pen me-1"></i>Confirm Sign-off</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Execution History Modal -->
+        <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-clock-history me-2"></i>Execution History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body" id="historyContent">
+                <div class="subtle">No history available.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fullscreen SQL Modal -->
+        <div class="fullscreen-modal" id="fullscreenSqlModal">
+          <div class="fullscreen-modal-header">
+            <div>
+              <h4 class="mb-1">Full SQL Query - <span id="fullscreenTestCaseName">—</span></h4>
+              <div class="small text-muted">Full screen view</div>
+            </div>
+            <button class="btn btn-light" id="btnCloseFullscreen"><i class="bi bi-x-lg me-1"></i>Close</button>
+          </div>
+          <div class="fullscreen-modal-body">
+            <div class="fullscreen-code-editor">
+              <pre id="fullscreenQueryPre"><code id="fullscreenQueryCode" class="language-sql"></code></pre>
+              <textarea id="fullscreenQueryTextArea" spellcheck="false" disabled></textarea>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // ============================================================
+      // DATA MODEL - Test Plan Execution (TPE)
+      // Based on actual entity data from tpe.xml, tce.xml, tc.xml, tc-details.xml
+      // ============================================================
+      const testPlanExecution = {
+        name: "Test Plan - 01 - ATT-Automated Testing Tool (H-BC4)",
+        executionId: "TPE-2776",
+        testPlanName: "Test Plan - 01 - ATT",
+        testPlanId: "f1353891-6444-f111-88b3-7c1e52813c79",
+        clientName: "Automated Testing Tool (H-BC4)",
+        executor: "Alex Tonog",
+        executionDate: "4/30/2026 7:19 AM",
+        executionStart: "2026-04-30 07:19:27",
+        executionEnd: "2026-04-30 07:22:00",
+        environment: "QA",
+        planYear: 2026,
+        templateType: "Multiple",
+        executionType: "Test Plan",
+        status: "Completed",
+        totalTestCases: 5,
+        totalPassed: 0,
+        totalFailed: 4,
+        totalCompleted: 5,
+        totalAwaitingDecision: 1,
+        runtimeParameters: [
+          { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" },
+          { Name: "SpecialGroupId", Value: "-1", DataType: "SMALLINT", CanShowTestcaseUI: "No" },
+          { Name: "PersonId", Value: "-1", DataType: "INT", CanShowTestcaseUI: "No" }
+        ],
+        overrideParameters: [],
+        signedOff: false,
+        signOffReviewer: null,
+        signOffTimestamp: null,
+        sentToTracker: false,
+        testTrackerUrl: "",
+        reviewComments: "",
+        reviewDate: null,
+        reviewedBy: null,
+        testCaseExecutions: [
+          {
+            // TCE row 1 - SQL-based, User Validation
+            name: "test-sql-based-alex-1",
+            testcaseId: "TC-3217",
+            testcaseExecutionId: "TCE-3710",
+            testcaseGuid: "b0ec51b4-9c51-f011-877a-000d3a109097",
+            templateName: "Calc Compare - AE",
+            templateVersion: "",
+            environment: "QA",
+            executionResult: "User Validation",
+            executionResultCode: 100,
+            executedBy: "Alex Tonog",
+            executionDate: "4/30/2026 7:20 AM",
+            executionRemarks: "CalcAnalysis",
+            executionStatus: "Pending Review",
+            reviewStatus: "PENDING",
+            reviewRemarks: "",
+            overrideComment: "",
+            resultRef: "e022eced-5111-48ad-a609-8cf6d01cc08d",
+            logReferenceId: "",
+            additionalDetails: "",
+            executionInstance: 1,
+            conditions: "",
+            formattedWhereClause: "",
+            whereClause: "",
+            query: `DECLARE @SpecialGroupId SMALLINT = -1;
+DECLARE @PersonId INT = -1;
+DECLARE @PlanYear SMALLINT = 2026;
+
+-- ===========================================================================================================================================
+-- Calc Analysis Between PlanYears
+-- Test Case: Compare elections between planyears
+-- ===========================================================================================================================================
+
+-----------------------------------------------------------------------------------
+-- Parameters
+-----------------------------------------------------------------------------------
+
+DECLARE @PlanYear1 SMALLINT = @PlanYear - 1;
+DECLARE @PlanYear2 SMALLINT = @PlanYear;
+
+-----------------------------------------------------------------------------------
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+-----------------------------------------------------------------------------------
+-- 0 - Select employees for AE
+-----------------------------------------------------------------------------------
+DROP TABLE IF EXISTS #group
+
+SELECT TOP 1
+    c1.PersonId, PlanYear1 = c1.PlanYear, CalcId1 = c1.CalcId,
+    EventCode1 = c1.EventCode, PlanYear2 = c2.PlanYear,
+    CalcId2 = c2.CalcId, EventCode2 = c2.EventCode
+INTO
+    #group
+FROM
+    dbo.hw_calcmaster c1 WITH (NOLOCK)
+JOIN
+    dbo.hw_calcmaster c2 WITH (NOLOCK)
+    ON c1.PersonId = c2.PersonId
+     AND c1.PlanYear = @PlanYear1
+     AND c2.PlanYear = @PlanYear2
+     AND c1.RecordStatus = 'A'
+     AND c2.RecordStatus = 'A'
+WHERE
+   dbo.IsInternalTest(c1.PersonId) = 0
+   AND ( @SpecialGroupId = -1 OR c1.PersonId IN (
+       SELECT PersonId FROM cdm_person_select_ids (NOLOCK)
+       WHERE GroupId = @SpecialGroupId ) )
+   AND ( @PersonId = -1 OR c1.PersonId = @PersonId)
+
+-- 1 - Gather data sets for comparison
+;WITH CTE_Election_1 AS (
+   SELECT e.*, l.CovAmt, l.CostEffectiveDate, EventCode1 = c.EventCode1
+   FROM hw_election_log e(NOLOCK)
+   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
+     AND e.PlanYear = c.PlanYear1 AND e.CalcId = c.CalcId1
+     AND e.RecordStatus = 'A'
+   LEFT JOIN hw_eligibility l(NOLOCK) ON l.PersonId = e.PersonId
+     AND l.PlanYear = e.PlanYear AND l.CalcId = e.CalcId
+     AND l.BenId = e.BenId AND l.OptionId = e.OptionId AND l.TierId = e.TierId
+),
+CTE_Election_2 AS (
+   SELECT e.*, l.CovAmt, l.CostEffectiveDate, EventCode2 = c.EventCode2
+   FROM hw_election_log e(NOLOCK)
+   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
+     AND e.PlanYear = c.PlanYear2 AND e.CalcId = c.CalcId2
+     AND e.RecordStatus = 'A'
+   LEFT JOIN hw_eligibility l(NOLOCK) ON l.PersonId = e.PersonId
+     AND l.PlanYear = e.PlanYear AND l.CalcId = e.CalcId
+     AND l.BenId = e.BenId AND l.OptionId = e.OptionId AND l.TierId = e.TierId
+)
+SELECT *
+FROM (
+   SELECT PersonId = ISNULL(e1.PersonId, e2.PersonId),
+     BenId = ISNULL(e1.BenId, e2.BenId),
+     OptionId1 = e1.OptionId, OptionId2 = e2.OptionId,
+     TierId1 = e1.TierId, TierId2 = e2.TierId
+   FROM CTE_Election_1 e1
+   FULL JOIN CTE_Election_2 e2 ON e1.PersonId = e2.PersonId AND e1.BenId = e2.BenId
+) t
+ORDER BY 1, 2, 3;`,
+            parameters: [
+              { Name: "SpecialGroupId", Value: "-1", DataType: "SMALLINT", CanShowTestcaseUI: "No" },
+              { Name: "PersonId", Value: "-1", DataType: "INT", CanShowTestcaseUI: "No" },
+              { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
+            ],
+            results: [
+              { name: "Target > 0", expected: 0, actual: 5, remarks: "Pass" },
+              { name: "Positive > 0", expected: 0, actual: 5, remarks: "Pass" },
+              { name: "Target = Positive", expected: 5, actual: 5, remarks: "Pass" },
+              { name: "Negative = 0", expected: 0, actual: 0, remarks: "Pass" },
+              { name: "Fallout = 0", expected: 0, actual: 0, remarks: "Pass" }
+            ],
+            userValidation: { status: "User Validation", comments: "" },
+            phases: null,
+            history: [
+              { instance: 1, date: "4/30/2026 7:20 AM", result: "User Validation", executor: "Alex Tonog" }
+            ]
+          },
+          {
+            // TCE row 2 - SQL-based with conditions, Failed
+            name: "aa_group_mapping_6",
+            testcaseId: "TC-3207",
+            testcaseExecutionId: "TCE-3708",
+            testcaseGuid: "b0dce4fa-2550-f011-877a-6045bddb5c95",
+            templateName: "Mapping - PriceGroup",
+            templateVersion: "TMPV-1450",
+            environment: "QA",
+            executionResult: "Failed",
+            executionResultCode: 400,
+            executedBy: "Alex Tonog",
+            executionDate: "4/30/2026 7:20 AM",
+            executionRemarks: "Fail",
+            executionStatus: "Pending Review",
+            reviewStatus: "PENDING",
+            reviewRemarks: "",
+            overrideComment: "",
+            resultRef: "b137957a-cb01-41ba-8e81-87f7663aef3d",
+            logReferenceId: "",
+            additionalDetails: "",
+            executionInstance: 1,
+            conditions: '{"combinator":"and","rules":[{"id":"dfa7b843-b4f2-4ad3-bb1c-95f894dd31fe","field":"cm.Location","operator":"=","valueSource":"value","value":"a"},{"id":"9da105d1-53e6-4f33-b931-6fe0be162ad1","rules":[{"id":"f1b662ba-ca69-42dd-bded-e891a7e17383","field":"cm.GroupId","operator":"=","valueSource":"value","value":"1"}],"combinator":"and","not":false}]}',
+            formattedWhereClause: "ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)",
+            whereClause: "ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)",
+            query: ` DECLARE @PriceGroupId SMALLINT = 1;
+
+ DECLARE @PlanYear SMALLINT = 2025;
+
+DECLARE @Debug BIT = 0;
+DROP TABLE IF EXISTS #group
+
+SELECT TOP 1  PersonId 
+INTO #group 
+FROM dbo.hw_calcmaster cm WITH (NOLOCK) 
+WHERE cm.RecordStatus = 'A' AND cm.PlanYear = @PlanYear    
+    AND dbo.IsInternalTest(personId) = 0
+     AND (
+ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)
+)
+--
+-------------------------------------
+-- 1 - Test population
+-------------------------------------
+IF @Debug = 1 BEGIN
+
+     DECLARE @cols NVARCHAR(MAX);
+
+    SELECT @cols = STRING_AGG('cm.' + QUOTENAME(c.COLUMN_NAME), ', ')
+    WITHIN GROUP (ORDER BY c.ORDINAL_POSITION)
+    FROM INFORMATION_SCHEMA.COLUMNS m
+         JOIN INFORMATION_SCHEMA.COLUMNS c
+        ON m.COLUMN_NAME = c.COLUMN_NAME
+    WHERE m.TABLE_NAME = 'pr_pricegroup_mapping'
+                AND c.TABLE_NAME = 'hw_calcmaster';
+
+    SET @cols += ', HasOverride = IIf(ov.PersonId IS NULL, ''N'', ''Y'')'
+
+    DECLARE @sql NVARCHAR(MAX) = '
+    SELECT ''Negative'' AS Type, cm.PersonId, ' + @cols + '
+    FROM dbo.hw_calcmaster cm (NOLOCK)
+        LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
+                ON cm.PersonId = ov.PersonId
+                        AND cm.PlanYear = ov.PlanYear
+                        AND ov.PriceGroupId =  @PriceGroupId 
+            AND ov.Enabled = 1
+    WHERE cm.RecordStatus = ''A''
+        AND cm.PlanYear = @PlanYear
+        AND cm.PriceGroupId = @PriceGroupId
+        AND dbo.IsInternalTest(cm.PersonId) = 0
+        AND cm.PersonId NOT IN (SELECT PersonId FROM #group)
+
+    UNION ALL
+
+    SELECT ''Fallout'' AS Type, cm.PersonId, ' + @cols + '
+    FROM dbo.hw_calcmaster cm (NOLOCK)
+        LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
+                ON cm.PersonId = ov.PersonId
+                        AND cm.PlanYear = ov.PlanYear
+                        AND ov.PriceGroupId IS NOT NULL 
+                        AND ov.PriceGroupId !=  @PriceGroupId
+            AND ov.Enabled = 1 
+    WHERE cm.RecordStatus = ''A''
+        AND cm.PlanYear = @PlanYear
+        AND cm.PriceGroupId != @PriceGroupId
+        AND cm.PersonId IN (SELECT PersonId FROM #group)
+    ORDER By PersonId
+    ';
+
+    EXEC sp_executesql @sql, N'@PlanYear SMALLINT, @PriceGroupId SMALLINT', @PlanYear, @PriceGroupId;
+
+END
+
+ELSE BEGIN
+    SELECT Type = 'Target', Count = COUNT(1)
+    FROM #group
+
+    UNION ALL
+
+    SELECT Type = 'Positive', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A'    
+            AND PlanYear = @PlanYear  
+            AND PriceGroupId = @PriceGroupId
+            AND PersonId IN (SELECT PersonId FROM #group)
+
+    UNION ALL
+
+    SELECT Type = 'Negative', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A' 
+            AND PlanYear = @PlanYear
+            AND PriceGroupId = @PriceGroupId
+            AND dbo.IsInternalTest(personId) = 0
+            AND PersonId NOT IN (SELECT PersonId FROM #group)
+
+    UNION ALL
+
+    SELECT Type = 'Fallout', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A' 
+            AND PlanYear = @PlanYear  
+            AND PriceGroupId != @PriceGroupId
+            AND PersonId IN (SELECT PersonId FROM #group)
+END;
+--`,
+            parameters: [
+              { Name: "PriceGroupId", Value: "1", DataType: "SMALLINT", CanShowTestcaseUI: "Yes" },
+              { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
+            ],
+            results: [
+              { name: "Target > 0", expected: 0, actual: 0, remarks: "Fail" },
+              { name: "Positive > 0", expected: 0, actual: 0, remarks: "Fail" },
+              { name: "Target = Positive", expected: 0, actual: 0, remarks: "Pass" },
+              { name: "Negative = 0", expected: 0, actual: 302, remarks: "Fail" },
+              { name: "Fallout = 0", expected: 0, actual: 0, remarks: "Pass" }
+            ],
+            userValidation: { status: "User Validation", comments: "" },
+            phases: null,
+            history: [
+              { instance: 1, date: "4/30/2026 7:20 AM", result: "Failed", executor: "Alex Tonog" }
+            ]
+          },
+          {
+            // TCE row 3 - ActionBased, Failed (has phases/steps data)
+            name: "Test-ActionBased-01",
+            testcaseId: "TC-3987",
+            testcaseExecutionId: "TCE-3709",
+            testcaseGuid: "ae407551-6444-f111-88b3-7c1e52813c79",
+            templateName: "ActionBased",
+            templateVersion: "",
+            environment: "QA",
+            executionResult: "Failed",
+            executionResultCode: 400,
+            executedBy: "Alex Tonog",
+            executionDate: "4/30/2026 7:20 AM",
+            executionRemarks: "Failed",
+            executionStatus: "Pending Review",
+            reviewStatus: "PENDING",
+            reviewRemarks: "",
+            overrideComment: "",
+            resultRef: "26b7c38f-4f06-4b30-b957-4c6e61c8df5b",
+            logReferenceId: "",
+            additionalDetails: "",
+            executionInstance: 1,
+            conditions: "",
+            formattedWhereClause: "",
+            whereClause: "",
+            query: "",
+            parameters: [
+              { Name: "PlanYear", Value: "2026", DataType: "Text", CanShowTestcaseUI: "No" },
+              { Name: "Clone", Value: "true", DataType: "Boolean", CanShowTestcaseUI: "Yes" }
+            ],
+            results: [],
+            userValidation: { status: "User Validation", comments: "" },
+            phases: [
+              {
+                name: "Parameter", displayName: "Parameter", code: "10", status: "Success", message: "", testStatus: 1,
+                steps: [{ name: "SharedData", displayName: "Shared Data", status: "Success", message: "", testStatus: 1, link: "",
+                  variables: [
+                    { name: "PlanYear", displayName: "PlanYear", value: "2026", type: "Text", required: true, include: true, description: "PlanYear" },
+                    { name: "Clone", displayName: "Clone", value: "true", type: "Boolean", required: true, include: true, description: "" }
+                  ]
+                }]
+              },
+              {
+                name: "TargetPerson", displayName: "TargetPerson", code: "20", status: "Success", message: "", testStatus: 1,
+                steps: [{ name: "FindPerson", displayName: "Find Person", status: "Success", message: "10681", testStatus: 1, link: "",
+                  variables: [
+                    { name: "PersonId", displayName: "PersonId", value: "10681", type: "Integer", required: false, include: true, description: "" },
+                    { name: "AgeFrom", displayName: "Age Range From", value: "35", type: "Integer", required: false, include: true, operator: "=", description: "Example: 25" },
+                    { name: "AgeTo", displayName: "Age Range To", value: "", type: "Integer", required: false, include: false, description: "Example: 35" },
+                    { name: "City", displayName: "City", value: "", type: "Text", required: false, include: false, description: "Example: New York" },
+                    { name: "State", displayName: "State", value: "", type: "Text", required: false, include: false, description: "" }
+                  ]
+                }]
+              },
+              {
+                name: "Precondition", displayName: "Precondition", code: "30", status: "Failure", message: "CreateNewHire: Index was outside the bounds of the array.", testStatus: 0,
+                steps: [{ name: "CreateNewHire", displayName: "Create New Hire", status: "Failure", message: "CreateNewHire: Index was outside the bounds of the array. CreateNewHire: System.IndexOutOfRangeException: Index was outside the bounds of the array. at Att.Core.Engine.TestFlow.Actions.PreCondition.CreateNewHire.GetDocumentIdAsync(DocumentServiceSoapClient client, Int32 instanceId) at Att.Core.Engine.TestFlow.Actions.PreCondition.CreateNewHire.ExecuteAsync(ActionContext context) in /home/runner/work/automated-testing-tool/automated-testing-tool/Att.Core.Engine/TestFlow/Actions/PreCondition/CreateNewHire.cs:line 47 at", testStatus: 0, link: "", variables: [] }]
+              },
+              {
+                name: "Execution", displayName: "Execution", code: "40", status: "", message: "", testStatus: -1,
+                steps: [{ name: "MasterProcessControl", displayName: "Master Process Control", status: "", message: "", testStatus: -1, link: "", variables: [] }]
+              },
+              {
+                name: "Verification", displayName: "Verification", code: "50", status: "", message: "", testStatus: -1,
+                steps: [{ name: "VerifyCalc", displayName: "Verify Calc", status: "", message: "", testStatus: -1, link: "",
+                  variables: [
+                    { name: "EventCode", displayName: "EventCode", value: "100", type: "Text", required: false, include: true, operator: "=", description: "" },
+                    { name: "EventDate", displayName: "EventDate", value: "", type: "Date", required: false, include: false, description: "EventDate" },
+                    { name: "HasWindow", displayName: "Has Window", value: "", type: "Text", required: false, include: false, description: "HasWindow" }
+                  ]
+                }]
+              },
+              {
+                name: "Cleanup", displayName: "Cleanup", code: "60", status: "", message: "", testStatus: -1,
+                steps: [{ name: "DeleteClone", displayName: "Delete Clone", status: "", message: "", testStatus: -1, link: "", variables: [] }]
+              }
+            ],
+            history: [
+              { instance: 1, date: "4/30/2026 7:20 AM", result: "Failed", executor: "Alex Tonog" }
+            ]
+          },
+          {
+            // TCE row 4 - SQL-based, Failed
+            name: "basic life  - imputed",
+            testcaseId: "TC-3442",
+            testcaseExecutionId: "TCE-3706",
+            testcaseGuid: "5652e5a1-3566-f011-bec2-6045bda6d171",
+            templateName: "Imputed Income - Basic Life",
+            templateVersion: "TMPV-1396",
+            environment: "QA",
+            executionResult: "Failed",
+            executionResultCode: 400,
+            executedBy: "Alex Tonog",
+            executionDate: "4/30/2026 7:21 AM",
+            executionRemarks: "Fail",
+            executionStatus: "Pending Review",
+            reviewStatus: "PENDING",
+            reviewRemarks: "",
+            overrideComment: "",
+            resultRef: "d010a305-3f34-4ab8-91dc-9d002780ce91",
+            logReferenceId: "",
+            additionalDetails: "",
+            executionInstance: 1,
+            conditions: "",
+            formattedWhereClause: "",
+            whereClause: "",
+            query: ` DECLARE @BenId SMALLINT = 4;
+
+ DECLARE @PlanYear SMALLINT = 2025;
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+    DECLARE @AmountThreshold  DECIMAL(10, 4) = 50000.00;
+    DECLARE @RatePer  DECIMAL(10, 4) = 1000.00;
+    DECLARE @Debug BIT = 0;
+
+    DECLARE @AgeRates TABLE (
+        AgeFrom INT,
+        AgeTo INT,
+        Rate DECIMAL(10, 4)
+    );
+
+    INSERT INTO @AgeRates(AgeFrom, AgeTo, Rate)
+    VALUES
+        ( 0,  24, 0.0500),
+        (25,  29, 0.0600),
+        (30,  34, 0.0800),
+        (35,  39, 0.0900),
+        (40,  44, 0.1000),
+        (45,  49, 0.1500),
+        (50,  54, 0.2300),
+        (55,  59, 0.4300),
+        (60,  64, 0.6600),
+        (65,  69, 1.2700),
+        (70, 200, 2.0600);
+
+    DROP TABLE IF EXISTS #group;
+
+    SELECT TOP 1  
+        cm.PersonId,
+        cm.PlanYear,
+        cm.CalcId,
+        cm.PriceGroupId, 
+        cm.ImputedAge,
+        elig.BenId,
+        elig.OptionId,
+        rate.Rate,
+        elig.CovAmt,
+        elig.PosTaxPrice,        
+        ExpectedImputed = CONVERT(DECIMAL(18, 4), elig.Imputed),
+        ActualImputed = CONVERT(DECIMAL(18, 4), 
+                                ((elig.CovAmt - @AmountThreshold) / @RatePer * rate.Rate) - PosTaxPrice)
+    INTO #group
+        FROM 
+            hw_calcmaster cm WITH (NOLOCK)
+        JOIN 
+            hw_eligibility elig WITH (NOLOCK)
+                ON elig.PersonId = cm.PersonId 
+                AND elig.PlanYear = cm.PlanYear 
+                AND elig.CalcId = cm.CalcId
+        JOIN 
+            @AgeRates rate 
+                ON cm.ImputedAge BETWEEN rate.AgeFrom AND rate.AgeTo
+        WHERE 
+            cm.PlanYear = @PlanYear 
+            AND cm.RecordStatus = 'A' 
+            AND cm.GroupId > 0
+            AND dbo.IsInternalTest(cm.PersonId) = 0
+            AND elig.BenId = @BenId;
+--
+IF @Debug = 1 BEGIN
+        SELECT * FROM #group
+        WHERE ExpectedImputed != ActualImputed;
+    END
+
+    ELSE BEGIN
+        SELECT Type = 'Target', Count = COUNT(1)
+        FROM #group
+
+        UNION ALL
+
+        SELECT Type = 'Positive', Count = COUNT(1)
+        FROM #group WITH (NOLOCK) 
+            WHERE ExpectedImputed = ActualImputed
+        
+        UNION ALL
+
+        SELECT Type = 'Negative', Count = COUNT(1)
+        FROM #group WITH (NOLOCK) 
+            WHERE ExpectedImputed != ActualImputed
+    END;
+
+    DROP TABLE IF EXISTS #group;
+--`,
+            parameters: [
+              { Name: "BenId", Value: "4", DataType: "SMALLINT", CanShowTestcaseUI: "Yes" },
+              { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
+            ],
+            results: [
+              { name: "Target > 0", expected: 0, actual: 12, remarks: "Pass" },
+              { name: "Positive > 0", expected: 0, actual: 10, remarks: "Pass" },
+              { name: "Negative = 0", expected: 0, actual: 2, remarks: "Fail" }
+            ],
+            userValidation: { status: "User Validation", comments: "" },
+            phases: null,
+            history: [
+              { instance: 1, date: "4/30/2026 7:21 AM", result: "Failed", executor: "Alex Tonog" }
+            ]
+          },
+          {
+            // TCE row 5 - SQL-based, Failed with error (SQL syntax error)
+            name: "test",
+            testcaseId: "TC-3578",
+            testcaseExecutionId: "TCE-3707",
+            testcaseGuid: "cf22aa48-3d78-f011-b4cc-6045bda6d171",
+            templateName: "Mapping - GroupID",
+            templateVersion: "TMPV-1448",
+            environment: "QA",
+            executionResult: "Failed",
+            executionResultCode: 400,
+            executedBy: "Alex Tonog",
+            executionDate: "4/30/2026 7:21 AM",
+            executionRemarks: "Incorrect syntax near ')'.",
+            executionStatus: "Pending Review",
+            reviewStatus: "PENDING",
+            reviewRemarks: "",
+            overrideComment: "",
+            resultRef: "83102f19-914d-43a6-b7dd-6e0d402e6b5f",
+            logReferenceId: "",
+            additionalDetails: "Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near ')'.\n   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)\n   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)\n   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, SqlCommand command, Boolean callerHasConnectionLock, Boolean asyncClose)\n   at Att.Core.DataAccess.Repostories.ClientRepository.ExecuteQuery(String query)\n   at Att.Core.Engine.ExecutionActions.ExecuteActionQueryV2.Execute()\nClientConnectionId:881ac69e-dd2f-4c8f-b16e-15271fee5518\nError Number:102,State:1,Class:15",
+            executionInstance: 1,
+            conditions: "",
+            formattedWhereClause: "",
+            whereClause: "",
+            query: ` DECLARE @GroupId SMALLINT = 2;
+
+ DECLARE @PlanYear SMALLINT = 2025;
+
+DECLARE @Debug BIT = 0;
+DROP TABLE IF EXISTS #group
+
+SELECT TOP 1  PersonId 
+INTO #group 
+FROM dbo.hw_calcmaster cm WITH (NOLOCK) 
+WHERE cm.RecordStatus = 'A' AND cm.PlanYear = @PlanYear    
+    AND dbo.IsInternalTest(personId) = 0
+     AND (
+
+)
+--
+-------------------------------------
+-- 1 - Test population
+-------------------------------------
+IF @Debug = 1 BEGIN
+
+     DECLARE @cols NVARCHAR(MAX);
+
+    SELECT @cols = STRING_AGG('cm.' + QUOTENAME(c.COLUMN_NAME), ', ')
+    WITHIN GROUP (ORDER BY c.ORDINAL_POSITION)
+    FROM INFORMATION_SCHEMA.COLUMNS m
+         JOIN INFORMATION_SCHEMA.COLUMNS c
+        ON m.COLUMN_NAME = c.COLUMN_NAME
+    WHERE m.TABLE_NAME = 'pr_group_mapping'
+                AND c.TABLE_NAME = 'hw_calcmaster';
+
+    SET @cols += ', HasOverride = IIf(ov.PersonId IS NULL, ''N'', ''Y'')'
+
+    DECLARE @sql NVARCHAR(MAX) = '
+    SELECT ''Negative'' AS Type, cm.PersonId, ' + @cols + '
+    FROM dbo.hw_calcmaster cm (NOLOCK)
+        LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
+                ON cm.PersonId = ov.PersonId
+                        AND cm.PlanYear = ov.PlanYear
+                        AND ov.GroupId =  @GroupId 
+            AND ov.Enabled = 1
+    WHERE cm.RecordStatus = ''A''
+        AND cm.PlanYear = @PlanYear
+        AND cm.GroupId = @GroupId
+        AND dbo.IsInternalTest(cm.PersonId) = 0
+        AND cm.PersonId NOT IN (SELECT PersonId FROM #group)
+
+    UNION ALL
+
+    SELECT ''Fallout'' AS Type, cm.PersonId, ' + @cols + '
+    FROM dbo.hw_calcmaster cm (NOLOCK)
+        LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
+                ON cm.PersonId = ov.PersonId
+                        AND cm.PlanYear = ov.PlanYear
+                        AND ov.GroupId IS NOT NULL 
+                        AND ov.GroupId !=  @GroupId
+            AND ov.Enabled = 1 
+    WHERE cm.RecordStatus = ''A''
+        AND cm.PlanYear = @PlanYear
+        AND cm.GroupId != @GroupId
+        AND cm.PersonId IN (SELECT PersonId FROM #group)
+    ORDER By PersonId
+    ';
+
+    EXEC sp_executesql @sql, N'@PlanYear SMALLINT, @GroupId SMALLINT', @PlanYear, @GroupId;
+
+END
+
+ELSE BEGIN
+    SELECT Type = 'Target', Count = COUNT(1)
+    FROM #group
+
+    UNION ALL
+
+    SELECT Type = 'Positive', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A'    
+            AND PlanYear = @PlanYear  
+            AND GroupId = @GroupId
+            AND PersonId IN (SELECT PersonId FROM #group)
+
+    UNION ALL
+
+    SELECT Type = 'Negative', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A' 
+            AND PlanYear = @PlanYear
+            AND GroupId = @GroupId
+            AND dbo.IsInternalTest(personId) = 0
+            AND PersonId NOT IN (SELECT PersonId FROM #group)
+
+    UNION ALL
+
+    SELECT Type = 'Fallout', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A' 
+            AND PlanYear = @PlanYear  
+            AND GroupId != @GroupId
+            AND PersonId IN (SELECT PersonId FROM #group)
+END;  
+--`,
+            parameters: [
+              { Name: "GroupId", Value: "2", DataType: "SMALLINT", CanShowTestcaseUI: "Yes" },
+              { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
+            ],
+            results: [],
+            userValidation: { status: "User Validation", comments: "" },
+            phases: null,
+            history: [
+              { instance: 1, date: "4/30/2026 7:21 AM", result: "Failed", executor: "Alex Tonog" }
+            ]
+          }
+        ]
+      };
+
+      // ============================================================
+      // STATE
+      // ============================================================
+      let selectedIndex = -1;
+      let currentFilter = "ALL";
+      let searchText = "";
+      let bulkSelected = new Set();
+      let currentTab = "general";
+
+      // ============================================================
+      // DOM ELEMENTS
+      // ============================================================
+      const screenWelcome = document.getElementById("screenWelcome");
+      const screenReview = document.getElementById("screenReview");
+      const appRoot = document.getElementById("appRoot");
+
+      const btnStartReview = document.getElementById("btnStartReview");
+      const btnBackToWelcome = document.getElementById("btnBackToWelcome");
+      const btnToggleSidebar = document.getElementById("btnToggleSidebar");
+
+      const tcList = document.getElementById("tcList");
+      const tcSearch = document.getElementById("tcSearch");
+      const btnClearSearch = document.getElementById("btnClearSearch");
+
+      const progressBadge = document.getElementById("progressBadge");
+      const pendingCountBadge = document.getElementById("pendingCountBadge");
+      const tcNameHeading = document.getElementById("tcNameHeading");
+
+      const btnSignOff = document.getElementById("btnSignOff");
+      const btnSignOffBanner = document.getElementById("btnSignOffBanner");
+      const btnSendTracker = document.getElementById("btnSendTracker");
+      const btnViewHistory = document.getElementById("btnViewHistory");
+      const historyBtnContainer = document.getElementById("historyBtnContainer");
+
+      const paramTbody = document.getElementById("paramTbody");
+
+      const queryTextArea = document.getElementById("queryTextArea");
+      const queryCode = document.getElementById("queryCode");
+      const queryPre = document.getElementById("queryPre");
+      const btnCopySQL = document.getElementById("btnCopySQL");
+      const btnMaximizeQuery = document.getElementById("btnMaximizeQuery");
+
+      const reviewRemarks = document.getElementById("reviewRemarks");
+      const btnSubmitReview = document.getElementById("btnSubmitReview");
+      const actionsSection = document.getElementById("actionsSection");
+      const reviewStatusOptions = document.getElementById("reviewStatusOptions");
+      const remarksRequired = document.getElementById("remarksRequired");
+
+      const bulkBar = document.getElementById("bulkBar");
+      const bulkCount = document.getElementById("bulkCount");
+      const btnBulkApprove = document.getElementById("btnBulkApprove");
+      const btnBulkCancel = document.getElementById("btnBulkCancel");
+
+      // Fullscreen
+      const fullscreenSqlModal = document.getElementById("fullscreenSqlModal");
+      const fullscreenQueryTextArea = document.getElementById("fullscreenQueryTextArea");
+      const fullscreenQueryCode = document.getElementById("fullscreenQueryCode");
+      const fullscreenQueryPre = document.getElementById("fullscreenQueryPre");
+      const fullscreenTestCaseName = document.getElementById("fullscreenTestCaseName");
+      const btnCloseFullscreen = document.getElementById("btnCloseFullscreen");
+
+      // Sign-off modal
+      const signOffModal = new bootstrap.Modal(document.getElementById("signOffModal"));
+      const btnConfirmSignOff = document.getElementById("btnConfirmSignOff");
+
+      // History modal
+      const historyModal = new bootstrap.Modal(document.getElementById("historyModal"));
+      const historyContent = document.getElementById("historyContent");
+
+      // ============================================================
+      // INIT WELCOME PAGE
+      // ============================================================
+      function initWelcome() {
+        const tce = testPlanExecution;
+        document.getElementById("welcomePlanName").textContent = tce.name;
+        document.getElementById("welcomeExecId").textContent = tce.executionId;
+        document.getElementById("welcomeExecutor").textContent = tce.executor;
+        document.getElementById("welcomeEnvironment").textContent = tce.environment;
+        document.getElementById("welcomeExecDate").textContent = tce.executionDate;
+
+        const passed = tce.testCaseExecutions.filter(t => t.executionResult === "Passed").length;
+        const failed = tce.testCaseExecutions.filter(t => t.executionResult === "Failed").length;
+        const uv = tce.testCaseExecutions.filter(t => t.executionResult === "User Validation").length;
+
+        document.getElementById("welcomePassedCount").textContent = passed;
+        document.getElementById("welcomeFailedCount").textContent = failed;
+        document.getElementById("welcomeUVCount").textContent = uv;
+        document.getElementById("welcomeTotalCount").textContent = tce.testCaseExecutions.length;
+
+        // Test case names list
+        const listEl = document.getElementById("testCaseNamesList");
+        listEl.innerHTML = tce.testCaseExecutions.map((tc, i) => {
+          const resultColor = tc.executionResult === "Passed" ? "text-success" : tc.executionResult === "Failed" ? "text-danger" : "text-warning";
+          return `<div class="text-truncate" title="${escapeHtml(tc.name)}">${i+1}. ${escapeHtml(tc.name)} <span class="${resultColor} small">(${tc.executionResult})</span></div>`;
+        }).join("");
+
+        updateStartReviewButton();
+      }
+
+      function updateStartReviewButton() {
+        const reviewed = testPlanExecution.testCaseExecutions.filter(t => t.reviewStatus !== "PENDING").length;
+        btnStartReview.innerHTML = reviewed > 0
+          ? '<i class="bi bi-arrow-right-circle me-1"></i>Continue Review'
+          : '<i class="bi bi-play-fill me-1"></i>Start Review';
+      }
+
+      initWelcome();
+
+      // ============================================================
+      // HELPERS
+      // ============================================================
+      function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, s => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[s]);
+      }
+
+      function reviewStatusBadgeClass(status) {
+        if (status === "APPROVED") return "badge-approved";
+        if (status === "OVERRIDDEN") return "badge-overridden";
+        if (status === "RE_EXECUTE") return "badge-reexecute";
+        if (status === "FAILED") return "badge-failed";
+        return "badge-pending";
+      }
+
+      function executionResultBadgeClass(result) {
+        if (result === "Passed") return "badge-passed";
+        if (result === "Failed") return "badge-failed";
+        return "badge-uservalidation";
+      }
+
+      function reviewStatusLabel(status) {
+        if (status === "RE_EXECUTE") return "Re-execute";
+        return status.charAt(0) + status.slice(1).toLowerCase();
+      }
+
+      function pendingCount() { return testPlanExecution.testCaseExecutions.filter(t => t.reviewStatus === "PENDING").length; }
+      function approvedCount() { return testPlanExecution.testCaseExecutions.filter(t => t.reviewStatus === "APPROVED").length; }
+      function overriddenCount() { return testPlanExecution.testCaseExecutions.filter(t => t.reviewStatus === "OVERRIDDEN").length; }
+      function failedCount() { return testPlanExecution.testCaseExecutions.filter(t => t.reviewStatus === "FAILED" || (t.reviewStatus === "PENDING" && t.executionResult === "Failed")).length; }
+      function reviewedCount() { return testPlanExecution.testCaseExecutions.filter(t => t.reviewStatus !== "PENDING").length; }
+
+      function updateFilterCounts() {
+        document.getElementById("countAll").textContent = testPlanExecution.testCaseExecutions.length;
+        document.getElementById("countPending").textContent = pendingCount();
+        document.getElementById("countFailed").textContent = testPlanExecution.testCaseExecutions.filter(t => t.executionResult === "Failed" && t.reviewStatus !== "OVERRIDDEN" && t.reviewStatus !== "APPROVED").length;
+        document.getElementById("countApproved").textContent = approvedCount();
+        document.getElementById("countOverridden").textContent = overriddenCount();
+      }
+
+      function updateTopBadges() {
+        progressBadge.textContent = `${reviewedCount()} / ${testPlanExecution.testCaseExecutions.length} reviewed`;
+        pendingCountBadge.textContent = `Pending: ${pendingCount()}`;
+        updateFilterCounts();
+        checkSignOffEligibility();
+      }
+
+      function checkSignOffEligibility() {
+        // Sign-off enabled when all test cases are either APPROVED or OVERRIDDEN
+        const allReviewed = testPlanExecution.testCaseExecutions.every(t => t.reviewStatus === "APPROVED" || t.reviewStatus === "OVERRIDDEN");
+        btnSignOff.disabled = !allReviewed || testPlanExecution.signedOff;
+
+        const completionBanner = document.getElementById("completionBanner");
+        if (allReviewed && !testPlanExecution.signedOff) {
+          completionBanner.classList.add("show");
+          // Show overridden summary
+          const overridden = testPlanExecution.testCaseExecutions.filter(t => t.reviewStatus === "OVERRIDDEN");
+          const overriddenSummary = document.getElementById("overriddenSummary");
+          if (overridden.length > 0) {
+            overriddenSummary.style.display = "block";
+            document.getElementById("overriddenList").textContent = overridden.map(t => t.name).join(", ");
+          } else {
+            overriddenSummary.style.display = "none";
+          }
+        } else {
+          completionBanner.classList.remove("show");
+        }
+
+        if (testPlanExecution.signedOff) {
+          btnSignOff.innerHTML = '<i class="bi bi-check-lg me-1"></i>Signed Off';
+          btnSignOff.classList.remove("btn-success");
+          btnSignOff.classList.add("btn-outline-success");
+          btnSendTracker.disabled = false;
+        }
+      }
+
+      // ============================================================
+      // LIST RENDERING (US3 - failed first sort)
+      // ============================================================
+      function getVisibleIndexes() {
+        let items = testPlanExecution.testCaseExecutions
+          .map((tc, idx) => ({ tc, idx }))
+          .filter(({ tc }) => {
+            if (currentFilter === "PENDING" && tc.reviewStatus !== "PENDING") return false;
+            if (currentFilter === "FAILED" && !(tc.executionResult === "Failed" && tc.reviewStatus !== "OVERRIDDEN" && tc.reviewStatus !== "APPROVED")) return false;
+            if (currentFilter === "APPROVED" && tc.reviewStatus !== "APPROVED") return false;
+            if (currentFilter === "OVERRIDDEN" && tc.reviewStatus !== "OVERRIDDEN") return false;
+            return true;
+          })
+          .filter(({ tc }) => {
+            if (!searchText.trim()) return true;
+            const s = searchText.toLowerCase();
+            return tc.name.toLowerCase().includes(s) || tc.testcaseId.toLowerCase().includes(s) || tc.templateName.toLowerCase().includes(s);
+          });
+
+        // Sort: Failed first, then User Validation, then Passed (US3.2)
+        const resultOrder = { "Failed": 0, "User Validation": 1, "Passed": 2 };
+        items.sort((a, b) => {
+          const ra = resultOrder[a.tc.executionResult] ?? 1;
+          const rb = resultOrder[b.tc.executionResult] ?? 1;
+          if (ra !== rb) return ra - rb;
+          return a.tc.name.localeCompare(b.tc.name);
+        });
+
+        return items.map(x => x.idx);
+      }
+
+      function renderList() {
+        const visible = getVisibleIndexes();
+        tcList.innerHTML = "";
+
+        if (visible.length === 0) {
+          tcList.innerHTML = `<div class="subtle small">No test case executions match your filter/search.</div>`;
+          return;
+        }
+
+        visible.forEach(idx => {
+          const tc = testPlanExecution.testCaseExecutions[idx];
+          const row = document.createElement("div");
+          row.className = "tc-row";
+          if (idx === selectedIndex) row.classList.add("active");
+
+          const resultBadge = `<span class="badge ${executionResultBadgeClass(tc.executionResult)} me-1">${tc.executionResult}</span>`;
+          const reviewBadge = tc.reviewStatus !== "PENDING"
+            ? `<span class="badge ${reviewStatusBadgeClass(tc.reviewStatus)}">${reviewStatusLabel(tc.reviewStatus)}</span>`
+            : `<span class="badge badge-pending">Pending Review</span>`;
+
+          const showCheckbox = tc.executionResult === "Passed" && tc.reviewStatus === "PENDING";
+          const checkboxHtml = showCheckbox
+            ? `<input class="form-check-input me-2 bulk-check" type="checkbox" data-idx="${idx}" ${bulkSelected.has(idx) ? 'checked' : ''} onclick="event.stopPropagation()">`
+            : '';
+
+          row.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <div class="d-flex align-items-start">
+                ${checkboxHtml}
+                <div>
+                  <div class="fw-semibold">${escapeHtml(tc.name)}</div>
+                  <div class="small subtle">${escapeHtml(tc.testcaseId)} &bull; ${escapeHtml(tc.templateName)}</div>
+                </div>
+              </div>
+              <div class="text-end">
+                ${resultBadge}
+                ${reviewBadge}
+              </div>
+            </div>
+          `;
+
+          row.addEventListener("click", (e) => {
+            if (e.target.classList.contains("bulk-check")) return;
+            selectTestCase(idx);
+          });
+
+          // Checkbox handler
+          const checkbox = row.querySelector(".bulk-check");
+          if (checkbox) {
+            checkbox.addEventListener("change", (e) => {
+              if (e.target.checked) bulkSelected.add(idx);
+              else bulkSelected.delete(idx);
+              updateBulkBar();
+            });
+          }
+
+          tcList.appendChild(row);
+        });
+      }
+
+      function updateBulkBar() {
+        if (bulkSelected.size > 0) {
+          bulkBar.classList.add("show");
+          bulkCount.textContent = bulkSelected.size;
+        } else {
+          bulkBar.classList.remove("show");
+        }
+      }
+
+      // ============================================================
+      // DETAIL PANEL - SELECT TEST CASE
+      // ============================================================
+      function selectTestCase(idx) {
+        selectedIndex = idx;
+        const tc = testPlanExecution.testCaseExecutions[idx];
+
+        tcNameHeading.textContent = tc.name;
+        historyBtnContainer.style.cssText = "";
+        btnViewHistory.disabled = false;
+        btnCopySQL.disabled = false;
+        btnMaximizeQuery.disabled = false;
+
+        // Populate General Information
+        document.getElementById("infoName").innerHTML = `<a href="#" style="color:var(--wtw-purple);text-decoration:underline">${escapeHtml(tc.name)}</a>`;
+        document.getElementById("infoTemplate").textContent = tc.templateName + (tc.templateVersion ? ` (${tc.templateVersion})` : '');
+        document.getElementById("infoEnvironment").textContent = tc.environment;
+        document.getElementById("infoTcId").textContent = tc.testcaseId;
+
+        let additionalHtml = `Testplan execution Id: ${testPlanExecution.executionId}<br>Testcase execution Id: ${tc.testcaseExecutionId}`;
+        if (tc.resultRef) additionalHtml += `<br>Result reference Id: ${tc.resultRef}`;
+        document.getElementById("infoAdditional").innerHTML = additionalHtml;
+
+        document.getElementById("infoExecStatus").textContent = tc.executionStatus;
+        const resultEl = document.getElementById("infoExecResult");
+        resultEl.textContent = tc.executionResult;
+        resultEl.className = "info-value";
+        if (tc.executionResult === "Failed") resultEl.classList.add("text-danger");
+        else if (tc.executionResult === "User Validation") resultEl.classList.add("text-warning-custom");
+        else resultEl.style.color = "var(--wtw-success)";
+
+        document.getElementById("infoExecutedBy").textContent = tc.executedBy;
+        document.getElementById("infoExecDate").textContent = tc.executionDate;
+        document.getElementById("infoRemarks").textContent = tc.executionRemarks;
+
+        // Show additional details (error stack trace) if present
+        const additionalDetailsEl = document.getElementById("infoAdditionalDetails");
+        if (additionalDetailsEl) {
+          if (tc.additionalDetails) {
+            additionalDetailsEl.style.display = "block";
+            additionalDetailsEl.querySelector('.detail-content').textContent = tc.additionalDetails;
+          } else {
+            additionalDetailsEl.style.display = "none";
+          }
+        }
+
+        // Configure tabs based on template type
+        const isActionBased = tc.templateName === "ActionBased";
+        configureTabsForTemplate(tc);
+
+        // Show "Resolving Fail" badge for failed test cases
+        const resolvingBadge = document.getElementById("badgeResolvingFail");
+        resolvingBadge.style.display = tc.executionResult === "Failed" ? "" : "none";
+
+        if (isActionBased) {
+          // ActionBased: populate Phase Results and Verification Results
+          populatePhaseResults(tc);
+          populateVerificationResults(tc);
+          // If current tab is SQL-only, reset to general
+          if (['results', 'condition', 'query', 'uservalidation'].includes(currentTab)) {
+            currentTab = 'general';
+          }
+        } else {
+          // SQL-based: populate Results
+          populateResults(tc);
+          // If current tab is ActionBased-only, reset to general
+          if (['verificationresults', 'phaseresults'].includes(currentTab)) {
+            currentTab = 'general';
+          }
+        }
+
+        // Populate User Validation (only for non-ActionBased)
+        if (!isActionBased) {
+          populateUserValidation(tc);
+        }
+
+        // Populate Parameters
+        populateParams(tc.parameters);
+
+        // Populate Condition tab (only for non-ActionBased)
+        if (!isActionBased) {
+          populateCondition(tc);
+        }
+
+        // Populate Query tab (only for non-ActionBased)
+        if (!isActionBased) {
+          queryTextArea.value = tc.query || '';
+          syncAndHighlightQuery();
+        }
+
+        // Populate Actions
+        populateActions(tc);
+
+        // Show current tab
+        switchTab(currentTab);
+
+        renderList();
+      }
+
+      function populateResults(tc) {
+        const tbody = document.getElementById("resultsTbody");
+        if (!tc.results || tc.results.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="subtle">No result data available.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = tc.results.map(row => {
+          const remarkClass = row.remarks === "Fail" ? "text-danger" : row.remarks === "Pass" ? "text-success" : "";
+          return `<tr>
+            <td>${escapeHtml(row.name)}</td>
+            <td>${row.expected}</td>
+            <td>${row.actual}</td>
+            <td class="${remarkClass}">${escapeHtml(row.remarks)}</td>
+          </tr>`;
+        }).join("");
+      }
+
+      function populateVerificationResults(tc) {
+        const tbody = document.getElementById("verificationResultsTbody");
+        if (!tc.results || tc.results.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="subtle">No verification result data available.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = tc.results.map(row => {
+          const remarkClass = row.remarks === "Fail" ? "text-danger" : row.remarks === "Pass" ? "text-success" : "";
+          return `<tr>
+            <td>${escapeHtml(row.name)}</td>
+            <td>${row.expected}</td>
+            <td>${row.actual}</td>
+            <td class="${remarkClass}">${escapeHtml(row.remarks)}</td>
+          </tr>`;
+        }).join("");
+      }
+
+      function populatePhaseResults(tc) {
+        const tbody = document.getElementById("phaseResultsTbody");
+        if (!tc.phases || tc.phases.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="subtle">No phase result data available.</td></tr>`;
+          return;
+        }
+        let html = '';
+        tc.phases.forEach(phase => {
+          phase.steps.forEach(step => {
+            const statusClass = step.status === "Failure" ? "text-danger" : step.status === "Success" ? "text-success" : "";
+            html += `<tr class="phase-row">
+              <td>${escapeHtml(phase.displayName)}</td>
+              <td>${escapeHtml(step.displayName)}</td>
+              <td class="${statusClass}">${escapeHtml(step.status || '')}</td>
+              <td class="small" style="max-width:400px;white-space:pre-wrap;word-break:break-word">${escapeHtml(step.message || '')}</td>
+            </tr>`;
+            // Variable rows (toggled by Show Variables checkbox)
+            if (step.variables && step.variables.length > 0) {
+              const included = step.variables.filter(v => v.include);
+              included.forEach(v => {
+                html += `<tr class="phase-variable-row" style="background:#f9f9f9">
+                  <td></td>
+                  <td class="ps-4 small text-muted">- ${escapeHtml(v.displayName || v.name)}</td>
+                  <td></td>
+                  <td class="small">${escapeHtml(v.value || '')}</td>
+                </tr>`;
+              });
+            }
+          });
+        });
+        tbody.innerHTML = html;
+      }
+
+      function togglePhaseVariables(show) {
+        document.querySelectorAll('.phase-variable-row').forEach(row => {
+          row.style.display = show ? '' : 'none';
+        });
+      }
+
+      function populateUserValidation(tc) {
+        const uv = tc.userValidation || { status: "User Validation", comments: "" };
+        document.getElementById("uvStatusUV").checked = uv.status === "User Validation";
+        document.getElementById("uvStatusPass").checked = uv.status === "Pass";
+        document.getElementById("uvStatusFail").checked = uv.status === "Failed";
+        document.getElementById("uvComments").value = uv.comments || "";
+      }
+
+      function populateParams(params) {
+        paramTbody.innerHTML = "";
+        if (!params || params.length === 0) {
+          paramTbody.innerHTML = `<tr><td colspan="3" class="subtle">No parameters.</td></tr>`;
+          return;
+        }
+        params.forEach(p => {
+          const tr = document.createElement("tr");
+          // Support both old format (name/type/value) and new format (Name/DataType/Value)
+          const pName = p.Name || p.name || '';
+          const pType = p.DataType || p.type || '';
+          const pValue = p.Value || p.value || '';
+          tr.innerHTML = `
+            <td>${escapeHtml(pName)}</td>
+            <td>${escapeHtml(pType)}</td>
+            <td>${escapeHtml(pValue)}</td>
+          `;
+          paramTbody.appendChild(tr);
+        });
+      }
+
+      function populateCondition(tc) {
+        const condPane = document.getElementById("tab-condition");
+        if (!tc.formattedWhereClause && !tc.whereClause && !tc.conditions) {
+          condPane.innerHTML = `<div class="subtle text-center py-4"><i class="bi bi-info-circle me-1"></i>No condition data available for this test case execution.</div>`;
+          return;
+        }
+        let html = '';
+        // Show the WHERE clause from the TC definition
+        const whereVal = tc.formattedWhereClause || tc.whereClause;
+        if (whereVal) {
+          html += `<div class="mb-3"><label class="form-label fw-semibold">WHERE Clause</label><div class="code-editor" style="background:#0b1020;border-radius:8px;padding:12px 14px"><pre style="margin:0;color:#e5e7eb;font-size:13px;line-height:1.5;white-space:pre-wrap"><code>${escapeHtml(whereVal)}</code></pre></div></div>`;
+        }
+        if (tc.conditions) {
+          try {
+            const cond = typeof tc.conditions === 'string' ? JSON.parse(tc.conditions) : tc.conditions;
+            html += `<div class="mb-3"><label class="form-label fw-semibold">Condition Rules (JSON)</label><pre class="bg-light border p-3 rounded small" style="max-height:200px;overflow:auto">${escapeHtml(JSON.stringify(cond, null, 2))}</pre></div>`;
+          } catch(e) {
+            html += `<div class="mb-3"><label class="form-label fw-semibold">Conditions (Raw)</label><pre class="bg-light border p-3 rounded small">${escapeHtml(tc.conditions)}</pre></div>`;
+          }
+        }
+        condPane.innerHTML = html;
+      }
+
+      function populateActions(tc) {
+        actionsSection.style.display = "block";
+        reviewRemarks.value = tc.reviewRemarks || tc.reviewComment || "";
+        reviewStatusOptions.innerHTML = "";
+
+        if (tc.reviewStatus !== "PENDING") {
+          // Already reviewed - show status
+          reviewStatusOptions.innerHTML = `<div class="alert alert-light border small mb-0"><i class="bi bi-check-circle me-1"></i>Review status: <strong>${reviewStatusLabel(tc.reviewStatus)}</strong>${tc.overrideComment ? ' — ' + escapeHtml(tc.overrideComment) : ''}</div>`;
+          btnSubmitReview.disabled = true;
+          reviewRemarks.disabled = true;
+          remarksRequired.style.display = "none";
+          return;
+        }
+
+        reviewRemarks.disabled = false;
+
+        if (tc.executionResult === "Failed" || tc.executionResult === "User Validation") {
+          // Failed/UV test cases: Override, Re-execute, or Leave Failed (US5.1)
+          reviewStatusOptions.innerHTML = `
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="reviewAction" id="actionOverride" value="OVERRIDDEN">
+              <label class="form-check-label" for="actionOverride"><strong>Override</strong> <span class="small text-muted">— Pass with comment (requires explanation)</span></label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="reviewAction" id="actionReexecute" value="RE_EXECUTE">
+              <label class="form-check-label" for="actionReexecute"><strong>Re-execute</strong> <span class="small text-muted">— Mark for re-run</span></label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="reviewAction" id="actionLeaveFailed" value="FAILED">
+              <label class="form-check-label" for="actionLeaveFailed"><strong>Leave Failed</strong> <span class="small text-muted">— Confirm failure</span></label>
+            </div>
+          `;
+        } else {
+          // Passed test cases: Approve or Re-execute
+          reviewStatusOptions.innerHTML = `
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="reviewAction" id="actionApprove" value="APPROVED" checked>
+              <label class="form-check-label" for="actionApprove"><strong>Approved</strong></label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="reviewAction" id="actionReexecute" value="RE_EXECUTE">
+              <label class="form-check-label" for="actionReexecute"><strong>Re-execute</strong> <span class="small text-muted">— Mark for re-run</span></label>
+            </div>
+          `;
+        }
+
+        btnSubmitReview.disabled = false;
+
+        // Listen for radio changes to toggle required remarks
+        reviewStatusOptions.querySelectorAll('input[name="reviewAction"]').forEach(radio => {
+          radio.addEventListener("change", () => {
+            const val = document.querySelector('input[name="reviewAction"]:checked')?.value;
+            if (val === "OVERRIDDEN") {
+              remarksRequired.style.display = "inline";
+            } else {
+              remarksRequired.style.display = "none";
+            }
+          });
+        });
+      }
+
+      // ============================================================
+      // TAB SWITCHING
+      // ============================================================
+      function configureTabsForTemplate(tc) {
+        const isActionBased = tc.templateName === "ActionBased";
+        // Show/hide tab nav items based on template type
+        document.querySelectorAll('.tab-sql').forEach(el => el.style.display = isActionBased ? 'none' : '');
+        document.querySelectorAll('.tab-action').forEach(el => el.style.display = isActionBased ? '' : 'none');
+      }
+
+      function switchTab(tabName) {
+        currentTab = tabName;
+        document.querySelectorAll(".tab-pane").forEach(p => p.style.display = "none");
+        const pane = document.getElementById(`tab-${tabName}`);
+        if (pane) pane.style.display = "block";
+        document.querySelectorAll(".detail-tabs .nav-link").forEach(link => {
+          link.classList.toggle("active", link.dataset.tab === tabName);
+        });
+      }
+
+      document.querySelectorAll(".detail-tabs .nav-link").forEach(link => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          switchTab(link.dataset.tab);
+        });
+      });
+
+      // Show Variables checkbox toggle
+      document.getElementById("chkShowVariables").addEventListener("change", (e) => {
+        togglePhaseVariables(e.target.checked);
+      });
+
+      // ============================================================
+      // SQL HIGHLIGHTING
+      // ============================================================
+      function syncAndHighlightQuery() {
+        const val = queryTextArea.value || "";
+        const queryEditorEl = queryTextArea.closest('.code-editor');
+        const noQueryMsg = document.getElementById('noQueryMsg');
+        if (!val.trim()) {
+          queryEditorEl.style.display = "none";
+          if (!noQueryMsg) {
+            const msg = document.createElement('div');
+            msg.id = 'noQueryMsg';
+            msg.className = 'subtle text-center py-4';
+            msg.innerHTML = '<i class="bi bi-info-circle me-1"></i>No SQL query available for this test case execution.';
+            queryEditorEl.parentNode.appendChild(msg);
+          } else {
+            noQueryMsg.style.display = "block";
+          }
+        } else {
+          queryEditorEl.style.display = "";
+          if (noQueryMsg) noQueryMsg.style.display = "none";
+          queryCode.textContent = val;
+          queryCode.removeAttribute("data-highlighted");
+          hljs.highlightElement(queryCode);
+          queryPre.scrollTop = queryTextArea.scrollTop;
+          queryPre.scrollLeft = queryTextArea.scrollLeft;
+        }
+      }
+
+      // ============================================================
+      // EVENT HANDLERS
+      // ============================================================
+
+      // Start Review
+      btnStartReview.addEventListener("click", () => {
+        screenWelcome.classList.add("d-none");
+        screenReview.classList.remove("d-none");
+
+        document.getElementById("planTitleTop").textContent = testPlanExecution.name + " (" + testPlanExecution.executionId + ")";
+        updateTopBadges();
+        renderList();
+
+        // Auto-select first visible
+        const visible = getVisibleIndexes();
+        if (visible.length > 0) selectTestCase(visible[0]);
+      });
+
+      // Back
+      btnBackToWelcome.addEventListener("click", () => {
+        screenReview.classList.add("d-none");
+        screenWelcome.classList.remove("d-none");
+        updateStartReviewButton();
+      });
+
+      // Toggle sidebar
+      btnToggleSidebar.addEventListener("click", () => {
+        appRoot.classList.toggle("sidebar-collapsed");
+      });
+
+      // Filter buttons
+      document.querySelectorAll("[data-filter]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentFilter = btn.getAttribute("data-filter");
+          renderList();
+
+          const visible = getVisibleIndexes();
+          if (!visible.includes(selectedIndex)) {
+            if (visible.length > 0) selectTestCase(visible[0]);
+            else { selectedIndex = -1; clearDetails(); }
+          }
+        });
+      });
+
+      // Search
+      tcSearch.addEventListener("input", () => { searchText = tcSearch.value; renderList(); });
+      btnClearSearch.addEventListener("click", () => { tcSearch.value = ""; searchText = ""; renderList(); });
+
+      // Submit Review (US5)
+      btnSubmitReview.addEventListener("click", () => {
+        if (selectedIndex < 0) return;
+        const tc = testPlanExecution.testCaseExecutions[selectedIndex];
+        const action = document.querySelector('input[name="reviewAction"]:checked')?.value;
+
+        if (!action) { alert("Please select a review status."); return; }
+
+        // Override requires comment (US5.2)
+        if (action === "OVERRIDDEN" && !reviewRemarks.value.trim()) {
+          alert("Override requires a mandatory comment explaining the decision.");
+          reviewRemarks.focus();
+          return;
+        }
+
+        tc.reviewStatus = action;
+        tc.reviewRemarks = reviewRemarks.value.trim();
+        if (action === "OVERRIDDEN") tc.overrideComment = reviewRemarks.value.trim();
+
+        // Re-execute: create new instance (US6.1)
+        if (action === "RE_EXECUTE") {
+          const newInstance = tc.executionInstance + 1;
+          tc.history.push({
+            instance: newInstance,
+            date: new Date().toLocaleString(),
+            result: "Re-executed",
+            executor: "Current User"
+          });
+          tc.executionInstance = newInstance;
+          tc.executionStatus = "Re-execute Pending";
+        }
+
+        updateTopBadges();
+        renderList();
+        moveToNext();
+      });
+
+      // Bulk Approve (US3.4)
+      btnBulkApprove.addEventListener("click", () => {
+        bulkSelected.forEach(idx => {
+          const tc = testPlanExecution.testCaseExecutions[idx];
+          if (tc.reviewStatus === "PENDING" && tc.executionResult === "Passed") {
+            tc.reviewStatus = "APPROVED";
+            tc.reviewRemarks = "Bulk approved";
+          }
+        });
+        bulkSelected.clear();
+        updateBulkBar();
+        updateTopBadges();
+        renderList();
+        if (selectedIndex >= 0) selectTestCase(selectedIndex);
+      });
+
+      btnBulkCancel.addEventListener("click", () => {
+        bulkSelected.clear();
+        updateBulkBar();
+        renderList();
+      });
+
+      // Copy SQL (US4.2)
+      btnCopySQL.addEventListener("click", async () => {
+        if (selectedIndex < 0) return;
+        try {
+          await navigator.clipboard.writeText(queryTextArea.value);
+          const orig = btnCopySQL.innerHTML;
+          btnCopySQL.innerHTML = '<i class="bi bi-check-lg me-1"></i>Copied!';
+          btnCopySQL.classList.add("btn-success"); btnCopySQL.classList.remove("btn-light");
+          setTimeout(() => { btnCopySQL.innerHTML = orig; btnCopySQL.classList.remove("btn-success"); btnCopySQL.classList.add("btn-light"); }, 2000);
+        } catch(e) { alert("Failed to copy."); }
+      });
+
+      // Maximize Query
+      btnMaximizeQuery.addEventListener("click", () => {
+        if (selectedIndex < 0) return;
+        const tc = testPlanExecution.testCaseExecutions[selectedIndex];
+        fullscreenTestCaseName.textContent = `${tc.testcaseId} - ${tc.name}`;
+        fullscreenQueryTextArea.value = tc.query;
+        fullscreenQueryCode.textContent = tc.query;
+        fullscreenQueryCode.removeAttribute("data-highlighted");
+        hljs.highlightElement(fullscreenQueryCode);
+
+        fullscreenSqlModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+        requestAnimationFrame(() => { requestAnimationFrame(() => { fullscreenSqlModal.classList.add("show"); }); });
+      });
+
+      btnCloseFullscreen.addEventListener("click", () => {
+        fullscreenSqlModal.classList.remove("show");
+        setTimeout(() => { fullscreenSqlModal.classList.remove("active"); document.body.style.overflow = ""; }, 300);
+      });
+
+      // User Validation Save
+      document.getElementById("btnUVSave").addEventListener("click", () => {
+        if (selectedIndex < 0) return;
+        const tc = testPlanExecution.testCaseExecutions[selectedIndex];
+        const status = document.querySelector('input[name="uvStatus"]:checked')?.value || "User Validation";
+        const comments = document.getElementById("uvComments").value;
+        tc.userValidation = { status, comments };
+        alert(`User Validation saved: ${status}`);
+      });
+
+      // Sign-off (US1, US8)
+      function openSignOff() {
+        const overridden = testPlanExecution.testCaseExecutions.filter(t => t.reviewStatus === "OVERRIDDEN");
+        const overridesSection = document.getElementById("signOffOverridesSection");
+        if (overridden.length > 0) {
+          overridesSection.style.display = "block";
+          document.getElementById("signOffOverridesList").innerHTML = overridden.map(t =>
+            `<div class="mb-1"><strong>${escapeHtml(t.name)}</strong>: ${escapeHtml(t.overrideComment)}</div>`
+          ).join("");
+        } else {
+          overridesSection.style.display = "none";
+        }
+        signOffModal.show();
+      }
+
+      btnSignOff.addEventListener("click", openSignOff);
+      btnSignOffBanner.addEventListener("click", openSignOff);
+
+      btnConfirmSignOff.addEventListener("click", () => {
+        const reviewer = document.getElementById("signOffReviewer").value.trim();
+        if (!reviewer) { alert("Please enter reviewer name."); return; }
+
+        testPlanExecution.signedOff = true;
+        testPlanExecution.signOffReviewer = reviewer;
+        testPlanExecution.signOffTimestamp = new Date().toLocaleString();
+
+        signOffModal.hide();
+        checkSignOffEligibility();
+        alert(`✅ Execution signed off by ${reviewer} at ${testPlanExecution.signOffTimestamp}`);
+      });
+
+      // Send to Tracker (US8.3)
+      btnSendTracker.addEventListener("click", () => {
+        if (!testPlanExecution.signedOff) return;
+        testPlanExecution.sentToTracker = true;
+        btnSendTracker.disabled = true;
+        btnSendTracker.innerHTML = '<i class="bi bi-check-lg me-1"></i>Sent';
+        alert(`✅ Execution ${testPlanExecution.executionId} sent to Test Tracker.`);
+      });
+
+      // View History (US6)
+      btnViewHistory.addEventListener("click", () => {
+        if (selectedIndex < 0) return;
+        const tc = testPlanExecution.testCaseExecutions[selectedIndex];
+        historyContent.innerHTML = `<h6>${escapeHtml(tc.name)} — Execution History</h6>` +
+          tc.history.map(h => `
+            <div class="history-item ${h.instance === tc.executionInstance ? 'current' : ''}">
+              <div class="fw-semibold">Instance #${h.instance} ${h.instance === tc.executionInstance ? '<span class="badge badge-soft ms-1">Current</span>' : ''}</div>
+              <div class="small subtle">${escapeHtml(h.date)} &bull; ${escapeHtml(h.executor)} &bull; Result: <strong>${escapeHtml(h.result)}</strong></div>
+            </div>
+          `).join("");
+        historyModal.show();
+      });
+
+      // ESC for fullscreen
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && fullscreenSqlModal.classList.contains("active")) {
+          btnCloseFullscreen.click();
+        }
+      });
+
+      // ============================================================
+      // UTILITY
+      // ============================================================
+      function moveToNext() {
+        const visible = getVisibleIndexes();
+        if (visible.length === 0) { selectedIndex = -1; clearDetails(); renderList(); return; }
+        const pos = visible.indexOf(selectedIndex);
+        const nextPos = pos >= 0 && pos < visible.length - 1 ? pos + 1 : 0;
+        selectTestCase(visible[nextPos]);
+      }
+
+      function clearDetails() {
+        tcNameHeading.textContent = "—";
+        actionsSection.style.display = "none";
+        btnCopySQL.disabled = true;
+        btnMaximizeQuery.disabled = true;
+        btnViewHistory.disabled = true;
+        document.getElementById("infoName").textContent = "—";
+        document.getElementById("infoTemplate").textContent = "—";
+        document.getElementById("infoEnvironment").textContent = "—";
+        document.getElementById("infoTcId").textContent = "—";
+        document.getElementById("infoAdditional").textContent = "—";
+        document.getElementById("infoExecStatus").textContent = "—";
+        document.getElementById("infoExecResult").textContent = "—";
+        document.getElementById("infoExecutedBy").textContent = "—";
+        document.getElementById("infoExecDate").textContent = "—";
+        document.getElementById("infoRemarks").textContent = "—";
+        paramTbody.innerHTML = `<tr><td colspan="3" class="subtle">Select a test case to view parameters.</td></tr>`;
+        document.getElementById("resultsTbody").innerHTML = `<tr><td colspan="4" class="subtle">Select a test case to view results.</td></tr>`;
+        document.getElementById("verificationResultsTbody").innerHTML = `<tr><td colspan="4" class="subtle">Select a test case to view results.</td></tr>`;
+        document.getElementById("phaseResultsTbody").innerHTML = `<tr><td colspan="4" class="subtle">Select a test case to view phase results.</td></tr>`;
+        queryTextArea.value = "";
+        syncAndHighlightQuery();
+      }
+
+      // PowerApps sidebar toggle
+      const powerappsSidebar = document.getElementById("powerappsSidebar");
+      const powerappsMain = document.getElementById("powerappsMain");
+    </script>
+  </body>
+</html>

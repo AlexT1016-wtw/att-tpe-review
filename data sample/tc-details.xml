@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<data>
+  <row>
+    <att_data>{"name":"Parameter","displayName":"Parameter","code":"10","steps":[{"name":"SharedData","displayName":"Shared Data","status":"","message":"","testStatus":-1,"link":"","variables":[{"name":"PlanYear","displayName":"PlanYear","value":"2025","valueList":["2025"],"actual":"","type":"Text","allowedValues":[],"required":true,"include":true,"operator":"","display":true,"description":"PlanYear","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[]},{"name":"Clone","displayName":"Clone","value":"true","valueList":["true"],"actual":"","type":"Boolean","allowedValues":[],"required":true,"include":true,"operator":"","display":true,"description":"","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[]}],"stepId":"42a4dd65-736f-4147-ab5d-b5442f107559","hasError":false}]}</att_data>
+    <att_dataorder>1</att_dataorder>
+    <att_phase>b2fdf191-01bd-ef11-b8e9-00224825fd04</att_phase>
+    <att_phasename>Parameter</att_phasename>
+    <att_testcase>ae407551-6444-f111-88b3-7c1e52813c79</att_testcase>
+    <att_testcasedetailsid>b0407551-6444-f111-88b3-7c1e52813c79</att_testcasedetailsid>
+    <att_testcasedetailsreferenceid>TCD-3614</att_testcasedetailsreferenceid>
+    <att_testcasename>Test-ActionBased-01</att_testcasename>
+    <createdby>c1f5e6fa-c213-f011-998a-000d3a109097</createdby>
+    <createdbyname>Alex Tonog</createdbyname>
+    <createdbyyominame>Alex Tonog</createdbyyominame>
+    <createdon>2026-04-30 07:15:18.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>c1f5e6fa-c213-f011-998a-000d3a109097</modifiedby>
+    <modifiedbyname>Alex Tonog</modifiedbyname>
+    <modifiedbyyominame>Alex Tonog</modifiedbyyominame>
+    <modifiedon>2026-04-30 07:15:18.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>1</statuscode>
+    <statuscodename>Active</statuscodename>
+    <timezoneruleversionnumber />
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+  <row>
+    <att_data>{"name":"TargetPerson","displayName":"TargetPerson","code":"20","message":"","status":"","steps":[{"name":"FindPersonByPersonalInfo","displayName":"Personal Info","status":"","message":"","testStatus":-1,"link":"","variables":[{"name":"BirthDate","displayName":"Birth Date (mm/dd, year ignored)","value":"","valueList":[],"actual":"","type":"Date","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"AgeFrom","displayName":"Age Range From","value":"35","valueList":["35"],"actual":"","type":"Integer","allowedValues":[],"required":false,"include":true,"operator":"=","display":true,"description":"Example: 25","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"AgeTo","displayName":"Age Range To","value":"","valueList":[],"actual":"","type":"Integer","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"Example: 35","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"AgeAsOfBOY","displayName":"Age As Of Beginning Of PlanYear","value":"","valueList":[],"actual":"","type":"Integer","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"Example: 35","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"AgeAsOfEOY","displayName":"Age As Of End Of PlanYear","value":"","valueList":[],"actual":"","type":"Integer","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"Example: 35","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"AgeAsOfCalendarBOY","displayName":"Age As Of Beginning Of Calendar","value":"","valueList":[],"actual":"","type":"Integer","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"Example: 35","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"AgeAsOfCalendarEOY","displayName":"Age As Of End Of Calendar","value":"","valueList":[],"actual":"","type":"Integer","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"Example: 35","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"Pre65Medicare","displayName":"Pre-65 Medicare","value":"","valueList":[],"actual":"","type":"Boolean","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"City","displayName":"City","value":"","valueList":[],"actual":"","type":"Text","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"Example: New York","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"State","displayName":"State","value":"","valueList":[],"actual":"","type":"Text","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"","multiSelect":true,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"ZipCodeFrom","displayName":"Zipcode Range From","value":"","valueList":[],"actual":"","type":"Text","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"Example: 10001","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"ZipCodeTo","displayName":"Zipcode Range To","value":"","valueList":[],"actual":"","type":"Text","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"Example: 10002","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"TobaccoUsageType","displayName":"Tobacco Usage Type","value":"","valueList":[],"actual":"","type":"Text","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"","multiSelect":true,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"PlanYear","displayName":"PlanYear","value":"","valueList":[],"actual":"","type":"Text","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]}],"stepId":"ccae0ed1-6713-4ad2-96b9-c149af0f4acc","hasError":false}]}</att_data>
+    <att_dataorder>2</att_dataorder>
+    <att_phase>36cefe85-01bd-ef11-b8e9-00224825fd04</att_phase>
+    <att_phasename>Target Person</att_phasename>
+    <att_testcase>ae407551-6444-f111-88b3-7c1e52813c79</att_testcase>
+    <att_testcasedetailsid>61500262-6444-f111-88b3-7c1e52813c79</att_testcasedetailsid>
+    <att_testcasedetailsreferenceid>TCD-3615</att_testcasedetailsreferenceid>
+    <att_testcasename>Test-ActionBased-01</att_testcasename>
+    <createdby>c1f5e6fa-c213-f011-998a-000d3a109097</createdby>
+    <createdbyname>Alex Tonog</createdbyname>
+    <createdbyyominame>Alex Tonog</createdbyyominame>
+    <createdon>2026-04-30 07:15:36.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>c1f5e6fa-c213-f011-998a-000d3a109097</modifiedby>
+    <modifiedbyname>Alex Tonog</modifiedbyname>
+    <modifiedbyyominame>Alex Tonog</modifiedbyyominame>
+    <modifiedon>2026-04-30 07:15:36.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>1</statuscode>
+    <statuscodename>Active</statuscodename>
+    <timezoneruleversionnumber />
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+  <row>
+    <att_data>{"name":"Precondition","displayName":"Precondition","code":"30","message":"","status":"","steps":[{"name":"CreateNewHire","displayName":"Create New Hire","status":"","message":"","testStatus":-1,"link":"","variables":[],"stepId":"909f4d39-f2db-4e68-a980-9ccfda67d73a","hasError":false}]}</att_data>
+    <att_dataorder>3</att_dataorder>
+    <att_phase>54902b67-14bd-ef11-b8e9-00224825fd04</att_phase>
+    <att_phasename>Precondition</att_phasename>
+    <att_testcase>ae407551-6444-f111-88b3-7c1e52813c79</att_testcase>
+    <att_testcasedetailsid>ec15116a-6444-f111-88b3-7c1e52813c79</att_testcasedetailsid>
+    <att_testcasedetailsreferenceid>TCD-3616</att_testcasedetailsreferenceid>
+    <att_testcasename>Test-ActionBased-01</att_testcasename>
+    <createdby>c1f5e6fa-c213-f011-998a-000d3a109097</createdby>
+    <createdbyname>Alex Tonog</createdbyname>
+    <createdbyyominame>Alex Tonog</createdbyyominame>
+    <createdon>2026-04-30 07:15:54.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>c1f5e6fa-c213-f011-998a-000d3a109097</modifiedby>
+    <modifiedbyname>Alex Tonog</modifiedbyname>
+    <modifiedbyyominame>Alex Tonog</modifiedbyyominame>
+    <modifiedon>2026-04-30 07:15:54.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>1</statuscode>
+    <statuscodename>Active</statuscodename>
+    <timezoneruleversionnumber />
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+  <row>
+    <att_data>{"name":"Execution","displayName":"Execution","code":"40","message":"","status":"","steps":[{"name":"MasterProcessControl","displayName":"Master Process Control","status":"","message":"","testStatus":-1,"link":"","variables":[],"stepId":"8c82ce5b-d094-4370-a875-f22de67fddfd","hasError":false}]}</att_data>
+    <att_dataorder>4</att_dataorder>
+    <att_phase>91d71298-01bd-ef11-b8e9-00224825fd04</att_phase>
+    <att_phasename>Execution</att_phasename>
+    <att_testcase>ae407551-6444-f111-88b3-7c1e52813c79</att_testcase>
+    <att_testcasedetailsid>fd15116a-6444-f111-88b3-7c1e52813c79</att_testcasedetailsid>
+    <att_testcasedetailsreferenceid>TCD-3617</att_testcasedetailsreferenceid>
+    <att_testcasename>Test-ActionBased-01</att_testcasename>
+    <createdby>c1f5e6fa-c213-f011-998a-000d3a109097</createdby>
+    <createdbyname>Alex Tonog</createdbyname>
+    <createdbyyominame>Alex Tonog</createdbyyominame>
+    <createdon>2026-04-30 07:16:00.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>c1f5e6fa-c213-f011-998a-000d3a109097</modifiedby>
+    <modifiedbyname>Alex Tonog</modifiedbyname>
+    <modifiedbyyominame>Alex Tonog</modifiedbyyominame>
+    <modifiedon>2026-04-30 07:16:00.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>1</statuscode>
+    <statuscodename>Active</statuscodename>
+    <timezoneruleversionnumber />
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+  <row>
+    <att_data>{"name":"Verification","displayName":"Verification","code":"50","message":"","status":"","steps":[{"name":"VerifyCalc","displayName":"Verify Calc","status":"","message":"","testStatus":-1,"link":"","variables":[{"name":"EventCode","displayName":"EventCode","value":"100","valueList":["100"],"actual":"","type":"Text","allowedValues":[],"required":false,"include":true,"operator":"=","display":true,"description":"","multiSelect":true,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"EventDate","displayName":"EventDate","value":"","valueList":[],"actual":"","type":"Date","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"EventDate","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"BaseEventDate","displayName":"Base EventDate","value":"","valueList":[],"actual":"","type":"Text","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"EventDate","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"BaseEventDatePreOffset","displayName":"Base EventDate Pre Offset (days)","value":"","valueList":[],"actual":"","type":"Integer","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"BaseEventDateOffSetType","displayName":"Base EventDate OffSet Type","value":"","valueList":[],"actual":"","type":"Text","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"BaseEventDateOffSet","displayName":"Base EventDate Offset (days)","value":"","valueList":[],"actual":"","type":"Integer","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]},{"name":"HasWindow","displayName":"Has Window","value":"","valueList":[],"actual":"","type":"Text","allowedValues":[],"required":false,"include":false,"operator":"","display":true,"description":"HasWindow","multiSelect":false,"dependsOn":[],"lookup":[],"operators":[],"dynamicAllowedValues":[]}],"stepId":"c30bc1bc-7fc9-45aa-b347-a6b7db199206","hasError":false}]}</att_data>
+    <att_dataorder>5</att_dataorder>
+    <att_phase>21999ea4-01bd-ef11-b8e9-00224825fd04</att_phase>
+    <att_phasename>Verification</att_phasename>
+    <att_testcase>ae407551-6444-f111-88b3-7c1e52813c79</att_testcase>
+    <att_testcasedetailsid>fe1cff76-6444-f111-88b3-7c1e52813c79</att_testcasedetailsid>
+    <att_testcasedetailsreferenceid>TCD-3618</att_testcasedetailsreferenceid>
+    <att_testcasename>Test-ActionBased-01</att_testcasename>
+    <createdby>c1f5e6fa-c213-f011-998a-000d3a109097</createdby>
+    <createdbyname>Alex Tonog</createdbyname>
+    <createdbyyominame>Alex Tonog</createdbyyominame>
+    <createdon>2026-04-30 07:16:11.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>c1f5e6fa-c213-f011-998a-000d3a109097</modifiedby>
+    <modifiedbyname>Alex Tonog</modifiedbyname>
+    <modifiedbyyominame>Alex Tonog</modifiedbyyominame>
+    <modifiedon>2026-04-30 07:16:11.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>1</statuscode>
+    <statuscodename>Active</statuscodename>
+    <timezoneruleversionnumber />
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+  <row>
+    <att_data>{"name":"Cleanup","displayName":"Cleanup","code":"60","message":"","status":"","steps":[{"name":"DeleteClone","displayName":"Delete Clone","status":"","message":"","testStatus":-1,"link":"","variables":[],"stepId":"ba1e9239-e29a-4472-adf4-117b42f6257f","hasError":false}]}</att_data>
+    <att_dataorder>6</att_dataorder>
+    <att_phase>175c51d0-01bd-ef11-b8e9-000d3a9ddefc</att_phase>
+    <att_phasename>Clean Up</att_phasename>
+    <att_testcase>ae407551-6444-f111-88b3-7c1e52813c79</att_testcase>
+    <att_testcasedetailsid>031dff76-6444-f111-88b3-7c1e52813c79</att_testcasedetailsid>
+    <att_testcasedetailsreferenceid>TCD-3619</att_testcasedetailsreferenceid>
+    <att_testcasename>Test-ActionBased-01</att_testcasename>
+    <createdby>c1f5e6fa-c213-f011-998a-000d3a109097</createdby>
+    <createdbyname>Alex Tonog</createdbyname>
+    <createdbyyominame>Alex Tonog</createdbyyominame>
+    <createdon>2026-04-30 07:16:18.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>c1f5e6fa-c213-f011-998a-000d3a109097</modifiedby>
+    <modifiedbyname>Alex Tonog</modifiedbyname>
+    <modifiedbyyominame>Alex Tonog</modifiedbyyominame>
+    <modifiedon>2026-04-30 07:16:18.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>1</statuscode>
+    <statuscodename>Active</statuscodename>
+    <timezoneruleversionnumber />
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+</data>

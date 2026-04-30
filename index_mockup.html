@@ -1,0 +1,2768 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>WTW • Test Plan Review</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Highlight.js (SQL) -->
+    <!-- Using dark theme for better contrast with dark background -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
+
+    <!-- and it's easy to individually load additional languages -->
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/languages/sql.min.js"></script>
+
+    <style>
+      /* -----------------------------
+       PowerApps Theme
+    --------------------------------*/
+      :root {
+        --powerapps-purple: #742774; /* PowerApps signature purple */
+        --wtw-purple: #6f2dbd; /* primary accent */
+        --wtw-purple-700: #5b239b;
+        --wtw-ink: #1f1f1f;
+        --wtw-muted: #6b7280;
+        --wtw-border: #e5e7eb;
+        --wtw-surface: #ffffff;
+        --wtw-bg: #f6f7fb;
+        --wtw-success: #14804a;
+        --wtw-danger: #b42318;
+        --wtw-warning: #b54708;
+        --radius: 14px;
+        --sidebar-width: 200px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--wtw-bg);
+        color: var(--wtw-ink);
+        font-family:
+          "Segoe UI",
+          sistema-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      /* PowerApps Header */
+      .powerapps-header {
+        background: var(--powerapps-purple);
+        color: white;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .powerapps-header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .powerapps-header-left .app-waffle {
+        width: 24px;
+        height: 24px;
+        display: grid;
+        grid-template-columns: repeat(3, 6px);
+        grid-template-rows: repeat(3, 6px);
+        gap: 2px;
+        cursor: pointer;
+      }
+
+      .powerapps-header-left .app-waffle span {
+        background: white;
+        border-radius: 1px;
+      }
+
+      .powerapps-header-brand {
+        font-size: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .powerapps-header-brand::after {
+        content: "";
+        width: 1px;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .powerapps-app-name {
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .powerapps-header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      /* PowerApps Sidebar */
+      .powerapps-sidebar {
+        position: fixed;
+        top: 48px;
+        left: 0;
+        width: var(--sidebar-width);
+        height: calc(100vh - 48px);
+        background: #f3f2f1;
+        border-right: 1px solid #d1d1d1;
+        overflow-y: auto;
+        z-index: 900;
+        transition: transform 0.3s ease;
+      }
+
+      .powerapps-sidebar.collapsed {
+        transform: translateX(calc(-1 * var(--sidebar-width)));
+      }
+
+      .powerapps-sidebar-section {
+        padding: 0;
+        margin: 8px 0;
+      }
+
+      .powerapps-sidebar-header {
+        padding: 8px 16px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #605e5c;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .powerapps-sidebar-item {
+        padding: 8px 16px 8px 32px;
+        font-size: 13px;
+        color: #323130;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        border-left: 3px solid transparent;
+      }
+
+      .powerapps-sidebar-item:hover {
+        background: #edebe9;
+      }
+
+      .powerapps-sidebar-item.active {
+        background: #e1dfdd;
+        border-left-color: var(--powerapps-purple);
+        font-weight: 600;
+      }
+
+      /* Main Content Area */
+      .powerapps-main {
+        margin-top: 48px;
+        margin-left: var(--sidebar-width);
+        height: calc(100vh - 48px);
+        overflow: hidden;
+        transition: margin-left 0.3s ease;
+      }
+
+      .powerapps-main.sidebar-collapsed {
+        margin-left: 0;
+      }
+
+      .wtw-navbar {
+        background: var(--wtw-surface);
+        border-bottom: 1px solid var(--wtw-border);
+        display: none; /* Hide old navbar */
+      }
+
+      .brand-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--wtw-purple);
+        display: inline-block;
+        margin: 0 6px 1px 6px;
+      }
+
+      .btn-wtw {
+        --bs-btn-bg: var(--wtw-purple);
+        --bs-btn-border-color: var(--wtw-purple);
+        --bs-btn-hover-bg: var(--wtw-purple-700);
+        --bs-btn-hover-border-color: var(--wtw-purple-700);
+        --bs-btn-color: #fff;
+        --bs-btn-hover-color: #fff;
+      }
+
+      .btn-wtw-outline {
+        --bs-btn-color: var(--wtw-purple);
+        --bs-btn-border-color: var(--wtw-purple);
+        --bs-btn-hover-bg: rgba(111, 45, 189, 0.08);
+        --bs-btn-hover-border-color: var(--wtw-purple-700);
+      }
+
+      .card {
+        border: 1px solid var(--wtw-border);
+        border-radius: var(--radius);
+        box-shadow: 0 1px 0 rgba(16, 24, 40, 0.02);
+      }
+
+      .section-title {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+
+      .subtle {
+        color: var(--wtw-muted);
+      }
+
+      /* Layout */
+      .app-shell {
+        max-width: 100%;
+        margin: 0;
+        padding: 18px 14px;
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      /* Fixed header for review screen */
+      #screenReview .header-fixed {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--wtw-bg);
+        padding-bottom: 14px;
+      }
+
+      #reviewLayout {
+        height: calc(100vh - 220px);
+        overflow: hidden;
+      }
+
+      .review-grid {
+        display: grid;
+        grid-template-columns: 36% 64%;
+        /* gap: 14px; */
+        height: 100%;
+        align-items: stretch;
+      }
+
+      .sidebar-collapsed .review-grid {
+        grid-template-columns: 0 100%;
+      }
+
+      .sidebar {
+        height: 100%;
+        overflow-y: scroll; /* Changed from auto to scroll */
+        overflow-x: hidden;
+        transition:
+          width 0.2s ease,
+          opacity 0.2s ease;
+        scrollbar-gutter: stable; /* Reserve space for scrollbar */
+      }
+
+      .sidebar-collapsed .sidebar {
+        opacity: 0;
+        pointer-events: none;
+        width: 0;
+      }
+
+      /* Scrollable main panel */
+      .main-panel {
+        height: 100%;
+        overflow-y: scroll; /* Changed from auto to scroll to always show scrollbar */
+        overflow-x: hidden;
+        scrollbar-gutter: stable; /* Reserve space for scrollbar */
+      }
+
+      /* Custom thin scrollbars for sidebar and main panel */
+      .sidebar,
+      .main-panel {
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: rgba(0, 0, 0, 0.5) rgba(0, 0, 0, 0.1); /* Firefox: thumb, track */
+      }
+
+      /* Webkit browsers (Chrome, Edge, Safari) */
+      .sidebar::-webkit-scrollbar,
+      .main-panel::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .sidebar::-webkit-scrollbar-track,
+      .main-panel::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 5px;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb,
+      .main-panel::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 5px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb:hover,
+      .main-panel::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.6);
+        background-clip: padding-box;
+      }
+
+      /* Test case list */
+      .tc-row {
+        border: 1px solid var(--wtw-border);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: #fff;
+        cursor: pointer;
+        transition:
+          transform 0.05s ease,
+          box-shadow 0.15s ease,
+          border-color 0.15s ease;
+      }
+      .tc-row:hover {
+        border-color: rgba(111, 45, 189, 0.35);
+        box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+      }
+      .tc-row.active {
+        border-color: var(--wtw-purple);
+        box-shadow: 0 10px 24px rgba(111, 45, 189, 0.12);
+        outline: 2px solid rgba(111, 45, 189, 0.1);
+      }
+
+      .badge-soft {
+        border: 1px solid var(--wtw-border);
+        background: #fff;
+        color: var(--wtw-muted);
+        font-weight: 600;
+      }
+      .badge-approved {
+        border-color: rgba(20, 128, 74, 0.25);
+        background: rgba(20, 128, 74, 0.08);
+        color: var(--wtw-success);
+      }
+      .badge-rejected {
+        border-color: rgba(180, 35, 24, 0.25);
+        background: rgba(180, 35, 24, 0.08);
+        color: var(--wtw-danger);
+      }
+      .badge-pending {
+        border-color: rgba(181, 71, 8, 0.25);
+        background: rgba(181, 71, 8, 0.08);
+        color: var(--wtw-warning);
+      }
+
+      /* “Textarea” with SQL syntax highlight (layered) */
+      .code-editor {
+        position: relative;
+        border: 1px solid var(--wtw-border);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #0b1020; /* dark surface for code contrast */
+      }
+      .code-editor pre {
+        margin: 0;
+        padding: 12px 14px;
+        min-height: auto;
+        max-height: 219px; /* ~10 lines with padding */
+        overflow: auto;
+        font-size: 13px;
+        line-height: 1.5;
+        background: transparent;
+      }
+      .code-editor textarea {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        resize: none;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.5;
+        background: transparent;
+        color: transparent; /* hides raw text */
+        caret-color: #ffffff; /* keeps caret visible */
+        outline: none;
+        overflow: auto;
+        white-space: pre;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+      }
+      .code-editor .hljs {
+        background: transparent;
+        color: #e5e7eb;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+      }
+
+      /* Custom scrollbar for code editor */
+      .code-editor pre {
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.1); /* Firefox: lighter for dark background */
+      }
+
+      .code-editor pre::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      .code-editor pre::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+      }
+
+      .code-editor pre::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+
+      .code-editor pre::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+        background-clip: padding-box;
+      }
+
+      .language-sql {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      /* Form field emphasis */
+      .form-label {
+        font-weight: 600;
+        color: #374151;
+      }
+
+      /* Fullscreen SQL Modal */
+      .fullscreen-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0);
+        z-index: 9999;
+        padding: 20px;
+        overflow: auto;
+        opacity: 0;
+        transition:
+          opacity 0.15s linear,
+          background 0.15s linear;
+      }
+      .fullscreen-modal.active {
+        display: block;
+      }
+      .fullscreen-modal.show {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.95);
+      }
+      .fullscreen-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        color: #fff;
+        transform: scale(0.9);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .fullscreen-modal.show .fullscreen-modal-header {
+        transform: scale(1);
+      }
+      .fullscreen-modal-body {
+        height: calc(100vh - 100px);
+        transform: scale(0.9);
+        opacity: 0;
+        transition:
+          transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+          opacity 0.15s linear;
+      }
+      .fullscreen-modal.show .fullscreen-modal-body {
+        transform: scale(1);
+        opacity: 1;
+      }
+      .fullscreen-code-editor {
+        position: relative;
+        border: 1px solid #333;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #0b1020;
+        height: 100%;
+      }
+      .fullscreen-code-editor pre {
+        margin: 0;
+        padding: 20px;
+        height: 100%;
+        overflow: auto;
+        font-size: 16px;
+        line-height: 1.6;
+        background: transparent !important;
+      }
+      .fullscreen-code-editor pre code {
+        background-color: transparent !important;
+      }
+
+      .fullscreen-code-editor textarea {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        resize: none;
+        padding: 20px;
+        font-size: 16px;
+        line-height: 1.6;
+        background: transparent;
+        color: transparent;
+        caret-color: #ffffff;
+        outline: none;
+        overflow: auto;
+        white-space: pre;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+      }
+
+      /* Fullscreen Parameters Table */
+      .fullscreen-params-container {
+        background: var(--wtw-surface);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
+        overflow: auto;
+      }
+      .fullscreen-params-container .table {
+        font-size: 15px;
+        margin-bottom: 0;
+      }
+      .fullscreen-params-container .table th {
+        position: sticky;
+        top: 0;
+        background: var(--wtw-bg);
+        z-index: 10;
+        padding: 12px;
+      }
+      .fullscreen-params-container .table td {
+        padding: 10px 12px;
+      }
+      .fullscreen-params-container .form-control {
+        font-size: 15px;
+        padding: 8px 12px;
+      }
+
+      /* Custom scrollbars for fullscreen modals */
+      .fullscreen-code-editor pre,
+      .fullscreen-params-container {
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.1); /* Firefox: thumb, track - lighter for dark background */
+      }
+
+      .fullscreen-code-editor pre::-webkit-scrollbar,
+      .fullscreen-params-container::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      .fullscreen-code-editor pre::-webkit-scrollbar-track,
+      .fullscreen-params-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+      }
+
+      .fullscreen-code-editor pre::-webkit-scrollbar-thumb,
+      .fullscreen-params-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+
+      .fullscreen-code-editor pre::-webkit-scrollbar-thumb:hover,
+      .fullscreen-params-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+        background-clip: padding-box;
+      }
+
+      /* Completion Banner */
+      .completion-banner {
+        display: none;
+        background: linear-gradient(135deg, #14804a 0%, #16a34a 100%);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        padding: 24px 28px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 16px rgba(20, 128, 74, 0.25);
+      }
+
+      .completion-banner.show {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .completion-banner h4 {
+        font-weight: 600;
+        color: white;
+        font-size: 1.25rem;
+      }
+
+      .completion-banner p {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 0.95rem;
+      }
+
+      .completion-banner .btn {
+        font-weight: 600;
+        min-width: 140px;
+        border: 2px solid transparent;
+      }
+
+      .completion-banner .btn-success {
+        background-color: white;
+        color: #14804a;
+        border-color: white;
+      }
+
+      .completion-banner .btn-success:hover {
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #14804a;
+        border-color: rgba(255, 255, 255, 0.9);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .completion-banner .btn-danger {
+        background-color: rgba(180, 35, 24, 0.2);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      .completion-banner .btn-danger:hover {
+        background-color: rgba(180, 35, 24, 0.3);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-1px);
+      }
+
+      /* Toggle Switch for SQL Display */
+      .sql-toggle-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.875rem;
+      }
+
+      .sql-toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+      }
+
+      .sql-toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .sql-toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s;
+        border-radius: 24px;
+      }
+
+      .sql-toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+      }
+
+      input:checked + .sql-toggle-slider {
+        background-color: var(--wtw-purple);
+      }
+
+      input:checked + .sql-toggle-slider:before {
+        transform: translateX(20px);
+      }
+
+      .sql-toggle-label {
+        font-weight: 500;
+        color: var(--wtw-muted);
+        user-select: none;
+      }
+
+      .sql-toggle-label.active {
+        color: var(--wtw-purple);
+        font-weight: 600;
+      }
+
+      /* Filter and Sort Button Active States */
+      .filter-btn.active {
+        background: var(--powerapps-purple) !important;
+        color: white !important;
+        border-color: var(--powerapps-purple) !important;
+      }
+
+      .sort-btn.active {
+        background: var(--powerapps-purple) !important;
+        color: white !important;
+        border-color: var(--powerapps-purple) !important;
+      }
+
+      /* Tooltip styling */
+      .param-name-cell {
+        position: relative;
+      }
+
+      .param-name-cell:hover {
+        cursor: help;
+      }
+
+      .param-name-cell .info-icon {
+        color: var(--wtw-muted);
+        font-size: 0.85em;
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
+
+      .param-name-cell input {
+        padding-right: 28px;
+      }
+
+      .tooltip {
+        max-width: 400px;
+      }
+
+      .tooltip-inner {
+        text-align: left;
+        padding: 8px 12px;
+        max-width: 400px;
+        font-size: 13px;
+      }
+
+      /* Responsive: stack on narrow */
+      @media (max-width: 992px) {
+        .review-grid {
+          grid-template-columns: 1fr;
+        }
+        .sidebar-collapsed .review-grid {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          min-height: auto;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- PowerApps Header -->
+    <!-- <header class="powerapps-header">
+      <div class="powerapps-header-left">
+        <div class="app-waffle" id="sidebarToggle">
+          <span></span><span></span><span></span> <span></span><span></span
+          ><span></span> <span></span><span></span><span></span>
+        </div>
+        <div class="powerapps-header-brand">Power Apps</div>
+        <div class="powerapps-app-name">Automated Testing Tool</div>
+      </div>
+      <div class="powerapps-header-right">SANDBOX</div>
+    </header> -->
+
+    <!-- PowerApps Sidebar -->
+    <aside class="powerapps-sidebar" id="powerappsSidebar">
+      <div class="powerapps-sidebar-section">
+        <div class="powerapps-sidebar-header">Test Plan Management</div>
+        <div class="powerapps-sidebar-item active">Test Plans</div>
+      </div>
+
+      <div class="powerapps-sidebar-section">
+        <div class="powerapps-sidebar-header">Test Case Management</div>
+        <div class="powerapps-sidebar-item">Test Cases</div>
+        <div class="powerapps-sidebar-item">Create SQL Testcase</div>
+        <div class="powerapps-sidebar-item">Create Action Testcases</div>
+      </div>
+
+      <div class="powerapps-sidebar-section">
+        <div class="powerapps-sidebar-header">Test Case Execution</div>
+        <div class="powerapps-sidebar-item">Test Plan Executions</div>
+      </div>
+
+      <div class="powerapps-sidebar-section">
+        <div class="powerapps-sidebar-header">Miscellaneous</div>
+        <div class="powerapps-sidebar-item">Announcements</div>
+        <div class="powerapps-sidebar-item">Submit Feedback</div>
+        <div class="powerapps-sidebar-item">Clear Cache</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="powerapps-main" id="powerappsMain">
+      <main class="app-shell" id="appRoot">
+        <!-- ----------------------------
+           SCREEN 1: Welcome Page
+      ----------------------------- -->
+        <section id="screenWelcome">
+          <div class="row g-3 align-items-stretch">
+            <div class="col-12 col-lg-8">
+              <div class="card p-4 h-100">
+                <div
+                  class="d-flex align-items-start justify-content-between gap-3"
+                >
+                  <div>
+                    <!-- <div class="subtle small">Welcome</div> -->
+                    <h4 class="mb-1 section-title">Test Plan Review</h4>                   
+                    <p class="subtle mb-0">
+                      Review the test cases assigned to this test plan. Approve
+                      or reject each test case with a streamlined flow.
+                    </p>
+                  </div>
+                  <!-- <span class="badge badge-soft px-3 py-2">Review Session</span> -->
+                </div>
+
+                <hr class="my-3" />
+
+                <div class="row g-3">
+                  <div class="col-12 col-md-12">
+                    <div class="subtle small">Test Plan Name</div>
+                    <div class="fw-semibold" id="testPlanName">Performance Testing test plan </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Owner</div>
+                    <div class="fw-semibold" id="welcomeOwner">Kat</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small"># of Test Cases</div>
+                    <div class="fw-semibold" id="welcomeCount">8</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Client</div>
+                    <div class="fw-semibold" id="welcomeClient">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Focus</div>
+                    <div class="fw-semibold" id="welcomeFocus">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Type</div>
+                    <div class="fw-semibold" id="welcomeType">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">SOC 2</div>
+                    <div class="fw-semibold" id="welcomeSoc2">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Date Last Updated</div>
+                    <div class="fw-semibold" id="welcomeUpdated">
+                      2026-03-23
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">
+                      Pending / Approved / Rejected
+                    </div>
+                    <div class="fw-semibold" id="welcomeStatusSummary">
+                      — / — / —
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="subtle small">Assigned Reviewers</div>
+                    <div class="fw-semibold" id="welcomeReviewers">
+                      Alex Tonog, Jorge De Los Reyes, Alvin Manzano
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                  <button class="btn btn-wtw px-4" id="btnStartReview">
+                    <i class="bi bi-play-fill me-1"></i>
+                    Start Review
+                  </button>
+                  <button
+                    class="btn btn-wtw-outline px-4"
+                    type="button"
+                    onclick="alert('Mock action')"
+                  >
+                    View History
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <div class="card p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h5 class="mb-0 section-title">What to expect</h5>
+                  <i
+                    class="bi bi-shield-check"
+                    style="color: var(--wtw-purple); font-size: 1.25rem"
+                  ></i>
+                </div>
+                <ul class="mt-3 mb-0 subtle small">
+                  <li>Review test cases in a focused list.</li>
+                  <li>See Criteria + Parameters clearly in one place.</li>
+                  <li>
+                    Maximize the Criteria and Setup Parameters view for better
+                    visibility.
+                  </li>
+                  <li>
+                    Approve/Reject moves you to the next test case
+                    automatically.
+                  </li>
+                  <li>Comments are required only for rejected test cases.</li>
+                </ul>
+
+                <div class="mt-3">
+                  <div class="small subtle mb-2">Test Cases in this Plan:</div>
+                  <div
+                    class="small"
+                    style="max-height: 120px; overflow-y: auto"
+                    id="testCaseNamesList"
+                  >
+                    <div class="text-muted">Loading...</div>
+                  </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="small subtle">Tips:</div>
+                <div class="fw-semibold">
+                  <ul>
+                    <li>
+                      Use the burger button
+                      <button
+                        class="btn btn-sm btn-light border"
+                        title="Toggle test case list"
+                      >
+                        <i class="bi bi-list"></i>
+                      </button>
+                      to collapse the test case list and focus on details.
+                    </li>
+                    <li>
+                      Use the Maximize  button
+                      <button
+                        class="btn btn-sm btn-light border"
+                        title="Maximize test case list"
+                      >
+                        <i class="bi bi-arrows-fullscreen"></i>
+                      </button>
+                      to maximize and view the panes in full screen mode.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ----------------------------
+         SCREEN 2: Review Workbench
+    ----------------------------- -->
+        <section id="screenReview" class="d-none">
+          <!-- Completion Banner -->
+          <div class="completion-banner alert" id="completionBanner">
+            <div
+              class="d-flex align-items-center justify-content-between gap-3"
+            >
+              <div class="flex-grow-1">
+                <h4 class="mb-2">
+                  <i class="bi bi-check-circle-fill me-2"></i>Test Plan Review
+                  Complete!
+                </h4>
+                <p class="mb-0">
+                  All test cases have been reviewed. You can now approve or
+                  reject the entire test plan.
+                </p>
+              </div>
+              <div class="d-flex gap-2 flex-shrink-0">
+                <button
+                  class="btn btn-danger visually-hidden"
+                  id="btnRejectTestPlanBanner"
+                >
+                  <i class="bi bi-x-circle me-1"></i>Reject Plan
+                </button>
+                <button class="btn btn-success" id="btnApproveTestPlanBanner">
+                  <i class="bi bi-check2-all me-1"></i>Approve Test Plan
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top panel: Test Plan Name (Fixed) -->
+          <div class="header-fixed">
+            <div class="card p-3">
+              <div
+                class="d-flex flex-wrap align-items-center justify-content-between gap-2"
+              >
+                <div class="d-flex align-items-center gap-2">
+                  <button
+                    class="btn btn-sm btn-light border"
+                    id="btnToggleSidebar"
+                    title="Toggle test case list"
+                  >
+                    <i class="bi bi-list"></i>
+                  </button>
+                  <div>
+                    <div class="subtle small">Test Plan Review</div>
+                    <div class="fw-bold" id="planTitleTop">
+                      Kat ATT Test Plan
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span class="badge badge-soft px-3 py-2" id="progressBadge"
+                    >0 / 8 reviewed</span
+                  >
+                  <button
+                    class="btn btn-sm btn-danger border"
+                    id="btnRejectTestPlan"
+                    title="Reject Test Plan"
+                  >
+                    <i class="bi bi-x-circle"></i> Reject Test Plan
+                  </button>
+                  <button
+                    class="btn btn-sm btn-light border"
+                    id="btnBackToWelcome"
+                    title="Back"
+                  >
+                    <i class="bi bi-arrow-left"></i> Back
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="reviewLayout">
+            <div class="review-grid">
+              <!-- Left panel: Test case list -->
+              <aside class="sidebar me-2">
+                <div class="card p-3">
+                  <div
+                    class="d-flex align-items-center justify-content-between"
+                  >
+                    <div>
+                      <div class="subtle small">Queue</div>
+                      <div class="section-title">Test Cases for Review</div>
+                    </div>
+                    <span class="badge badge-soft" id="pendingCountBadge"
+                      >Pending: 8</span
+                    >
+                  </div>
+
+                  <div class="mt-3 d-flex gap-2">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white border"
+                        ><i class="bi bi-search"></i
+                      ></span>
+                      <input
+                        class="form-control border"
+                        id="tcSearch"
+                        placeholder="Search test cases..."
+                      />
+                    </div>
+                    <button
+                      class="btn btn-sm btn-light border"
+                      id="btnClearSearch"
+                      title="Clear"
+                    >
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+
+                  <div class="mt-3 d-flex flex-wrap gap-2">
+                    <button
+                      class="btn btn-sm btn-light border filter-btn active"
+                      data-filter="ALL"
+                    >
+                      All
+                      <span class="badge bg-secondary ms-1" id="countAll"
+                        >0</span
+                      >
+                    </button>
+                    <button
+                      class="btn btn-sm btn-light border filter-btn"
+                      data-filter="PENDING"
+                    >
+                      Pending
+                      <span
+                        class="badge bg-warning text-dark ms-1"
+                        id="countPending"
+                        >0</span
+                      >
+                    </button>
+                    <button
+                      class="btn btn-sm btn-light border filter-btn"
+                      data-filter="APPROVED"
+                    >
+                      Approved
+                      <span class="badge bg-success ms-1" id="countApproved"
+                        >0</span
+                      >
+                    </button>
+                    <button
+                      class="btn btn-sm btn-light border filter-btn"
+                      data-filter="REJECTED"
+                    >
+                      Rejected
+                      <span class="badge bg-danger ms-1" id="countRejected"
+                        >0</span
+                      >
+                    </button>
+                    <button
+                      class="btn btn-sm btn-light border"
+                      id="btnToggleSort"
+                      title="Toggle sort options"
+                    >
+                      <i class="bi bi-sort-down"></i>
+                    </button>
+                  </div>
+
+                  <!-- Sort Controls -->
+                  <div
+                    class="mt-3 d-flex align-items-center gap-2 d-none"
+                    id="sortControls"
+                  >
+                    <span class="small text-muted">Sort by:</span>
+                    <button
+                      class="btn btn-sm btn-outline-secondary sort-btn active"
+                      data-sort="template"
+                      id="sortByTemplate"
+                    >
+                      <i class="bi bi-folder me-1"></i>Template
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-secondary sort-btn"
+                      data-sort="name"
+                      id="sortByName"
+                    >
+                      <i class="bi bi-sort-alpha-down me-1"></i>Testcase Name
+                    </button>
+                  </div>
+
+                  <div class="mt-3 d-grid gap-2" id="tcList"></div>
+                </div>
+              </aside>
+
+              <!-- Right panel: Test case details -->
+              <section class="main-panel">
+                <div class="card p-3">
+                  <div
+                    class="d-flex align-items-start justify-content-between gap-2"
+                  >
+                    <div>
+                      <div class="subtle small">Selected Test Case</div>
+                      <h5 class="mb-1 section-title" id="tcNameHeading">—</h5>
+                      <div class="small subtle" id="tcMetaLine">
+                        Select a test case from the list.
+                      </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                      <button
+                        class="btn btn-light btn-sm border"
+                        id="btnEditTestCase"
+                        disabled
+                      >
+                        <i class="bi bi-pencil me-1"></i> Edit
+                      </button>
+                      <button
+                        class="btn btn-success btn-sm"
+                        id="btnApprove"
+                        disabled
+                      >
+                        <i class="bi bi-check2-circle me-1"></i> Approve
+                      </button>
+                      <button
+                        class="btn btn-danger btn-sm"
+                        id="btnReject"
+                        disabled
+                      >
+                        <i class="bi bi-x-circle me-1"></i> Reject
+                      </button>
+                    </div>
+                  </div>
+
+                  <hr class="my-3" />
+
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">Testcase Name</label>
+                      <input class="form-control" id="fieldName" readonly />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <label class="form-label">Testcase Id</label>
+                      <input class="form-control" id="fieldId" readonly />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <label class="form-label">Template</label>
+                      <input class="form-control" id="fieldTemplate" readonly />
+                    </div>
+
+                    <div class="col-12 col-md-4 visually-hidden">
+                      <label class="form-label">Status</label>
+                      <input class="form-control" id="fieldStatus" readonly />
+                    </div>
+
+                    <div class="col-12">
+                      <label class="form-label">Description</label>
+                      <textarea
+                        class="form-control"
+                        id="fieldDesc"
+                        rows="3"
+                        placeholder="Description..."
+                        readonly
+                      ></textarea>
+                    </div>
+
+                    <div class="col-12">
+                      <div
+                        class="d-flex align-items-center justify-content-between"
+                      >
+                        <div>
+                          <div class="section-title">Setup Parameters</div>
+                          <div class="small subtle">
+                            Parameter names used in the query
+                          </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                          <button
+                            class="btn btn-sm btn-light border"
+                            id="btnMaximizeParams"
+                            title="Maximize parameters view"
+                            disabled
+                          >
+                            <i class="bi bi-arrows-fullscreen"></i>
+                          </button>
+                          <button
+                            class="btn btn-sm btn-light border visually-hidden"
+                            id="btnAddParam"
+                            disabled
+                          >
+                            <i class="bi bi-plus-lg me-1"></i> Add row
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="table-responsive mt-2">
+                        <table class="table table-sm align-middle">
+                          <thead>
+                            <tr class="subtle">
+                              <th style="width: 45%">Name</th>
+                              <th style="width: 25%">Data type</th>
+                              <th style="width: 30%">Value</th>
+                            </tr>
+                          </thead>
+                          <tbody id="paramTbody">
+                            <tr>
+                              <td colspan="3" class="subtle">
+                                Select a test case to view parameters.
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div class="col-12">
+                      <div
+                        class="d-flex align-items-center justify-content-between"
+                      >
+                        <div class="d-flex align-items-center gap-3">
+                          <label class="form-label mb-0">Criteria:</label>
+                          <div class="sql-toggle-wrapper">
+                            <span class="sql-toggle-label active" id="labelWhereClause">WHERE Clause</span>
+                            <label class="sql-toggle-switch">
+                              <input type="checkbox" id="sqlDisplayToggle">
+                              <span class="sql-toggle-slider"></span>
+                            </label>
+                            <span class="sql-toggle-label" id="labelFullSQL">Full SQL</span>
+                          </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                          <button
+                            class="btn btn-sm btn-light border"
+                            id="btnCopyFullSQL"
+                            title="Copy full SQL query"
+                            disabled
+                          >
+                            <i class="bi bi-clipboard me-1"></i> Copy Full SQL
+                          </button>
+                          <button
+                            class="btn btn-sm btn-light border"
+                            id="btnMaximizeQuery"
+                            title="Maximize query view"
+                            disabled
+                          >
+                            <i class="bi bi-arrows-fullscreen"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- WHERE clause display -->
+                      <div class="code-editor mt-2">
+                        <pre
+                          id="queryPre"
+                        ><code id="queryCode" class="language-sql"></code></pre>
+                        <textarea
+                          id="queryTextArea"
+                          spellcheck="false"
+                          aria-label="SQL query editor"
+                          disabled
+                        ></textarea>
+                      </div>
+                    </div>
+
+                    <div
+                      class="col-12"
+                      id="reviewCommentSection"
+                      style="display: none"
+                    >
+                      <label class="form-label">
+                        <i class="bi bi-chat-left-text me-1"></i>Review Comment
+                      </label>
+                      <div class="alert alert-light border mb-0">
+                        <div
+                          class="small"
+                          id="fieldReviewComment"
+                          style="white-space: pre-wrap"
+                        >
+                          —
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- row -->
+                </div>
+                <!-- card -->
+              </section>
+            </div>
+            <!-- grid -->
+          </div>
+          <!-- layout -->
+        </section>
+
+        <!-- Review Comment Modal -->
+        <div
+          class="modal fade"
+          id="reviewCommentModal"
+          tabindex="-1"
+          aria-labelledby="reviewCommentModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="reviewCommentModalLabel">
+                  Add Review Comment
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="reviewCommentText" class="form-label"
+                    >Comment <span class="text-muted">(optional)</span></label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="reviewCommentText"
+                    rows="4"
+                    placeholder="Enter your review comments here..."
+                  ></textarea>
+                  <div class="form-text">
+                    This comment will be saved with your decision.
+                  </div>
+                </div>
+                <div
+                  class="alert alert-info mb-0 d-flex align-items-start gap-2"
+                >
+                  <i class="bi bi-info-circle-fill"></i>
+                  <div>
+                    <strong id="reviewActionLabel">Approving:</strong>
+                    <div class="small" id="reviewTestCaseName">—</div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-light"
+                  data-bs-dismiss="modal"
+                >
+                  Cancel
+                </button>
+                <button type="button" class="btn btn-wtw" id="btnConfirmReview">
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reject Test Plan Modal -->
+        <div
+          class="modal fade"
+          id="rejectTestPlanModal"
+          tabindex="-1"
+          aria-labelledby="rejectTestPlanModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="rejectTestPlanModalLabel">
+                  <i class="bi bi-exclamation-triangle-fill me-2"></i>Reject
+                  Test Plan
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="rejectTestPlanReason" class="form-label"
+                    >Reason <span class="text-danger">*required</span></label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="rejectTestPlanReason"
+                    rows="4"
+                    placeholder="Please explain why you are rejecting this test plan..."
+                  ></textarea>
+                  <div class="form-text">
+                    This reason will be recorded with your rejection decision.
+                  </div>
+                </div>
+                <div
+                  class="alert alert-warning mb-0 d-flex align-items-start gap-2"
+                >
+                  <i class="bi bi-exclamation-triangle-fill"></i>
+                  <div>
+                    <strong>Warning:</strong> This will reject the entire test
+                    plan:
+                    <div class="small mt-1 fw-semibold" id="rejectTestPlanName">
+                      —
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-light"
+                  data-bs-dismiss="modal"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  id="btnConfirmRejectTestPlan"
+                >
+                  <i class="bi bi-x-circle me-1"></i>Reject Test Plan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fullscreen SQL Query Modal -->
+        <div class="fullscreen-modal" id="fullscreenSqlModal">
+          <div class="fullscreen-modal-header">
+            <div>
+              <h4 class="mb-1">
+                Full SQL Query - <span id="fullscreenTestCaseName">—</span>
+              </h4>
+              <div class="small text-muted">Full screen view</div>
+            </div>
+            <button
+              class="btn btn-light"
+              id="btnCloseFullscreen"
+              title="Close fullscreen (ESC)"
+            >
+              <i class="bi bi-x-lg me-1"></i> Close
+            </button>
+          </div>
+          <div class="fullscreen-modal-body">
+            <div class="fullscreen-code-editor">
+              <pre
+                id="fullscreenQueryPre"
+              ><code id="fullscreenQueryCode" class="language-sql"></code></pre>
+              <textarea
+                id="fullscreenQueryTextArea"
+                spellcheck="false"
+                aria-label="SQL query editor fullscreen"
+                disabled
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fullscreen Parameters Modal -->
+        <div class="fullscreen-modal" id="fullscreenParamsModal">
+          <div class="fullscreen-modal-header">
+            <div>
+              <h4 class="mb-1">
+                Setup Parameters |
+                <span id="fullscreenParamsTestCaseName">|</span>
+              </h4>
+              <div class="small text-muted">Full screen view</div>
+            </div>
+            <div class="d-flex gap-2">
+              <button
+                class="btn btn-success btn-sm visually-hidden"
+                id="btnAddParamFullscreen"
+              >
+                <i class="bi bi-plus-lg me-1"></i> Add Parameter
+              </button>
+              <button
+                class="btn btn-light"
+                id="btnCloseFullscreenParams"
+                title="Close fullscreen (ESC)"
+              >
+                <i class="bi bi-x-lg me-1"></i> Close
+              </button>
+            </div>
+          </div>
+          <div class="fullscreen-modal-body">
+            <div class="fullscreen-params-container">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr class="subtle">
+                    <th style="width: 40%">Name</th>
+                    <th style="width: 25%">Data type</th>
+                    <th style="width: 30%">Value</th>
+                    <th style="width: 5%"></th>
+                  </tr>
+                </thead>
+                <tbody id="fullscreenParamTbody">
+                  <tr>
+                    <td colspan="4" class="subtle text-center">
+                      No parameters
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+      <script>
+        // -----------------------------
+        // Mock data (replace with real)
+        // -----------------------------
+        const testPlan = {
+          name: "Performance Testing test plan",
+          owner: "Zara Diwa",
+          client: "Automated Testing Tool (H-BC4)",
+          focus: "Calc",
+          type: "Annual Enrollment",
+          soc2: "Yes",
+          reviewers: ["Alex Tonog", "Jorge De Los Reyes", "Alvin Manzano"],
+          lastUpdated: "2026-03-23",
+          testCases: [
+            {
+              name: "Group42 - Active Full-Time Resident",
+              id: "TC-1467",
+              type: "SQL",
+              template: "Group Id",
+              status: "PENDING",
+              description:
+                "Validate eligibility rules for active full-time residents.",
+              query: `SELECT m.MemberId, m.StatusCode, m.Class
+FROM dbo.Members m
+WHERE m.InYear = '2021'
+  AND m.StatusCode IN ('L','U')
+  AND m.Class IN ('RN','OPT');`,
+              parameters: [
+                {
+                  name: "InYear",
+                  type: "VARCHAR",
+                  value: "2021",
+                  description:
+                    "The <strong>plan year</strong> for which to retrieve member data. This filters records based on the year of enrollment. Must be in <code>YYYY</code> format.",
+                },
+                {
+                  name: "StatusCode",
+                  type: "VARCHAR",
+                  value: "L,U",
+                  description:
+                    "Comma-separated list of valid member status codes. <em>L</em> represents active members, while <em>U</em> represents pending status members awaiting verification.",
+                },
+                {
+                  name: "Class",
+                  type: "VARCHAR",
+                  value: "RN,OPT",
+                  description:
+                    "Member classification codes that determine the type of membership. RN indicates regular members, and OPT indicates optional coverage members.",
+                },
+              ],
+              reviewComment: "",
+            },
+            {
+              name: "Kat Test Case",
+              id: "TC-1468",
+              type: "SQL",
+              template: "Group Id",
+              status: "PENDING",
+              description:
+                "Verify default case behavior when optional filters are absent.",
+              query: `SELECT TOP 100 *
+FROM dbo.Claims c
+WHERE c.PlanYear = @PlanYear
+ORDER BY c.LastUpdated DESC;`,
+              parameters: [
+                {
+                  name: "PlanYear",
+                  type: "INT",
+                  value: "2024",
+                  description:
+                    "The fiscal year for which claims data should be retrieved. This parameter is used to filter all claim records to ensure only data from the specified year is included in the result set.",
+                },
+              ],
+              reviewComment: "",
+            },
+            {
+              name: "Group43 - Active Part Time A",
+              id: "TC-1469",
+              type: "SQL",
+              template: "Group Id",
+              status: "PENDING",
+              description:
+                "Validate part-time segment A business rules and exclusions.",
+              query: `SELECT e.EmployeeId, e.GroupId, e.IsActive
+FROM dbo.Employees e
+WHERE e.GroupId = @GroupId
+  AND e.IsActive = 1;`,
+              parameters: [
+                {
+                  name: "GroupId",
+                  type: "SMALLINT",
+                  value: "-1",
+                  description:
+                    "The unique identifier for the employee group. Use <code>-1</code> to select all groups, or provide a specific group ID to filter results to that group only.",
+                },
+              ],
+              reviewComment: "",
+            },
+            // add more to match desired volume (mock)
+            ...Array.from({ length: 3 }).map((_, i) => ({
+              name: `Additional Test Case ${i + 1}`,
+              id: `TC-147${i}`,
+              type: i % 2 ? "SQL" : "Action",
+              template: i % 2 ? "Basic Test" : "Action Based",
+              status: "PENDING",
+              description: "Mock description for additional test cases.",
+              query: `SELECT *
+FROM dbo.Table${i + 1} t
+WHERE t.Flag = 1;`,
+              parameters: [
+                {
+                  name: "Flag",
+                  type: "BIT",
+                  value: "1",
+                  description:
+                    "Boolean flag indicating whether to include active records only. Set to <code>1</code> for true or <code>0</code> for false.",
+                },
+              ],
+              reviewComment: "",
+            })),
+          ],
+        };
+
+        // -----------------------------
+        // State
+        // -----------------------------
+        let selectedIndex = -1;
+        let currentFilter = "PENDING"; // Start with PENDING filter
+        let currentSort = "template"; // "template" or "name"
+        let searchText = "";
+        let pendingReviewAction = null; // "APPROVED" or "REJECTED"
+        let showFullSQL = false; // Toggle state for SQL display
+
+        // -----------------------------
+        // Elements
+        // -----------------------------
+        const screenWelcome = document.getElementById("screenWelcome");
+        const screenReview = document.getElementById("screenReview");
+        const appRoot = document.getElementById("appRoot");
+
+        const btnStartReview = document.getElementById("btnStartReview");
+        const btnBackToWelcome = document.getElementById("btnBackToWelcome");
+        const btnToggleSidebar = document.getElementById("btnToggleSidebar");
+
+        const tcList = document.getElementById("tcList");
+        const tcSearch = document.getElementById("tcSearch");
+        const btnClearSearch = document.getElementById("btnClearSearch");
+        const btnToggleSort = document.getElementById("btnToggleSort");
+        const sortControls = document.getElementById("sortControls");
+
+        const progressBadge = document.getElementById("progressBadge");
+        const pendingCountBadge = document.getElementById("pendingCountBadge");
+
+        const btnApprove = document.getElementById("btnApprove");
+        const btnReject = document.getElementById("btnReject");
+        const btnAddParam = document.getElementById("btnAddParam");
+        const btnEditTestCase = document.getElementById("btnEditTestCase");
+        const btnCopyFullSQL = document.getElementById("btnCopyFullSQL");
+        const sqlDisplayToggle = document.getElementById("sqlDisplayToggle");
+        const labelWhereClause = document.getElementById("labelWhereClause");
+        const labelFullSQL = document.getElementById("labelFullSQL");
+
+        const tcNameHeading = document.getElementById("tcNameHeading");
+        const tcMetaLine = document.getElementById("tcMetaLine");
+
+        const fieldName = document.getElementById("fieldName");
+        const fieldId = document.getElementById("fieldId");
+        const fieldTemplate = document.getElementById("fieldTemplate");
+        const fieldStatus = document.getElementById("fieldStatus");
+        const fieldDesc = document.getElementById("fieldDesc");
+        const fieldReviewComment =
+          document.getElementById("fieldReviewComment");
+        const reviewCommentSection = document.getElementById(
+          "reviewCommentSection",
+        );
+
+        const queryTextArea = document.getElementById("queryTextArea");
+        const queryCode = document.getElementById("queryCode");
+        const queryPre = document.getElementById("queryPre");
+        const paramTbody = document.getElementById("paramTbody");
+
+        // Review comment modal elements
+        const reviewCommentModal = new bootstrap.Modal(
+          document.getElementById("reviewCommentModal"),
+        );
+        const reviewCommentText = document.getElementById("reviewCommentText");
+        const reviewActionLabel = document.getElementById("reviewActionLabel");
+        const reviewTestCaseName =
+          document.getElementById("reviewTestCaseName");
+        const btnConfirmReview = document.getElementById("btnConfirmReview");
+        const reviewCommentLabel = document.querySelector(
+          'label[for=\"reviewCommentText\"]',
+        );
+
+        // Reject Test Plan modal elements
+        const rejectTestPlanModal = new bootstrap.Modal(
+          document.getElementById("rejectTestPlanModal"),
+        );
+        const rejectTestPlanReason = document.getElementById(
+          "rejectTestPlanReason",
+        );
+        const rejectTestPlanName =
+          document.getElementById("rejectTestPlanName");
+        const btnConfirmRejectTestPlan = document.getElementById(
+          "btnConfirmRejectTestPlan",
+        );
+
+        // Fullscreen SQL modal elements
+        const fullscreenSqlModal =
+          document.getElementById("fullscreenSqlModal");
+        const fullscreenQueryTextArea = document.getElementById(
+          "fullscreenQueryTextArea",
+        );
+        const fullscreenQueryCode = document.getElementById(
+          "fullscreenQueryCode",
+        );
+        const fullscreenQueryPre =
+          document.getElementById("fullscreenQueryPre");
+        const fullscreenTestCaseName = document.getElementById(
+          "fullscreenTestCaseName",
+        );
+        const btnMaximizeQuery = document.getElementById("btnMaximizeQuery");
+        const btnCloseFullscreen =
+          document.getElementById("btnCloseFullscreen");
+
+        // Fullscreen Parameters modal elements
+        const fullscreenParamsModal = document.getElementById(
+          "fullscreenParamsModal",
+        );
+        const fullscreenParamTbody = document.getElementById(
+          "fullscreenParamTbody",
+        );
+        const fullscreenParamsTestCaseName = document.getElementById(
+          "fullscreenParamsTestCaseName",
+        );
+        const btnMaximizeParams = document.getElementById("btnMaximizeParams");
+        const btnCloseFullscreenParams = document.getElementById(
+          "btnCloseFullscreenParams",
+        );
+        const btnAddParamFullscreen = document.getElementById(
+          "btnAddParamFullscreen",
+        );
+
+        // Welcome fields
+        document.getElementById("welcomeOwner").textContent = testPlan.owner;
+        document.getElementById("welcomeClient").textContent =
+          testPlan.client || "—";
+        document.getElementById("welcomeFocus").textContent =
+          testPlan.focus || "—";
+        document.getElementById("welcomeType").textContent =
+          testPlan.type || "—";
+        document.getElementById("welcomeSoc2").textContent =
+          testPlan.soc2 || "—";
+        document.getElementById("welcomeReviewers").textContent =
+          testPlan.reviewers.join(", ");
+        document.getElementById("welcomeCount").textContent =
+          testPlan.testCases.length;
+        document.getElementById("welcomeUpdated").textContent =
+          testPlan.lastUpdated;
+        document.getElementById("welcomeStatusSummary").textContent =
+          `${pendingCount()} / ${approvedCount()} / ${rejectedCount()}`;
+        document.getElementById("planTitleTop").textContent = testPlan.name;
+
+        // Display test case names list
+        const testCaseNamesList = document.getElementById("testCaseNamesList");
+        if (testCaseNamesList) {
+          testCaseNamesList.innerHTML = testPlan.testCases
+            .map(
+              (tc, i) =>
+                `<div class="text-truncate" title="${escapeAttr(tc.name)}">${i + 1}. ${escapeHtml(tc.name)}</div>`,
+            )
+            .join("");
+        }
+
+        // Update button text based on review progress
+        function updateStartReviewButton() {
+          const hasReviewed = reviewedCount() > 0;
+          btnStartReview.innerHTML = hasReviewed
+            ? '<i class="bi bi-arrow-right-circle me-1"></i>Continue Review'
+            : '<i class="bi bi-play-fill me-1"></i>Start Review';
+        }
+        updateStartReviewButton();
+
+        // -----------------------------
+        // Helpers
+        // -----------------------------
+        function statusBadgeClass(status) {
+          if (status === "APPROVED") return "badge-approved";
+          if (status === "REJECTED") return "badge-rejected";
+          return "badge-pending";
+        }
+
+        function reviewedCount() {
+          return testPlan.testCases.filter(
+            (tc) => tc.status === "APPROVED" || tc.status === "REJECTED",
+          ).length;
+        }
+
+        function pendingCount() {
+          return testPlan.testCases.filter((tc) => tc.status === "PENDING")
+            .length;
+        }
+
+        function approvedCount() {
+          return testPlan.testCases.filter((tc) => tc.status === "APPROVED")
+            .length;
+        }
+
+        function rejectedCount() {
+          return testPlan.testCases.filter((tc) => tc.status === "REJECTED")
+            .length;
+        }
+
+        function updateFilterCounts() {
+          const countAll = document.getElementById("countAll");
+          const countPending = document.getElementById("countPending");
+          const countApproved = document.getElementById("countApproved");
+          const countRejected = document.getElementById("countRejected");
+
+          if (countAll) countAll.textContent = testPlan.testCases.length;
+          if (countPending) countPending.textContent = pendingCount();
+          if (countApproved) countApproved.textContent = approvedCount();
+          if (countRejected) countRejected.textContent = rejectedCount();
+        }
+
+        function updateTopBadges() {
+          progressBadge.textContent = `${reviewedCount()} / ${testPlan.testCases.length} reviewed`;
+          pendingCountBadge.textContent = `Pending: ${pendingCount()}`;
+          updateFilterCounts();
+          checkCompletion(); // Check if all reviewed
+        }
+
+        function checkCompletion() {
+          const allReviewed = testPlan.testCases.every(
+            (tc) => tc.status !== "PENDING",
+          );
+          const completionBanner = document.getElementById("completionBanner");
+          if (allReviewed && testPlan.testCases.length > 0) {
+            completionBanner.classList.add("show");
+          } else {
+            completionBanner.classList.remove("show");
+          }
+        }
+
+        function getVisibleIndexes() {
+          let items = testPlan.testCases
+            .map((tc, idx) => ({ tc, idx }))
+            .filter(({ tc }) => {
+              if (currentFilter === "PENDING" && tc.status !== "PENDING")
+                return false;
+              if (currentFilter === "APPROVED" && tc.status !== "APPROVED")
+                return false;
+              if (currentFilter === "REJECTED" && tc.status !== "REJECTED")
+                return false;
+              return true;
+            })
+            .filter(({ tc }) => {
+              if (!searchText.trim()) return true;
+              const s = searchText.toLowerCase();
+              return (
+                tc.name.toLowerCase().includes(s) ||
+                tc.id.toLowerCase().includes(s)
+              );
+            });
+
+          // Sort items
+          if (currentSort === "template") {
+            // Sort by template, then by name
+            items.sort((a, b) => {
+              const templateCompare = a.tc.template.localeCompare(
+                b.tc.template,
+              );
+              if (templateCompare !== 0) return templateCompare;
+              return a.tc.name.localeCompare(b.tc.name);
+            });
+          } else if (currentSort === "name") {
+            // Sort by name only
+            items.sort((a, b) => a.tc.name.localeCompare(b.tc.name));
+          }
+
+          return items.map((x) => x.idx);
+        }
+
+        function renderList() {
+          const visible = getVisibleIndexes();
+
+          tcList.innerHTML = "";
+          if (visible.length === 0) {
+            tcList.innerHTML = `<div class="subtle small">No test cases match your filter/search.</div>`;
+            return;
+          }
+
+          visible.forEach((idx) => {
+            const tc = testPlan.testCases[idx];
+            const row = document.createElement("div");
+            row.className = "tc-row";
+            if (idx === selectedIndex) row.classList.add("active");
+
+            const hasComment = tc.reviewComment && tc.reviewComment.trim();
+            const commentIcon = hasComment
+              ? '<i class="bi bi-chat-left-text-fill text-muted ms-1" title="Has review comment"></i>'
+              : "";
+
+            row.innerHTML = `
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div>
+              <div class="fw-semibold">${escapeHtml(tc.name)} ${commentIcon}</div>
+              <div class="small subtle">${escapeHtml(tc.id)} • ${escapeHtml(tc.type ?? " - ")} • ${escapeHtml(tc.template)}</div>
+            </div>
+            <span class="badge ${statusBadgeClass(tc.status)}">${tc.status}</span>
+          </div>
+        `;
+
+            row.addEventListener("click", () => selectTestCase(idx));
+            tcList.appendChild(row);
+          });
+        }
+
+        function selectTestCase(idx) {
+          selectedIndex = idx;
+          const tc = testPlan.testCases[idx];
+
+          // enable actions
+          btnApprove.disabled = false;
+          btnReject.disabled = false;
+          btnAddParam.disabled = false;
+          btnMaximizeQuery.disabled = false;
+          btnMaximizeParams.disabled = false;
+          btnEditTestCase.disabled = false;
+          btnCopyFullSQL.disabled = false;
+
+          // Header
+          tcNameHeading.textContent = tc.name;
+          tcMetaLine.textContent = `${tc.id} • ${tc.template} • ${tc.status}`;
+
+          // Fields
+          fieldName.value = tc.name;
+          fieldId.value = tc.id;
+          fieldTemplate.value = tc.template;
+          fieldStatus.value = tc.status;
+          fieldDesc.value = tc.description;
+
+          // Review comment (show only if exists)
+          if (tc.reviewComment && tc.reviewComment.trim()) {
+            fieldReviewComment.textContent = tc.reviewComment;
+            reviewCommentSection.style.display = "block";
+          } else {
+            reviewCommentSection.style.display = "none";
+          }
+
+          // Query editor - display based on toggle state
+          const whereClause = extractWhereClause(tc.query);
+          queryTextArea.value = showFullSQL ? tc.query : whereClause;
+          // Store full query for copy button and toggle
+          queryTextArea.dataset.fullQuery = tc.query;
+          queryTextArea.dataset.whereClause = whereClause;
+          syncAndHighlightQuery();
+
+          // Parameters
+          renderParams(tc.parameters);
+
+          renderList();
+        }
+
+        function renderParams(params) {
+          paramTbody.innerHTML = "";
+          params.forEach((p, i) => {
+            const tr = document.createElement("tr");
+            const description = p.description || "No description available";
+            tr.innerHTML = `
+          <td class="param-name-cell" title="" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="${escapeAttr(description)}">
+            <input class="form-control form-control-sm" value="${escapeAttr(p.name)}" readonly>
+            <i class="bi bi-info-circle info-icon"></i>
+          </td>
+          <td><input class="form-control form-control-sm" value="${escapeAttr(p.type)}" readonly></td>
+          <td><input class="form-control form-control-sm" value="${escapeAttr(p.value)}" readonly></td>
+        `;
+            // Keep the mock interactive (edit in place)
+            const inputs = tr.querySelectorAll("input");
+            inputs[0].addEventListener(
+              "input",
+              (e) => (params[i].name = e.target.value),
+            );
+            inputs[1].addEventListener(
+              "input",
+              (e) => (params[i].type = e.target.value),
+            );
+            inputs[2].addEventListener(
+              "input",
+              (e) => (params[i].value = e.target.value),
+            );
+
+            paramTbody.appendChild(tr);
+
+            // Initialize Bootstrap tooltip for this row
+            const nameCell = tr.querySelector(".param-name-cell");
+            new bootstrap.Tooltip(nameCell);
+          });
+        }
+
+        function syncAndHighlightQuery() {
+          // copy textarea value into code block and highlight
+          queryCode.textContent = queryTextArea.value || "";
+          queryCode.removeAttribute("data-highlighted");
+          hljs.highlightElement(queryCode);
+
+          // keep scroll in sync
+          queryPre.scrollTop = queryTextArea.scrollTop;
+          queryPre.scrollLeft = queryTextArea.scrollLeft;
+
+          // resize editor based on content
+          resizeCodeEditor();
+        }
+
+        function resizeCodeEditor() {
+          const content = queryTextArea.value || "";
+          const lines = Math.max(content.split("\n").length, 1);
+          const lineHeightPx = 19.5; // 13px font-size * 1.5 line-height
+          const verticalPadding = 24; // 12px top + 12px bottom
+          const maxLines = 10;
+
+          if (lines <= maxLines) {
+            // Fit content - set explicit height for lines <= 10
+            const contentHeight = lines * lineHeightPx;
+            // With box-sizing: border-box, total height = content + padding
+            queryPre.style.height = contentHeight + verticalPadding + "px";
+            queryPre.style.overflow = "hidden";
+          } else {
+            // More than 10 lines - use max height and show scrollbar
+            const maxContentHeight = maxLines * lineHeightPx;
+            queryPre.style.height = maxContentHeight + verticalPadding + "px";
+            queryPre.style.overflow = "auto";
+          }
+        }
+
+        function syncAndHighlightFullscreenQuery() {
+          // copy textarea value into code block and highlight for fullscreen
+          fullscreenQueryCode.textContent = fullscreenQueryTextArea.value || "";
+          fullscreenQueryCode.removeAttribute("data-highlighted");
+          hljs.highlightElement(fullscreenQueryCode);
+
+          // keep scroll in sync
+          fullscreenQueryPre.scrollTop = fullscreenQueryTextArea.scrollTop;
+          fullscreenQueryPre.scrollLeft = fullscreenQueryTextArea.scrollLeft;
+        }
+
+        function openFullscreenQuery() {
+          if (selectedIndex < 0) return;
+          const tc = testPlan.testCases[selectedIndex];
+
+          fullscreenTestCaseName.textContent = `${tc.id} - ${tc.name}`;
+          // Show full query in fullscreen mode
+          fullscreenQueryTextArea.value = tc.query;
+          syncAndHighlightFullscreenQuery();
+
+          fullscreenSqlModal.classList.add("active");
+          document.body.style.overflow = "hidden";
+
+          // Trigger animation with slight delay
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              fullscreenSqlModal.classList.add("show");
+            });
+          });
+        }
+
+        function closeFullscreenQuery() {
+          // Remove animation class first
+          fullscreenSqlModal.classList.remove("show");
+
+          // Wait for animation to complete before hiding
+          setTimeout(() => {
+            // Save changes back to the test case
+            if (selectedIndex >= 0) {
+              testPlan.testCases[selectedIndex].query =
+                fullscreenQueryTextArea.value;
+              queryTextArea.value = fullscreenQueryTextArea.value;
+              syncAndHighlightQuery();
+            }
+
+            fullscreenSqlModal.classList.remove("active");
+            document.body.style.overflow = "";
+          }, 300); // Match transition duration
+        }
+
+        function renderFullscreenParams(params) {
+          fullscreenParamTbody.innerHTML = "";
+          if (!params || params.length === 0) {
+            fullscreenParamTbody.innerHTML = `<tr><td colspan="4" class="subtle text-center">No parameters</td></tr>`;
+            return;
+          }
+
+          params.forEach((p, i) => {
+            const tr = document.createElement("tr");
+            const description = p.description || "No description available";
+            tr.innerHTML = `
+          <td class="param-name-cell" title="" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="${escapeAttr(description)}">
+            <input class="form-control" value="${escapeAttr(p.name)}">
+            <i class="bi bi-info-circle info-icon"></i>
+          </td>
+          <td><input class="form-control" value="${escapeAttr(p.type)}"></td>
+          <td><input class="form-control" value="${escapeAttr(p.value)}"></td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-danger" title="Delete parameter">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        `;
+
+            const inputs = tr.querySelectorAll("input");
+            inputs[0].addEventListener(
+              "input",
+              (e) => (params[i].name = e.target.value),
+            );
+            inputs[1].addEventListener(
+              "input",
+              (e) => (params[i].type = e.target.value),
+            );
+            inputs[2].addEventListener(
+              "input",
+              (e) => (params[i].value = e.target.value),
+            );
+
+            const btnDelete = tr.querySelector("button");
+            btnDelete.addEventListener("click", () => {
+              params.splice(i, 1);
+              renderFullscreenParams(params);
+              renderParams(params); // Sync with main view
+            });
+
+            fullscreenParamTbody.appendChild(tr);
+
+            // Initialize Bootstrap tooltip for this row
+            const nameCell = tr.querySelector(".param-name-cell");
+            new bootstrap.Tooltip(nameCell);
+          });
+        }
+
+        function openFullscreenParams() {
+          if (selectedIndex < 0) return;
+          const tc = testPlan.testCases[selectedIndex];
+
+          fullscreenParamsTestCaseName.textContent = `${tc.id} - ${tc.name}`;
+          renderFullscreenParams(tc.parameters);
+
+          fullscreenParamsModal.classList.add("active");
+          document.body.style.overflow = "hidden";
+
+          // Trigger animation with slight delay
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              fullscreenParamsModal.classList.add("show");
+            });
+          });
+        }
+
+        function closeFullscreenParams() {
+          // Remove animation class first
+          fullscreenParamsModal.classList.remove("show");
+
+          // Wait for animation to complete before hiding
+          setTimeout(() => {
+            // Sync back to the main parameter table
+            if (selectedIndex >= 0) {
+              const tc = testPlan.testCases[selectedIndex];
+              renderParams(tc.parameters);
+            }
+
+            fullscreenParamsModal.classList.remove("active");
+            document.body.style.overflow = "";
+          }, 300); // Match transition duration
+        }
+
+        function moveToNextAfterDecision() {
+          const visible = getVisibleIndexes();
+          if (visible.length === 0) {
+            selectedIndex = -1;
+            clearDetails();
+            renderList();
+            return;
+          }
+
+          // Find selected in visible list; move to next
+          const pos = visible.indexOf(selectedIndex);
+          const nextPos = pos >= 0 && pos < visible.length - 1 ? pos + 1 : 0;
+          selectTestCase(visible[nextPos]);
+        }
+
+        function clearDetails() {
+          btnApprove.disabled = true;
+          btnReject.disabled = true;
+          btnAddParam.disabled = true;
+          btnMaximizeQuery.disabled = true;
+          btnMaximizeParams.disabled = true;
+          btnEditTestCase.disabled = true;
+          btnCopyFullSQL.disabled = true;
+
+          tcNameHeading.textContent = "—";
+          tcMetaLine.textContent = "Select a test case from the list.";
+          fieldName.value = "";
+          fieldId.value = "";
+          fieldTemplate.value = "";
+          fieldStatus.value = "";
+          fieldDesc.value = "";
+          reviewCommentSection.style.display = "none";
+          queryTextArea.value = "";
+          queryTextArea.dataset.fullQuery = "";
+          syncAndHighlightQuery();
+          paramTbody.innerHTML = `<tr><td colspan="3" class="subtle">Select a test case to view parameters.</td></tr>`;
+        }
+
+        // Extract WHERE clause from SQL query
+        function extractWhereClause(query) {
+          if (!query) return "";
+
+          // Try to find WHERE clause in the query
+          const whereMatch = query.match(
+            /\bWHERE\b[\s\S]*?(?=\bORDER BY\b|\bGROUP BY\b|\bHAVING\b|\bLIMIT\b|;|$)/i,
+          );
+
+          if (whereMatch) {
+            return whereMatch[0].trim();
+          }
+
+          // If no WHERE clause found, return full query
+          return query;
+        }
+
+        function escapeHtml(str) {
+          return String(str).replace(
+            /[&<>"']/g,
+            (s) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[s],
+          );
+        }
+        function escapeAttr(str) {
+          return escapeHtml(str);
+        }
+
+        // -----------------------------
+        // Event wiring
+        // -----------------------------
+        btnStartReview.addEventListener("click", () => {
+          screenWelcome.classList.add("d-none");
+          screenReview.classList.remove("d-none");
+
+          updateTopBadges();
+          updateFilterCounts();
+
+          // Set PENDING filter as active by default
+          document
+            .querySelectorAll(".filter-btn")
+            .forEach((b) => b.classList.remove("active"));
+          const pendingBtn = document.querySelector('[data-filter="PENDING"]');
+          if (pendingBtn) pendingBtn.classList.add("active");
+
+          renderList();
+
+          // auto-select first visible item
+          const visible = getVisibleIndexes();
+          if (visible.length > 0) selectTestCase(visible[0]);
+          else clearDetails();
+        });
+
+        btnBackToWelcome.addEventListener("click", () => {
+          screenReview.classList.add("d-none");
+          screenWelcome.classList.remove("d-none");
+
+          // Update button text and status summary
+          updateStartReviewButton();
+          document.getElementById("welcomeStatusSummary").textContent =
+            `${pendingCount()} / ${approvedCount()} / ${rejectedCount()}`;
+        });
+
+        btnToggleSidebar.addEventListener("click", () => {
+          appRoot.classList.toggle("sidebar-collapsed");
+        });
+
+        // Filter buttons
+        document.querySelectorAll("[data-filter]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            // Remove active class from all filter buttons
+            document
+              .querySelectorAll(".filter-btn")
+              .forEach((b) => b.classList.remove("active"));
+            // Add active class to clicked button
+            btn.classList.add("active");
+
+            currentFilter = btn.getAttribute("data-filter");
+            renderList();
+
+            // if current selection not visible, pick first visible
+            const visible = getVisibleIndexes();
+            if (!visible.includes(selectedIndex)) {
+              if (visible.length > 0) selectTestCase(visible[0]);
+              else {
+                selectedIndex = -1;
+                clearDetails();
+              }
+            }
+          });
+        });
+
+        // Sort buttons
+        document.querySelectorAll("[data-sort]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            // Remove active class from all sort buttons
+            document
+              .querySelectorAll(".sort-btn")
+              .forEach((b) => b.classList.remove("active"));
+            // Add active class to clicked button
+            btn.classList.add("active");
+
+            currentSort = btn.getAttribute("data-sort");
+            renderList();
+
+            // Maintain selection if possible
+            const visible = getVisibleIndexes();
+            if (!visible.includes(selectedIndex)) {
+              if (visible.length > 0) selectTestCase(visible[0]);
+              else {
+                selectedIndex = -1;
+                clearDetails();
+              }
+            }
+          });
+        });
+
+        // Search
+        tcSearch.addEventListener("input", () => {
+          searchText = tcSearch.value;
+          renderList();
+        });
+        btnClearSearch.addEventListener("click", () => {
+          tcSearch.value = "";
+          searchText = "";
+          renderList();
+        });
+
+        // Toggle Sort Controls
+        btnToggleSort.addEventListener("click", () => {
+          sortControls.classList.toggle("d-none");
+        });
+
+        // Toggle SQL Display
+        sqlDisplayToggle.addEventListener("change", (e) => {
+          showFullSQL = e.target.checked;
+          
+          // Update label styles
+          if (showFullSQL) {
+            labelWhereClause.classList.remove("active");
+            labelFullSQL.classList.add("active");
+          } else {
+            labelWhereClause.classList.add("active");
+            labelFullSQL.classList.remove("active");
+          }
+          
+          // Update display if a test case is selected
+          if (selectedIndex >= 0) {
+            const fullQuery = queryTextArea.dataset.fullQuery || "";
+            const whereClause = queryTextArea.dataset.whereClause || "";
+            queryTextArea.value = showFullSQL ? fullQuery : whereClause;
+            syncAndHighlightQuery();
+          }
+        });
+
+        // Query editor sync
+        queryTextArea.addEventListener("input", () => {
+          if (selectedIndex < 0) return;
+          testPlan.testCases[selectedIndex].query = queryTextArea.value;
+          syncAndHighlightQuery();
+        });
+        queryTextArea.addEventListener("scroll", syncAndHighlightQuery);
+
+        // Approve/Reject - Open Modal
+        btnApprove.addEventListener("click", () => {
+          if (selectedIndex < 0) return;
+          const tc = testPlan.testCases[selectedIndex];
+          pendingReviewAction = "APPROVED";
+          reviewActionLabel.textContent = "Approving:";
+          reviewActionLabel.parentElement.parentElement.classList.remove(
+            "alert-danger",
+          );
+          reviewActionLabel.parentElement.parentElement.classList.add(
+            "alert-success",
+          );
+          reviewTestCaseName.textContent = `${tc.id} - ${tc.name}`;
+          reviewCommentText.value = tc.reviewComment || "";
+          // Make comment optional for approval
+          reviewCommentLabel.innerHTML =
+            'Comment <span class="text-muted">(optional)</span>';
+          reviewCommentModal.show();
+        });
+
+        btnReject.addEventListener("click", () => {
+          if (selectedIndex < 0) return;
+          const tc = testPlan.testCases[selectedIndex];
+          pendingReviewAction = "REJECTED";
+          reviewActionLabel.textContent = "Rejecting:";
+          reviewActionLabel.parentElement.parentElement.classList.remove(
+            "alert-success",
+          );
+          reviewActionLabel.parentElement.parentElement.classList.add(
+            "alert-danger",
+          );
+          reviewTestCaseName.textContent = `${tc.id} - ${tc.name}`;
+          reviewCommentText.value = tc.reviewComment || "";
+          // Make comment required for rejection
+          reviewCommentLabel.innerHTML =
+            'Comment <span class="text-danger">*required</span>';
+          reviewCommentModal.show();
+        });
+
+        // Confirm Review Action from Modal
+        btnConfirmReview.addEventListener("click", () => {
+          if (selectedIndex < 0 || !pendingReviewAction) return;
+
+          // Validate: Rejection requires a comment
+          if (
+            pendingReviewAction === "REJECTED" &&
+            !reviewCommentText.value.trim()
+          ) {
+            alert(
+              "Please provide a comment explaining why this test case is being rejected.",
+            );
+            reviewCommentText.focus();
+            return;
+          }
+
+          // Save the review comment and status
+          testPlan.testCases[selectedIndex].status = pendingReviewAction;
+          testPlan.testCases[selectedIndex].reviewComment =
+            reviewCommentText.value.trim();
+          fieldStatus.value = pendingReviewAction;
+
+          // Update UI
+          updateTopBadges();
+          renderList();
+
+          // Close modal and move to next
+          reviewCommentModal.hide();
+          moveToNextAfterDecision();
+
+          // Reset
+          pendingReviewAction = null;
+          reviewCommentText.value = "";
+        });
+
+        // Add parameter row
+        btnAddParam.addEventListener("click", () => {
+          if (selectedIndex < 0) return;
+          const tc = testPlan.testCases[selectedIndex];
+          tc.parameters.push({
+            name: "NewParam",
+            type: "VARCHAR",
+            value: "",
+            description: "Description for new parameter",
+          });
+          renderParams(tc.parameters);
+        });
+
+        // Edit test case button
+        btnEditTestCase.addEventListener("click", () => {
+          if (selectedIndex < 0) return;
+          const tc = testPlan.testCases[selectedIndex];
+          alert(
+            `Mock: Opening test case "${tc.name}" (${tc.id}) in edit mode.\n\nThis would navigate to the test case editor flow.`,
+          );
+        });
+
+        // Copy full SQL button
+        btnCopyFullSQL.addEventListener("click", async () => {
+          if (selectedIndex < 0) return;
+          const fullQuery =
+            queryTextArea.dataset.fullQuery || queryTextArea.value;
+
+          try {
+            await navigator.clipboard.writeText(fullQuery);
+            // Show success feedback
+            const originalHTML = btnCopyFullSQL.innerHTML;
+            btnCopyFullSQL.innerHTML =
+              '<i class="bi bi-check-lg me-1"></i> Copied!';
+            btnCopyFullSQL.classList.add("btn-success");
+            btnCopyFullSQL.classList.remove("btn-light");
+
+            setTimeout(() => {
+              btnCopyFullSQL.innerHTML = originalHTML;
+              btnCopyFullSQL.classList.remove("btn-success");
+              btnCopyFullSQL.classList.add("btn-light");
+            }, 2000);
+          } catch (err) {
+            alert("Failed to copy SQL to clipboard. Please try again.");
+          }
+        });
+
+        // Fullscreen SQL Query
+        btnMaximizeQuery.addEventListener("click", openFullscreenQuery);
+        btnCloseFullscreen.addEventListener("click", closeFullscreenQuery);
+
+        // Fullscreen query editor sync
+        fullscreenQueryTextArea.addEventListener("input", () => {
+          syncAndHighlightFullscreenQuery();
+        });
+        fullscreenQueryTextArea.addEventListener(
+          "scroll",
+          syncAndHighlightFullscreenQuery,
+        );
+
+        // Fullscreen Parameters
+        btnMaximizeParams.addEventListener("click", openFullscreenParams);
+        btnCloseFullscreenParams.addEventListener(
+          "click",
+          closeFullscreenParams,
+        );
+
+        // Add parameter in fullscreen
+        btnAddParamFullscreen.addEventListener("click", () => {
+          if (selectedIndex < 0) return;
+          const tc = testPlan.testCases[selectedIndex];
+          tc.parameters.push({
+            name: "NewParam",
+            type: "VARCHAR",
+            value: "",
+            description: "Description for new parameter",
+          });
+          renderFullscreenParams(tc.parameters);
+        });
+
+        // ESC key to close fullscreen
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            if (fullscreenSqlModal.classList.contains("active")) {
+              closeFullscreenQuery();
+            } else if (fullscreenParamsModal.classList.contains("active")) {
+              closeFullscreenParams();
+            }
+          }
+        });
+
+        // Approve/Reject Test Plan (when all test cases are reviewed)
+        const btnApproveTestPlan =
+          document.getElementById("btnApproveTestPlan");
+        const btnRejectTestPlan = document.getElementById("btnRejectTestPlan");
+        const btnApproveTestPlanBanner = document.getElementById(
+          "btnApproveTestPlanBanner",
+        );
+        const btnRejectTestPlanBanner = document.getElementById(
+          "btnRejectTestPlanBanner",
+        );
+
+        function handleApproveTestPlan() {
+          const allApproved = testPlan.testCases.every(
+            (tc) => tc.status === "APPROVED",
+          );
+          if (allApproved) {
+            alert(
+              `✅ Test Plan "${testPlan.name}" has been approved!\n\nAll ${testPlan.testCases.length} test cases have been approved.`,
+            );
+          } else {
+            const rejected = rejectedCount();
+            const approved = approvedCount();
+            if (
+              confirm(
+                `This test plan has ${rejected} rejected test case(s) and ${approved} approved test case(s).\n\nDo you want to approve the test plan anyway?`,
+              )
+            ) {
+              alert(
+                `✅ Test Plan "${testPlan.name}" has been approved with ${rejected} rejected test case(s).`,
+              );
+            }
+          }
+        }
+
+        function handleRejectTestPlan() {
+          // Open the modal
+          rejectTestPlanName.textContent = testPlan.name;
+          rejectTestPlanReason.value = "";
+          rejectTestPlanModal.show();
+        }
+
+        // Confirm Reject Test Plan from Modal
+        btnConfirmRejectTestPlan.addEventListener("click", () => {
+          const reason = rejectTestPlanReason.value.trim();
+
+          if (!reason) {
+            alert("Please provide a reason for rejecting the test plan.");
+            rejectTestPlanReason.focus();
+            return;
+          }
+
+          // Close modal and show success message
+          rejectTestPlanModal.hide();
+
+          setTimeout(() => {
+            alert(
+              `❌ Test Plan "${testPlan.name}" has been rejected.\n\nReason: ${reason}`,
+            );
+          }, 300);
+        });
+
+        if (btnApproveTestPlan) {
+          btnApproveTestPlan.addEventListener("click", handleApproveTestPlan);
+        }
+
+        if (btnRejectTestPlan) {
+          btnRejectTestPlan.addEventListener("click", handleRejectTestPlan);
+        }
+
+        if (btnApproveTestPlanBanner) {
+          btnApproveTestPlanBanner.addEventListener(
+            "click",
+            handleApproveTestPlan,
+          );
+        }
+
+        if (btnRejectTestPlanBanner) {
+          btnRejectTestPlanBanner.addEventListener(
+            "click",
+            handleRejectTestPlan,
+          );
+        }
+
+        // Clear modal when it's hidden
+        document
+          .getElementById("rejectTestPlanModal")
+          .addEventListener("hidden.bs.modal", () => {
+            rejectTestPlanReason.value = "";
+          });
+
+        // PowerApps Sidebar Toggle
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const powerappsSidebar = document.getElementById("powerappsSidebar");
+        const powerappsMain = document.getElementById("powerappsMain");
+
+        sidebarToggle.addEventListener("click", () => {
+          powerappsSidebar.classList.toggle("collapsed");
+          powerappsMain.classList.toggle("sidebar-collapsed");
+        });
+
+        // SQL language is already loaded via CDN script tag above
+      </script>
+    </div>
+    <!-- /powerapps-main -->
+  </body>
+</html>

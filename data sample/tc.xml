@@ -1,0 +1,1352 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<data>
+  <row>
+    <att_atttestcaseid>b0ec51b4-9c51-f011-877a-000d3a109097</att_atttestcaseid>
+    <att_clientlookup>dcdf1a89-274e-ef11-a317-6045bddb40df</att_clientlookup>
+    <att_clientlookupname>Automated Testing Tool (H-BC4)</att_clientlookupname>
+    <att_conditions />
+    <att_description>test</att_description>
+    <att_formattedwhereclause />
+    <att_fullsql> DECLARE @SpecialGroupId SMALLINT = -1;
+ DECLARE @PersonId INT = -1;
+ DECLARE @PlanYear SMALLINT = 2024;
+
+-- ===========================================================================================================================================
+-- Calc Analysis Between PlanYears
+-- Test Case: Compare elections between planyears
+-- ===========================================================================================================================================
+
+-----------------------------------------------------------------------------------
+-- Parameters
+-----------------------------------------------------------------------------------
+
+DECLARE @PlanYear1 SMALLINT = @PlanYear - 1;
+DECLARE @PlanYear2 SMALLINT = @PlanYear;
+
+-----------------------------------------------------------------------------------
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+-----------------------------------------------------------------------------------
+-- 0 - Select employees for AE
+-----------------------------------------------------------------------------------
+DROP TABLE IF EXISTS #group
+
+SELECT TOP 1 
+    c1.PersonId, PlanYear1 = c1.PlanYear, CalcId1 = c1.CalcId, EventCode1 = c1.EventCode, PlanYear2 = c2.PlanYear, CalcId2 = c2.CalcId, EventCode2 = c2.EventCode
+INTO 
+    #group 
+FROM 
+    dbo.hw_calcmaster c1 WITH (NOLOCK) 
+JOIN
+    dbo.hw_calcmaster c2 WITH (NOLOCK) 
+    ON c1.PersonId = c2.PersonId
+     AND c1.PlanYear = @PlanYear1
+     AND c2.PlanYear = @PlanYear2
+     AND c1.RecordStatus = 'A'
+     AND c2.RecordStatus = 'A'   
+     
+WHERE
+   
+   dbo.IsInternalTest(c1.PersonId) = 0   
+   AND ( @SpecialGroupId = -1 OR c1.PersonId IN ( SELECT PersonId FROM cdm_person_select_ids (NOLOCK) WHERE GroupId  = @SpecialGroupId ) )
+     AND ( @PersonId = -1 OR c1.PersonId = @PersonId) 
+-----------------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-- 1 - Gather two data sets for employee comparison
+-----------------------------------------------------------------------------------
+;WITH CTE_Election_1
+AS (
+   SELECT e.*
+     ,l.CovAmt
+     ,l.CostEffectiveDate
+     ,EventCode1 = c.EventCode1
+   FROM hw_election_log e(NOLOCK)
+   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
+     AND e.PlanYear = c.PlanYear1
+     AND e.CalcId = c.CalcId1
+     AND e.RecordStatus = 'A'
+   LEFT JOIN hw_eligibility l(NOLOCK) ON l.PersonId = e.PersonId
+     AND l.PlanYear = e.PlanYear
+     AND l.CalcId = e.CalcId
+     AND l.BenId = e.BenId
+     AND l.OptionId = e.OptionId
+     AND l.TierId = e.TierId
+   )
+   ,CTE_Election_2
+AS (
+   SELECT e.*
+     ,l.CovAmt
+     ,l.CostEffectiveDate
+     ,EventCode2 = c.EventCode2
+   FROM hw_election_log e(NOLOCK)
+   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
+     AND e.PlanYear = c.PlanYear2
+     AND e.CalcId = c.CalcId2
+     AND e.RecordStatus = 'A'
+   LEFT JOIN hw_eligibility l(NOLOCK) ON l.PersonId = e.PersonId
+     AND l.PlanYear = e.PlanYear
+     AND l.CalcId = e.CalcId
+     AND l.BenId = e.BenId
+     AND l.OptionId = e.OptionId
+     AND l.TierId = e.TierId
+   )
+---------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+-- ANALYSIS - Compare the two data sets and identify any differences
+--------------------------------------------------------------------------------------------------------------------
+SELECT *
+FROM (
+   SELECT PersonId = ISNULL(e1.PersonId, e2.PersonId)
+     ,PlanYear = ISNULL(e1.PlanYear, e2.PlanYear)
+     ,BenId = ISNULL(e1.BenId, e2.BenId)
+     ,OptionId1 = e1.OptionId
+     ,OptionId2 = e2.OptionId
+     ,TierId1 = e1.TierId
+     ,TierId2 = e2.TierId
+     ,EffectiveDate1 = e1.EffectiveDate
+     ,EffectiveDate2 = e2.EffectiveDate
+     ,EoiStatus1 = e1.EoiStatus
+     ,EoiStatus2 = e2.EoiStatus
+     ,CoverageEffectiveDate1 = e1.CoverageEffectiveDate
+     ,CoverageEffectiveDate2 = e2.CoverageEffectiveDate
+     ,CostEffectiveDate1 = e1.CostEffectiveDate
+     ,CostEffectiveDate2 = e2.CostEffectiveDate
+     ,EoiPend1 = e1.EoiPend
+     ,EoiPend2 = e2.EoiPend
+     ,Termed1 = e1.Termed
+     ,Termed2 = e2.Termed
+     ,TermDate1 = e1.TermDate
+     ,TermDate2 = e2.TermDate
+     ,CovAmt1 = e1.CovAmt
+     ,CovAmt2 = e2.CovAmt
+     ,EventCode1 = e1.EventCode1
+     ,EventCode2 = e2.EventCode2
+     ,ElectedAmount1 = e1.ElectedAmount
+     ,ElectedAmount2 = e2.ElectedAmount
+     ,Thumbprint1 = CONVERT(VARCHAR(255), HASHBYTES('SHA1', CONCAT (
+                e1.BenId
+                ,e1.OptionId
+                ,e1.TierId
+                ,e1.TermDate
+                ,e1.CoverageEffectiveDate
+                ,e1.CostEffectiveDate
+                ,e1.EffectiveDate
+                ,e1.EoiStatus
+                ,e1.EoiPend
+                ,e1.ElectedAmount
+                ,e1.Termed
+                ,e1.CovAmt
+                ,e1.EventCode1
+                )), 2)
+     ,Thumbprint2 = CONVERT(VARCHAR(255), HASHBYTES('SHA1', CONCAT (
+                e2.BenId
+                ,e2.OptionId
+                ,e2.TierId
+                ,e2.TermDate
+                ,e2.CoverageEffectiveDate
+                ,e2.CostEffectiveDate
+                ,e2.EffectiveDate
+                ,e2.EoiStatus
+                ,e2.EoiPend
+                ,e2.ElectedAmount
+                ,e2.Termed
+                ,e2.CovAmt
+              ,e2.EventCode2
+              )), 2)
+     ,Result = '===&gt;&gt;'
+     ,BenefitAnalysis = CASE 
+         WHEN e1.BenId IS NULL
+            THEN 'GAIN'
+         WHEN e2.BenId IS NULL AND ISNULL(e1.Termed, 0) = 0
+             THEN 'LOSS'
+         ELSE 'NO CHANGE'
+         END
+     ,OptionAnalysis = CASE 
+         WHEN e1.OptionId IS NULL
+             OR e2.OptionId IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.PlanYear != e2.PlanYear
+             AND e1.BenId IN (
+                11
+                ,12
+                )
+             AND e1.OptionId &gt; 0
+             AND ISNULL(e1.Termed, 0) = 0
+             AND e2.Source = 'D'
+             AND e2.OptionId &gt; 0
+             AND ISNULL(e2.Termed, 0) = 0
+             THEN 'SHOULD DEFAULT TO ZERO'
+         WHEN e1.OptionId &gt; 0
+             AND ISNULL(e1.Termed, 0) = 0
+             AND e2.OptionId = 0
+             THEN 'WAIVE'
+         WHEN e1.OptionId &gt;= 0
+             AND ISNULL(e1.Termed, 0) = 0
+             AND e2.OptionId &gt;= 0
+             AND e2.Termed = 1
+             THEN 'TERM'
+         WHEN e1.OptionId = 0
+             AND e2.OptionId &gt; 0
+             AND ISNULL(e2.Termed, 0) = 0
+             THEN 'GAIN'
+         WHEN e1.OptionId &gt; 0
+             AND e2.OptionId &gt; 0
+             AND e1.OptionId != e2.OptionId
+             THEN 'CHANGE'
+         WHEN e1.OptionId = e2.OptionId
+             THEN 'NO CHANGE'
+         WHEN e1.OptionId &gt; 0
+             AND e1.Termed = 1
+             AND e2.OptionId = 0
+             THEN 'TERM TO WAIVE'
+         ELSE 'UNKNOWN'
+         END
+     ,TierAnalysis = CASE 
+         WHEN e1.TierId IS NULL
+             OR e2.TierId IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.TierId &gt; 0
+             AND e2.TierId = 0
+             THEN 'LOSS'
+         WHEN e1.TierId = 0
+             AND e2.TierId &gt; 0
+             THEN 'GAIN'
+         WHEN e1.TierId &gt; 0
+             AND e2.TierId &gt; 0
+             AND e1.TierId != e2.TierId
+             THEN 'CHANGE'
+         WHEN e1.TierId = e1.TierId
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,EffectiveDateAnalysis = CASE 
+         WHEN e1.EffectiveDate IS NULL
+             OR e2.EffectiveDate IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.EffectiveDate != e2.EffectiveDate
+             THEN 'CHANGE'
+         WHEN e1.EffectiveDate = e2.EffectiveDate
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,CoverageEffectiveDateAnalysis = CASE 
+         WHEN e1.CoverageEffectiveDate IS NULL
+             OR e2.CoverageEffectiveDate IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.CoverageEffectiveDate != e2.CoverageEffectiveDate
+             THEN 'CHANGE'
+         WHEN e1.CoverageEffectiveDate = e2.CoverageEffectiveDate
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,CostEffectiveDateAnalysis = CASE 
+         WHEN e1.CostEffectiveDate IS NULL
+             OR e2.CostEffectiveDate IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.CostEffectiveDate != e2.CostEffectiveDate
+             THEN 'CHANGE'
+         WHEN e1.CostEffectiveDate = e2.CostEffectiveDate
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,TermDateAnalysis = CASE 
+         WHEN e1.TermDate IS NULL
+             OR e2.TermDate IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.TermDate != e2.TermDate
+             THEN 'CHANGE'
+         WHEN e1.TermDate = e2.TermDate
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,
+     -- Add EoiStatus, EoiPend, and EoiTier
+     EOIPendAnalysis = CASE 
+         WHEN e1.EoiStatus IS NULL
+             OR e2.EoiStatus IS NULL
+             THEN 'NO COMPARE'
+         WHEN e2.EoiPend != 99
+             AND ISNULL(e2.Termed, 0) = 0
+             THEN CASE 
+                  WHEN ISNULL(e1.EoiPend, 0) &lt; ISNULL(e2.EoiPend, 0)
+                      THEN 'OPTION INCREASE'
+                  WHEN ISNULL(e1.EoiPendTier, 0) &lt; ISNULL(e2.EoiPendTier, 0)
+                      THEN 'TIER INCREASE'
+                  WHEN ISNULL(e1.EoiPend, 0) &gt; ISNULL(e2.EoiPend, 0)
+                      THEN 'OPTION DECREASE'
+                  WHEN ISNULL(e1.EoiPendTier, 0) &gt; ISNULL(e2.EoiPendTier, 0)
+                      THEN 'TIER DECREASE'
+                  ELSE CASE 
+                          WHEN e1.EoiStatus != e2.EoiStatus
+                             THEN 'EOI Status CHANGE'
+                          WHEN ISNULL(e1.EoiPend, 0) = ISNULL(e2.EoiPend, 0)
+                             THEN 'NO CHANGE'
+                          END
+                  END
+         ELSE 'NO CHANGE' --'UNKNOWN' 
+         END
+     ,CovAmtAnalysis = CASE 
+         WHEN e1.CovAmt IS NULL
+             OR e2.CovAmt IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.CovAmt &lt; e2.CovAmt
+             AND ISNULL(e2.Termed, 0) = 0
+             THEN 'INCREASE'
+         WHEN e1.CovAmt &gt; e2.CovAmt
+             AND ISNULL(e2.Termed, 0) = 0
+             THEN 'DECREASE'
+         WHEN e1.CovAmt = e2.CovAmt
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,ElectedAmountAnalysis = CASE 
+         WHEN e1.ElectedAmount IS NULL
+             OR e2.ElectedAmount IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.ElectedAmount &lt; e2.ElectedAmount
+             AND ISNULL(e2.Termed, 0) = 0
+             THEN 'INCREASE'
+         WHEN e1.ElectedAmount &gt; e2.ElectedAmount
+             AND ISNULL(e2.Termed, 0) = 0
+             THEN 'DECREASE'
+         WHEN e1.ElectedAmount = e2.ElectedAmount
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+   FROM CTE_Election_1 e1
+   FULL JOIN CTE_Election_2 e2 ON e1.PersonId = e2.PersonId
+     AND e1.BenId = e2.BenId
+   ) t
+WHERE (Thumbprint1 != Thumbprint2 OR @PersonId != -1)
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ORDER BY 1
+   ,2
+   ,3
+   ,4;
+   
+GO
+ DECLARE @SpecialGroupId SMALLINT = -1;
+ DECLARE @PersonId INT = -1;
+ DECLARE @PlanYear SMALLINT = 2024;
+
+-- ===========================================================================================================================================
+-- Calc Analysis Between PlanYears
+-- Test Case: Compare elections between planyears
+-- ===========================================================================================================================================
+
+-----------------------------------------------------------------------------------
+-- Parameters
+-----------------------------------------------------------------------------------
+
+DECLARE @PlanYear1 SMALLINT = @PlanYear - 1;
+DECLARE @PlanYear2 SMALLINT = @PlanYear;
+
+-----------------------------------------------------------------------------------
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+-----------------------------------------------------------------------------------
+-- 0 - Select employees for AE
+-----------------------------------------------------------------------------------
+DROP TABLE IF EXISTS #group
+
+SELECT TOP 1 
+    c1.PersonId, PlanYear1 = c1.PlanYear, CalcId1 = c1.CalcId, EventCode1 = c1.EventCode, PlanYear2 = c2.PlanYear, CalcId2 = c2.CalcId, EventCode2 = c2.EventCode
+INTO 
+    #group 
+FROM 
+    dbo.hw_calcmaster c1 WITH (NOLOCK) 
+JOIN
+    dbo.hw_calcmaster c2 WITH (NOLOCK) 
+    ON c1.PersonId = c2.PersonId
+     AND c1.PlanYear = @PlanYear1
+     AND c2.PlanYear = @PlanYear2
+     AND c1.RecordStatus = 'A'
+     AND c2.RecordStatus = 'A'   
+     
+WHERE
+   
+   dbo.IsInternalTest(c1.PersonId) = 0   
+   AND ( @SpecialGroupId = -1 OR c1.PersonId IN ( SELECT PersonId FROM cdm_person_select_ids (NOLOCK) WHERE GroupId  = @SpecialGroupId ) )
+     AND ( @PersonId = -1 OR c1.PersonId = @PersonId) 
+-----------------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-- 1 - Gather two data sets for dependent comparison
+-----------------------------------------------------------------------------------
+;WITH CTE_Election_1
+AS (
+   SELECT e.*
+     ,EventCode1 = c.EventCode1
+   FROM hw_dependent_election_log e(NOLOCK)
+   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
+     AND e.PlanYear = c.PlanYear1
+     AND e.CalcId = c.CalcId1
+     AND e.RecordStatus = 'A'
+   )
+   ,CTE_Election_2
+AS (
+   SELECT e.*
+     ,EventCode2 = c.EventCode2
+   FROM hw_dependent_election_log e(NOLOCK)
+   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
+     AND e.PlanYear = c.PlanYear2
+     AND e.CalcId = c.CalcId2
+     AND e.RecordStatus = 'A'
+   )
+---------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+-- ANALYSIS - Compare the two data sets and identify any differences
+--------------------------------------------------------------------------------------------------------------------
+SELECT *
+FROM (
+   SELECT PersonId = ISNULL(e1.PersonId, e2.PersonId)
+     ,DepNum = ISNULL(e1.DepNum, e2.DepNum)
+     ,PlanYear = ISNULL(e1.PlanYear, e2.PlanYear)
+     ,BenId = ISNULL(e1.BenId, e2.BenId)
+     ,OptionId1 = e1.OptionId
+     ,EffectiveDate1 = e1.EffectiveDate
+     ,CoverageEffectiveDate1 = e1.CoverageEffectiveDate
+     ,Termed1 = e1.Termed
+     ,TermDate1 = e1.TermDate
+     ,EventCode1 = e1.EventCode1
+     ,Thumbprint1 = CONVERT(VARCHAR(255), HASHBYTES('SHA1', CONCAT (
+                e1.BenId
+                ,e1.OptionId
+                ,e1.EffectiveDate
+                ,e1.Termed
+                ,e1.TermDate
+                ,e1.CoverageEffectiveDate
+                ,e1.IsPended
+                ,e1.EventCode1
+                )), 2)
+     ,Transition = '===&gt;'
+     ,OptionId2 = e2.OptionId
+     ,EffectiveDate2 = e2.EffectiveDate
+     ,CoverageEffectiveDate2 = e2.CoverageEffectiveDate
+     ,Termed2 = e2.Termed
+     ,TermDate2 = e2.TermDate
+     ,EventCode2 = e2.EventCode2
+     ,Thumbprint2 = CONVERT(VARCHAR(255), HASHBYTES('SHA1', CONCAT (
+                e2.BenId
+                ,e2.OptionId
+                ,e2.EffectiveDate
+                ,e2.Termed
+                ,e2.TermDate
+                ,e2.CoverageEffectiveDate
+                ,e2.IsPended
+                ,e2.EventCode2
+                )), 2)
+     ,Result = '===&gt;&gt;'
+     ,BenefitAnalysis = CASE 
+         WHEN e1.BenId IS NULL
+             THEN 'GAIN'
+         WHEN e2.BenId IS NULL AND ISNULL(e1.Termed, 0) = 0
+             THEN 'LOSS'
+         ELSE 'NO CHANGE'
+         END
+     ,OptionAnalysis = CASE 
+         WHEN e1.OptionId IS NULL
+             OR e2.OptionId IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.OptionId &gt; 0
+             AND ISNULL(e1.Termed, 0) = 0
+             AND e2.OptionId = 0
+             THEN 'WAIVE'
+         WHEN e1.OptionId &gt;= 0
+             AND ISNULL(e1.Termed, 0) = 0
+             AND e2.OptionId &gt;= 0
+             AND e2.Termed = 1
+             THEN 'TERM'
+         WHEN e1.OptionId = 0
+             AND e2.OptionId &gt; 0
+             AND ISNULL(e2.Termed, 0) = 0
+             THEN 'GAIN'
+         WHEN e1.OptionId &gt; 0
+             AND e2.OptionId &gt; 0
+             AND e1.OptionId != e2.OptionId
+             THEN 'CHANGE'
+         WHEN e1.OptionId = e2.OptionId
+             THEN 'NO CHANGE'
+         WHEN e1.OptionId &gt; 0
+             AND e1.Termed = 1
+             AND e2.OptionId = 0
+             THEN 'TERM TO WAIVE'
+         ELSE 'UNKNOWN'
+         END
+     ,EffectiveDateAnalysis = CASE 
+         WHEN e1.EffectiveDate IS NULL
+             OR e2.EffectiveDate IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.EffectiveDate != e2.EffectiveDate
+             THEN 'CHANGE'
+         WHEN e1.EffectiveDate = e2.EffectiveDate
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,CoverageEffectiveDateAnalysis = CASE 
+         WHEN e1.CoverageEffectiveDate IS NULL
+             OR e2.CoverageEffectiveDate IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.CoverageEffectiveDate != e2.CoverageEffectiveDate
+             THEN 'CHANGE'
+         WHEN e1.CoverageEffectiveDate = e2.CoverageEffectiveDate
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,TermDateAnalysis = CASE 
+         WHEN e1.TermDate IS NULL
+             OR e2.TermDate IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.TermDate != e2.TermDate
+             THEN 'CHANGE'
+         WHEN e1.TermDate = e2.TermDate
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,IsPendedAnalysis = CASE 
+         WHEN e1.IsPended IS NULL
+             OR e2.IsPended IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.IsPended != e2.IsPended
+             THEN 'CHANGE'
+         WHEN e1.IsPended = e2.IsPended
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+   FROM CTE_Election_1 e1
+   FULL JOIN CTE_Election_2 e2 ON e1.PersonId = e2.PersonId
+     AND e1.DepNum = e2.DepNum
+     AND e1.BenId = e2.BenId
+   ) t
+WHERE (Thumbprint1 != Thumbprint2 OR @PersonId != -1)
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ORDER BY 1
+   ,2
+   ,3
+   ,4;
+
+
+
+         
+GO
+ DECLARE @SpecialGroupId SMALLINT = -1;
+ DECLARE @PersonId INT = -1;
+ DECLARE @PlanYear SMALLINT = 2024;
+
+-- ===========================================================================================================================================
+-- Calc Analysis Between PlanYears
+-- Test Case: Compare elections between planyears
+-- ===========================================================================================================================================
+
+-----------------------------------------------------------------------------------
+-- Parameters
+-----------------------------------------------------------------------------------
+
+DECLARE @PlanYear1 SMALLINT = @PlanYear - 1;
+DECLARE @PlanYear2 SMALLINT = @PlanYear;
+
+-----------------------------------------------------------------------------------
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+-----------------------------------------------------------------------------------
+-- 0 - Select employees for AE
+-----------------------------------------------------------------------------------
+DROP TABLE IF EXISTS #group
+
+SELECT TOP 1 
+    c1.PersonId, PlanYear1 = c1.PlanYear, CalcId1 = c1.CalcId, EventCode1 = c1.EventCode, PlanYear2 = c2.PlanYear, CalcId2 = c2.CalcId, EventCode2 = c2.EventCode
+INTO 
+    #group 
+FROM 
+    dbo.hw_calcmaster c1 WITH (NOLOCK) 
+JOIN
+    dbo.hw_calcmaster c2 WITH (NOLOCK) 
+    ON c1.PersonId = c2.PersonId
+     AND c1.PlanYear = @PlanYear1
+     AND c2.PlanYear = @PlanYear2
+     AND c1.RecordStatus = 'A'
+     AND c2.RecordStatus = 'A'   
+     
+WHERE
+   
+   dbo.IsInternalTest(c1.PersonId) = 0   
+   AND ( @SpecialGroupId = -1 OR c1.PersonId IN ( SELECT PersonId FROM cdm_person_select_ids (NOLOCK) WHERE GroupId  = @SpecialGroupId ) )
+     AND ( @PersonId = -1 OR c1.PersonId = @PersonId) 
+-----------------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------------
+-- 1 - Gather two data sets for employee comparison
+-----------------------------------------------------------------------------------
+;WITH CTE_Election_1
+AS (
+   SELECT e.*
+     ,EventCode1 = c.EventCode1
+   FROM hw_calculated_option_tier e(NOLOCK)
+   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
+     AND e.PlanYear = c.PlanYear1
+     AND e.CalcId = c.CalcId1
+     AND e.RecordStatus = 'A'
+   )
+   ,CTE_Election_2
+AS (
+   SELECT e.*
+     ,EventCode2 = c.EventCode2
+   FROM hw_calculated_option_tier e(NOLOCK)
+   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
+     AND e.PlanYear = c.PlanYear2
+     AND e.CalcId = c.CalcId2
+     AND e.RecordStatus = 'A'
+   )
+---------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+-- ANALYSIS - Compare the two data sets and identify any differences
+--------------------------------------------------------------------------------------------------------------------
+SELECT *
+FROM (
+   SELECT PersonId = ISNULL(e1.PersonId, e2.PersonId)
+     ,PlanYear = ISNULL(e1.PlanYear, e2.PlanYear)
+     ,BenId = ISNULL(e1.BenId, e2.BenId)
+     ,OptionId1 = e1.OptionId
+     ,OptionId2 = e2.OptionId
+     ,TierId1 = e1.TierId
+     ,TierId2 = e2.TierId
+     ,EffectiveDate1 = e1.EffectiveDate
+     ,EffectiveDate2 = e2.EffectiveDate
+     ,HasPendedDependents1 = e1.HasPendedDependents
+     ,DependentVerificationPendingTier2 = e2.DependentVerificationPendingTier
+     ,Thumbprint1 = CONVERT(VARCHAR(255), HASHBYTES('SHA1', CONCAT (
+                e1.BenId
+                ,e1.OptionId
+                ,e1.TierId                
+                ,e1.EffectiveDate
+                ,e1.HasPendedDependents
+                ,e1.DependentVerificationPendingTier
+                ,e1.EventCode1
+                )), 2)
+     ,Thumbprint2 = CONVERT(VARCHAR(255), HASHBYTES('SHA1', CONCAT (
+                e2.BenId
+                ,e2.OptionId
+                ,e2.TierId
+                ,e2.EffectiveDate
+                ,e2.HasPendedDependents
+                ,e2.DependentVerificationPendingTier
+                ,e2.EventCode2
+                )), 2)
+     ,Result = '===&gt;&gt;'
+     ,BenefitAnalysis = CASE 
+         WHEN e1.BenId IS NULL
+             THEN 'GAIN'
+         WHEN e2.BenId IS NULL
+             THEN 'LOSS'
+         ELSE 'NO CHANGE'
+         END
+     ,OptionAnalysis = CASE 
+         WHEN e1.OptionId IS NULL
+             OR e2.OptionId IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.OptionId &gt; 0             
+             AND e2.OptionId = 0
+             THEN 'WAIVE'
+         WHEN e1.OptionId = 0
+             AND e2.OptionId &gt; 0             
+             THEN 'GAIN'
+         WHEN e1.OptionId &gt; 0
+             AND e2.OptionId &gt; 0
+             AND e1.OptionId != e2.OptionId
+             THEN 'CHANGE'
+         WHEN e1.OptionId = e2.OptionId
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,TierAnalysis = CASE 
+         WHEN e1.TierId IS NULL
+             OR e2.TierId IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.TierId &gt; 0
+             AND e2.TierId = 0
+             THEN 'LOSS'
+         WHEN e1.TierId = 0
+             AND e2.TierId &gt; 0
+             THEN 'GAIN'
+         WHEN e1.TierId &gt; 0
+             AND e2.TierId &gt; 0
+             AND e1.TierId != e2.TierId
+             THEN 'CHANGE'
+         WHEN e1.TierId = e1.TierId
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,EffectiveDateAnalysis = CASE 
+         WHEN e1.EffectiveDate IS NULL
+             OR e2.EffectiveDate IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.EffectiveDate != e2.EffectiveDate
+             THEN 'CHANGE'
+         WHEN e1.EffectiveDate = e2.EffectiveDate
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,HasPendedDependentsAnalysis = CASE 
+         WHEN e1.HasPendedDependents IS NULL
+             OR e2.HasPendedDependents IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.HasPendedDependents != e2.HasPendedDependents
+             THEN 'CHANGE'
+         WHEN e1.HasPendedDependents = e2.HasPendedDependents
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END
+     ,DependentVerificationPendingTierAnalysis = CASE 
+         WHEN e1.TierId IS NULL
+             OR e2.TierId IS NULL
+             THEN 'NO COMPARE'
+         WHEN e1.TierId &gt; 0
+             AND e2.TierId = 0
+             THEN 'LOSS'
+         WHEN e1.TierId = 0
+             AND e2.TierId &gt; 0
+             THEN 'GAIN'
+         WHEN e1.TierId &gt; 0
+             AND e2.TierId &gt; 0
+             AND e1.TierId != e2.TierId
+             THEN 'CHANGE'
+         WHEN e1.TierId = e1.TierId
+             THEN 'NO CHANGE'
+         ELSE 'UNKNOWN'
+         END             
+   FROM CTE_Election_1 e1
+   FULL JOIN CTE_Election_2 e2 ON e1.PersonId = e2.PersonId
+     AND e1.BenId = e2.BenId
+   ) t
+WHERE (Thumbprint1 != Thumbprint2 OR @PersonId != -1)
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ORDER BY 1
+   ,2
+   ,3
+   ,4;
+
+     </att_fullsql>
+    <att_id>test-sql-based-alex-1</att_id>
+    <att_ishavingplanyear>1</att_ishavingplanyear>
+    <att_ishavingplanyearname>Yes</att_ishavingplanyearname>
+    <att_parameters>[{"CanShowTestcaseUI":"No","DataType":"SMALLINT","Name":"SpecialGroupId","Value":"-1"},{"CanShowTestcaseUI":"No","DataType":"INT","Name":"PersonId","Value":"-1"},{"CanShowTestcaseUI":"No","DataType":"SMALLINT","Name":"PlanYear","Value":"2024"}]</att_parameters>
+    <att_planyear>2024</att_planyear>
+    <att_reviewdate>2026-04-27 10:02:11.0000000</att_reviewdate>
+    <att_reviewedby>c1f5e6fa-c213-f011-998a-000d3a109097</att_reviewedby>
+    <att_reviewedbyname>Alex Tonog</att_reviewedbyname>
+    <att_reviewedbyyominame>Alex Tonog</att_reviewedbyyominame>
+    <att_reviewremarks>okay na</att_reviewremarks>
+    <att_settings />
+    <att_tableschema />
+    <att_templatename>cc181e0f-a75b-ef11-a317-7c1e5216e70a</att_templatename>
+    <att_templatenamename>Calc Compare - AE</att_templatenamename>
+    <att_testcasereferenceno>TC-3217</att_testcasereferenceno>
+    <att_whereclause />
+    <createdby>c1f5e6fa-c213-f011-998a-000d3a109097</createdby>
+    <createdbyname>Alex Tonog</createdbyname>
+    <createdbyyominame>Alex Tonog</createdbyyominame>
+    <createdon>2025-06-25 08:16:34.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>c1f5e6fa-c213-f011-998a-000d3a109097</modifiedby>
+    <modifiedbyname>Alex Tonog</modifiedbyname>
+    <modifiedbyyominame>Alex Tonog</modifiedbyyominame>
+    <modifiedon>2026-04-27 10:02:11.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>804660001</statuscode>
+    <statuscodename>Approved</statuscodename>
+    <timezoneruleversionnumber>0</timezoneruleversionnumber>
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+  <row>
+    <att_atttestcaseid>cf22aa48-3d78-f011-b4cc-6045bda6d171</att_atttestcaseid>
+    <att_clientlookup>dcdf1a89-274e-ef11-a317-6045bddb40df</att_clientlookup>
+    <att_clientlookupname>Automated Testing Tool (H-BC4)</att_clientlookupname>
+    <att_conditions />
+    <att_description />
+    <att_formattedwhereclause />
+    <att_fullsql> DECLARE @GroupId SMALLINT = 2;
+
+ DECLARE @PlanYear SMALLINT = 2025;
+
+DECLARE @Debug BIT = 0;
+DROP TABLE IF EXISTS #group
+
+SELECT TOP 1  PersonId 
+INTO #group 
+FROM dbo.hw_calcmaster cm WITH (NOLOCK) 
+WHERE cm.RecordStatus = 'A' AND cm.PlanYear = @PlanYear    
+    AND dbo.IsInternalTest(personId) = 0
+     AND (
+
+)
+--
+-------------------------------------
+-- 1 - Test population
+-------------------------------------
+IF @Debug = 1 BEGIN
+
+     DECLARE @cols NVARCHAR(MAX);
+
+    -- Get common columns between hw_calcmaster and the mapping table
+    SELECT @cols = STRING_AGG('cm.' + QUOTENAME(c.COLUMN_NAME), ', ')
+    WITHIN GROUP (ORDER BY c.ORDINAL_POSITION)
+    FROM INFORMATION_SCHEMA.COLUMNS m
+	 JOIN INFORMATION_SCHEMA.COLUMNS c
+        ON m.COLUMN_NAME = c.COLUMN_NAME
+    WHERE m.TABLE_NAME = 'pr_group_mapping'
+		AND c.TABLE_NAME = 'hw_calcmaster';
+
+    -- Add Type column explicitly   
+	SET @cols += ', HasOverride = IIf(ov.PersonId IS NULL, ''N'', ''Y'')'
+
+    DECLARE @sql NVARCHAR(MAX) = '
+    SELECT ''Negative'' AS Type, cm.PersonId, ' + @cols + '
+    FROM dbo.hw_calcmaster cm (NOLOCK)
+	LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
+		ON cm.PersonId = ov.PersonId
+			AND cm.PlanYear = ov.PlanYear			
+			AND ov.GroupId =  @GroupId 
+            AND ov.Enabled = 1
+
+    WHERE cm.RecordStatus = ''A''
+        AND cm.PlanYear = @PlanYear
+        AND cm.GroupId = @GroupId
+        AND dbo.IsInternalTest(cm.PersonId) = 0
+        AND cm.PersonId NOT IN (SELECT PersonId FROM #group)
+
+    UNION ALL
+
+    SELECT ''Fallout'' AS Type, cm.PersonId, ' + @cols + '
+    FROM dbo.hw_calcmaster cm (NOLOCK)
+	LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
+		ON cm.PersonId = ov.PersonId
+			AND cm.PlanYear = ov.PlanYear
+			AND ov.GroupId IS NOT NULL 
+			AND ov.GroupId !=  @GroupId
+            AND ov.Enabled = 1 
+
+    WHERE cm.RecordStatus = ''A''
+        AND cm.PlanYear = @PlanYear
+        AND cm.GroupId != @GroupId
+        AND cm.PersonId IN (SELECT PersonId FROM #group)
+
+    ORDER By PersonId
+    ';
+
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@PlanYear SMALLINT, @GroupId SMALLINT', @PlanYear, @GroupId;
+
+END
+
+ELSE BEGIN
+    SELECT Type = 'Target', Count = COUNT(1)
+    FROM #group
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    UNION ALL
+
+    -------------------------------------
+    -- 2 - Positive Test
+    -------------------------------------
+    SELECT Type = 'Positive', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A'    
+            AND PlanYear = @PlanYear  
+            AND GroupId = @GroupId
+            AND PersonId IN (SELECT PersonId FROM #group)
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    UNION ALL
+
+    --------------------
+    -- 3 - Negative Test
+    --------------------
+    SELECT Type = 'Negative', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A' 
+            AND PlanYear = @PlanYear
+            AND GroupId = @GroupId
+            AND dbo.IsInternalTest(personId) = 0
+            AND PersonId NOT IN (SELECT PersonId FROM #group)
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    UNION ALL
+
+    -------------------------------------
+    -- 4 - Fallout Test
+    -------------------------------------
+    SELECT Type = 'Fallout', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A' 
+            AND PlanYear = @PlanYear  
+            AND GroupId != @GroupId
+            AND PersonId IN (SELECT PersonId FROM #group)
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+END;  
+--
+</att_fullsql>
+    <att_id>test</att_id>
+    <att_ishavingplanyear>1</att_ishavingplanyear>
+    <att_ishavingplanyearname>Yes</att_ishavingplanyearname>
+    <att_parameters>[{"CanShowTestcaseUI":"Yes","DataType":"SMALLINT","Name":"GroupId","Value":"2"},{"CanShowTestcaseUI":"No","DataType":"SMALLINT","Name":"PlanYear","Value":"2025"}]</att_parameters>
+    <att_planyear>2025</att_planyear>
+    <att_reviewdate>2026-04-27 10:02:10.0000000</att_reviewdate>
+    <att_reviewedby>c1f5e6fa-c213-f011-998a-000d3a109097</att_reviewedby>
+    <att_reviewedbyname>Alex Tonog</att_reviewedbyname>
+    <att_reviewedbyyominame>Alex Tonog</att_reviewedbyyominame>
+    <att_reviewremarks>okay na</att_reviewremarks>
+    <att_settings />
+    <att_tableschema />
+    <att_templatename>bcc2e68e-82b1-ef11-b8e8-7c1e525ae6f7</att_templatename>
+    <att_templatenamename>Mapping - GroupID</att_templatenamename>
+    <att_testcasereferenceno>TC-3578</att_testcasereferenceno>
+    <att_whereclause />
+    <createdby>c1f5e6fa-c213-f011-998a-000d3a109097</createdby>
+    <createdbyname>Alex Tonog</createdbyname>
+    <createdbyyominame>Alex Tonog</createdbyyominame>
+    <createdon>2025-08-13 12:01:51.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>c1f5e6fa-c213-f011-998a-000d3a109097</modifiedby>
+    <modifiedbyname>Alex Tonog</modifiedbyname>
+    <modifiedbyyominame>Alex Tonog</modifiedbyyominame>
+    <modifiedon>2026-04-27 10:02:10.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>804660001</statuscode>
+    <statuscodename>Approved</statuscodename>
+    <timezoneruleversionnumber>0</timezoneruleversionnumber>
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+  <row>
+    <att_atttestcaseid>5652e5a1-3566-f011-bec2-6045bda6d171</att_atttestcaseid>
+    <att_clientlookup>dcdf1a89-274e-ef11-a317-6045bddb40df</att_clientlookup>
+    <att_clientlookupname>Automated Testing Tool (H-BC4)</att_clientlookupname>
+    <att_conditions />
+    <att_description />
+    <att_formattedwhereclause />
+    <att_fullsql> DECLARE @BenId SMALLINT = 4;
+
+ DECLARE @PlanYear SMALLINT = 2025;
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+    DECLARE @AmountThreshold  DECIMAL(10, 4) = 50000.00;
+    DECLARE @RatePer  DECIMAL(10, 4) = 1000.00;
+    DECLARE @Debug BIT = 0;
+
+    -- Declare the table variable
+    DECLARE @AgeRates TABLE (
+        AgeFrom INT,
+        AgeTo INT,
+        Rate DECIMAL(10, 4)
+    );
+
+    -- Insert data into the table variable
+    INSERT INTO @AgeRates(AgeFrom, AgeTo, Rate)
+    VALUES
+        ( 0,  24, 0.0500),
+        (25,  29, 0.0600),
+        (30,  34, 0.0800),
+        (35,  39, 0.0900),
+        (40,  44, 0.1000),
+        (45,  49, 0.1500),
+        (50,  54, 0.2300),
+        (55,  59, 0.4300),
+        (60,  64, 0.6600),
+        (65,  69, 1.2700),
+        (70, 200, 2.0600);
+
+    DROP TABLE IF EXISTS #group;
+
+    SELECT TOP 1  
+        cm.PersonId,
+        cm.PlanYear,
+        cm.CalcId,
+        cm.PriceGroupId, 
+        cm.ImputedAge,
+        elig.BenId,
+        elig.OptionId,
+        rate.Rate,
+        elig.CovAmt,
+        elig.PosTaxPrice,        
+        ExpectedImputed = CONVERT(DECIMAL(18, 4), elig.Imputed),
+        ActualImputed = CONVERT(DECIMAL(18, 4), 
+                                ((elig.CovAmt - @AmountThreshold) / @RatePer * rate.Rate) - PosTaxPrice)
+
+    INTO #group
+        FROM 
+            hw_calcmaster cm WITH (NOLOCK)
+        JOIN 
+            hw_eligibility elig WITH (NOLOCK)
+                ON elig.PersonId = cm.PersonId 
+                AND elig.PlanYear = cm.PlanYear 
+                AND elig.CalcId = cm.CalcId
+     JOIN 
+            @AgeRates rate 
+                ON cm.ImputedAge BETWEEN rate.AgeFrom AND rate.AgeTo
+        WHERE 
+            cm.PlanYear = @PlanYear 
+            AND cm.RecordStatus = 'A' 
+            AND cm.GroupId &gt; 0
+            AND dbo.IsInternalTest(cm.PersonId) = 0
+            AND elig.BenId = @BenId;
+--
+IF @Debug = 1 BEGIN
+        SELECT * FROM #group
+        WHERE ExpectedImputed != ActualImputed;
+    END
+
+    ELSE BEGIN
+        -------------------------------------
+        -- 1 - Test population
+        -------------------------------------
+        SELECT Type = 'Target', Count = COUNT(1)
+        FROM #group
+        ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        UNION ALL
+
+        -------------------------------------
+        -- 2 - Positive Test
+        -------------------------------------
+        SELECT Type = 'Positive', Count = COUNT(1)
+        FROM #group WITH (NOLOCK) 
+            WHERE ExpectedImputed = ActualImputed
+        ----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        UNION ALL
+
+        -------------------------------------
+        -- 3 - Negative Test
+        -------------------------------------
+        SELECT Type = 'Negative', Count = COUNT(1)
+        FROM #group WITH (NOLOCK) 
+            WHERE ExpectedImputed != ActualImputed
+        ----------------------------------------------------------------------------------------------------------------------------------------------------
+    END;
+
+    DROP TABLE IF EXISTS #group;
+--
+</att_fullsql>
+    <att_id>basic life  - imputed</att_id>
+    <att_ishavingplanyear>1</att_ishavingplanyear>
+    <att_ishavingplanyearname>Yes</att_ishavingplanyearname>
+    <att_parameters>[{"CanShowTestcaseUI":"Yes","DataType":"SMALLINT","Name":"BenId","Value":"4"},{"CanShowTestcaseUI":"No","DataType":"SMALLINT","Name":"PlanYear","Value":"2025"}]</att_parameters>
+    <att_planyear>2025</att_planyear>
+    <att_reviewdate>2026-04-27 17:20:11.0000000</att_reviewdate>
+    <att_reviewedby>cfd39242-2a01-ef11-a1fd-6045bdeed022</att_reviewedby>
+    <att_reviewedbyname>Kristin Owens</att_reviewedbyname>
+    <att_reviewedbyyominame>Kristin Owens</att_reviewedbyyominame>
+    <att_reviewremarks />
+    <att_settings />
+    <att_tableschema />
+    <att_templatename>9f3466fb-0f00-f011-bae3-000d3a109097</att_templatename>
+    <att_templatenamename>Imputed Income - Basic Life</att_templatenamename>
+    <att_testcasereferenceno>TC-3442</att_testcasereferenceno>
+    <att_whereclause />
+    <createdby>4086569a-5c01-ef11-a1fd-000d3a19a743</createdby>
+    <createdbyname>Jomari Talavera</createdbyname>
+    <createdbyyominame>Jomari Talavera</createdbyyominame>
+    <createdon>2025-07-21 13:21:43.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>cfd39242-2a01-ef11-a1fd-6045bdeed022</modifiedby>
+    <modifiedbyname>Kristin Owens</modifiedbyname>
+    <modifiedbyyominame>Kristin Owens</modifiedbyyominame>
+    <modifiedon>2026-04-27 17:20:11.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>804660001</statuscode>
+    <statuscodename>Approved</statuscodename>
+    <timezoneruleversionnumber>4</timezoneruleversionnumber>
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+  <row>
+    <att_atttestcaseid>b0dce4fa-2550-f011-877a-6045bddb5c95</att_atttestcaseid>
+    <att_clientlookup>dcdf1a89-274e-ef11-a317-6045bddb40df</att_clientlookup>
+    <att_clientlookupname>Automated Testing Tool (H-BC4)</att_clientlookupname>
+    <att_conditions>{"combinator":"and","rules":[{"id":"dfa7b843-b4f2-4ad3-bb1c-95f894dd31fe","field":"cm.Location","operator":"=","valueSource":"value","value":"a"},{"id":"9da105d1-53e6-4f33-b931-6fe0be162ad1","rules":[{"id":"f1b662ba-ca69-42dd-bded-e891a7e17383","field":"cm.GroupId","operator":"=","valueSource":"value","value":"1"}],"combinator":"and","not":false}],"id":"cf4172fa-6d5a-4246-8776-d61281c53ab6"}</att_conditions>
+    <att_description />
+    <att_formattedwhereclause>ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)</att_formattedwhereclause>
+    <att_fullsql> DECLARE @PriceGroupId SMALLINT = 1;
+
+ DECLARE @PlanYear SMALLINT = 2025;
+
+DECLARE @Debug BIT = 0;
+DROP TABLE IF EXISTS #group
+
+SELECT TOP 1  PersonId 
+INTO #group 
+FROM dbo.hw_calcmaster cm WITH (NOLOCK) 
+WHERE cm.RecordStatus = 'A' AND cm.PlanYear = @PlanYear    
+    AND dbo.IsInternalTest(personId) = 0
+     AND (
+ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)
+)
+--
+-------------------------------------
+-- 1 - Test population
+-------------------------------------
+IF @Debug = 1 BEGIN
+
+     DECLARE @cols NVARCHAR(MAX);
+
+    -- Get common columns between hw_calcmaster and the mapping table
+    SELECT @cols = STRING_AGG('cm.' + QUOTENAME(c.COLUMN_NAME), ', ')
+    WITHIN GROUP (ORDER BY c.ORDINAL_POSITION)
+    FROM INFORMATION_SCHEMA.COLUMNS m
+	 JOIN INFORMATION_SCHEMA.COLUMNS c
+        ON m.COLUMN_NAME = c.COLUMN_NAME
+    WHERE m.TABLE_NAME = 'pr_pricegroup_mapping'
+		AND c.TABLE_NAME = 'hw_calcmaster';
+
+    -- Add Type column explicitly   
+	SET @cols += ', HasOverride = IIf(ov.PersonId IS NULL, ''N'', ''Y'')'
+
+    DECLARE @sql NVARCHAR(MAX) = '
+    SELECT ''Negative'' AS Type, cm.PersonId, ' + @cols + '
+    FROM dbo.hw_calcmaster cm (NOLOCK)
+	LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
+		ON cm.PersonId = ov.PersonId
+			AND cm.PlanYear = ov.PlanYear			
+			AND ov.PriceGroupId =  @PriceGroupId 
+            AND ov.Enabled = 1
+    WHERE cm.RecordStatus = ''A''
+        AND cm.PlanYear = @PlanYear
+        AND cm.PriceGroupId = @PriceGroupId
+        AND dbo.IsInternalTest(cm.PersonId) = 0
+        AND cm.PersonId NOT IN (SELECT PersonId FROM #group)
+
+    UNION ALL
+
+    SELECT ''Fallout'' AS Type, cm.PersonId, ' + @cols + '
+    FROM dbo.hw_calcmaster cm (NOLOCK)
+	LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
+		ON cm.PersonId = ov.PersonId
+			AND cm.PlanYear = ov.PlanYear
+			AND ov.PriceGroupId IS NOT NULL 
+			AND ov.PriceGroupId !=  @PriceGroupId
+            AND ov.Enabled = 1 
+
+    WHERE cm.RecordStatus = ''A''
+        AND cm.PlanYear = @PlanYear
+        AND cm.PriceGroupId != @PriceGroupId
+        AND cm.PersonId IN (SELECT PersonId FROM #group)
+    ORDER By PersonId
+    ';
+
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql, N'@PlanYear SMALLINT, @PriceGroupId SMALLINT', @PlanYear, @PriceGroupId;
+
+END
+
+ELSE BEGIN
+    SELECT Type = 'Target', Count = COUNT(1)
+    FROM #group
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    UNION ALL
+
+    -------------------------------------
+    -- 2 - Positive Test
+    -------------------------------------
+    SELECT Type = 'Positive', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A'    
+            AND PlanYear = @PlanYear  
+            AND PriceGroupId = @PriceGroupId
+            AND PersonId IN (SELECT PersonId FROM #group)
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    UNION ALL
+
+    --------------------
+    -- 3 - Negative Test
+    --------------------
+    SELECT Type = 'Negative', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A' 
+            AND PlanYear = @PlanYear
+            AND PriceGroupId = @PriceGroupId
+            AND dbo.IsInternalTest(personId) = 0
+            AND PersonId NOT IN (SELECT PersonId FROM #group)
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    UNION ALL
+
+    -------------------------------------
+    -- 4 - Fallout Test
+    -------------------------------------
+    SELECT Type = 'Fallout', Count = COUNT(1)
+    FROM dbo.hw_calcmaster WITH (NOLOCK) 
+        WHERE RecordStatus = 'A' 
+            AND PlanYear = @PlanYear  
+            AND PriceGroupId != @PriceGroupId
+            AND PersonId IN (SELECT PersonId FROM #group)
+    ----------------------------------------------------------------------------------------------------------------------------------------------------
+END;
+--
+</att_fullsql>
+    <att_id>aa_group_mapping_6</att_id>
+    <att_ishavingplanyear>1</att_ishavingplanyear>
+    <att_ishavingplanyearname>Yes</att_ishavingplanyearname>
+    <att_parameters>[{"CanShowTestcaseUI":"Yes","DataType":"SMALLINT","Name":"PriceGroupId","Value":"1"},{"CanShowTestcaseUI":"No","DataType":"SMALLINT","Name":"PlanYear","Value":"2025"}]</att_parameters>
+    <att_planyear>2025</att_planyear>
+    <att_reviewdate>2026-04-27 16:06:21.0000000</att_reviewdate>
+    <att_reviewedby>d759dca9-1f01-ef11-a1fd-6045bda99ebb</att_reviewedby>
+    <att_reviewedbyname>Alvin Manzano</att_reviewedbyname>
+    <att_reviewedbyyominame>Alvin Manzano</att_reviewedbyyominame>
+    <att_reviewremarks />
+    <att_settings />
+    <att_tableschema>[{"name":"cm.Location","label":"cm.Location","inputType":"text"},{"name":"cm.WageGrade","label":"cm.WageGrade","inputType":"text"},{"name":"cm.UnionCode","label":"cm.UnionCode","inputType":"text"},{"name":"cm.GroupId","label":"cm.GroupId","inputType":"number"},{"name":"cm.UserDefined2","label":"cm.UserDefined2","inputType":"text"},{"name":"cm.State","label":"cm.State","inputType":"text"}]</att_tableschema>
+    <att_templatename>0cdad23f-04b7-ef11-b8e8-7c1e525abe03</att_templatename>
+    <att_templatenamename>Mapping - PriceGroup</att_templatenamename>
+    <att_testcasereferenceno>TC-3207</att_testcasereferenceno>
+    <att_whereclause>ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)</att_whereclause>
+    <createdby>cb05ca3a-2401-ef11-a1fd-6045bdeed022</createdby>
+    <createdbyname>Amanuel Assefa</createdbyname>
+    <createdbyyominame>Amanuel Assefa</createdbyyominame>
+    <createdon>2025-06-23 11:34:13.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>d759dca9-1f01-ef11-a1fd-6045bda99ebb</modifiedby>
+    <modifiedbyname>Alvin Manzano</modifiedbyname>
+    <modifiedbyyominame>Alvin Manzano</modifiedbyyominame>
+    <modifiedon>2026-04-27 16:06:21.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>804660001</statuscode>
+    <statuscodename>Approved</statuscodename>
+    <timezoneruleversionnumber>0</timezoneruleversionnumber>
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+  <row>
+    <att_atttestcaseid>ae407551-6444-f111-88b3-7c1e52813c79</att_atttestcaseid>
+    <att_clientlookup>dcdf1a89-274e-ef11-a317-6045bddb40df</att_clientlookup>
+    <att_clientlookupname>Automated Testing Tool (H-BC4)</att_clientlookupname>
+    <att_conditions />
+    <att_description>test</att_description>
+    <att_formattedwhereclause />
+    <att_fullsql />
+    <att_id>Test-ActionBased-01</att_id>
+    <att_ishavingplanyear>1</att_ishavingplanyear>
+    <att_ishavingplanyearname>Yes</att_ishavingplanyearname>
+    <att_parameters>[{"CanShowTestcaseUI":"No","DataType":"Text","Name":"PlanYear","Value":"2025"},{"CanShowTestcaseUI":"Yes","DataType":"Boolean","Name":"Clone","Value":"true"}]</att_parameters>
+    <att_planyear />
+    <att_reviewdate>2026-04-30 07:18:27.0000000</att_reviewdate>
+    <att_reviewedby>c1f5e6fa-c213-f011-998a-000d3a109097</att_reviewedby>
+    <att_reviewedbyname>Alex Tonog</att_reviewedbyname>
+    <att_reviewedbyyominame>Alex Tonog</att_reviewedbyyominame>
+    <att_reviewremarks />
+    <att_settings />
+    <att_tableschema />
+    <att_templatename>b0db2844-77bc-ef11-b8e8-7c1e525ae6f7</att_templatename>
+    <att_templatenamename>ActionBased</att_templatenamename>
+    <att_testcasereferenceno>TC-3987</att_testcasereferenceno>
+    <att_whereclause />
+    <createdby>c1f5e6fa-c213-f011-998a-000d3a109097</createdby>
+    <createdbyname>Alex Tonog</createdbyname>
+    <createdbyyominame>Alex Tonog</createdbyyominame>
+    <createdon>2026-04-30 07:15:09.0000000</createdon>
+    <createdonbehalfby />
+    <createdonbehalfbyname />
+    <createdonbehalfbyyominame />
+    <importsequencenumber />
+    <modifiedby>c1f5e6fa-c213-f011-998a-000d3a109097</modifiedby>
+    <modifiedbyname>Alex Tonog</modifiedbyname>
+    <modifiedbyyominame>Alex Tonog</modifiedbyyominame>
+    <modifiedon>2026-04-30 07:18:29.0000000</modifiedon>
+    <modifiedonbehalfby />
+    <modifiedonbehalfbyname />
+    <modifiedonbehalfbyyominame />
+    <overriddencreatedon />
+    <ownerid>35add2f4-b553-ef11-a317-00224820907d</ownerid>
+    <owneriddsc>0</owneriddsc>
+    <owneridname>ATT_1109</owneridname>
+    <owneridtype>9</owneridtype>
+    <owneridyominame />
+    <owningbusinessunit>d57fc429-defe-ee11-a1ff-000d3a5389af</owningbusinessunit>
+    <owningbusinessunitname>hwc-bda-us-dev</owningbusinessunitname>
+    <owningteam>35add2f4-b553-ef11-a317-00224820907d</owningteam>
+    <owninguser />
+    <statecode>0</statecode>
+    <statecodename>Active</statecodename>
+    <statuscode>804660001</statuscode>
+    <statuscodename>Approved</statuscodename>
+    <timezoneruleversionnumber>0</timezoneruleversionnumber>
+    <utcconversiontimezonecode />
+    <versionnumber>System.Byte[]</versionnumber>
+  </row>
+</data>
