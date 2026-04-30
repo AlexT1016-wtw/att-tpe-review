@@ -1,0 +1,64 @@
+A1 As a reviewer, I want visibility to the sample target person ID used during setup so that review, documentation, and training are supported.
+
+A2 As a reviewer, I want failures surfaced first and visually distinguished so that I can prioritize investigation.
+
+A3 As a reviewer, I want phase errors clearly differentiated from verification failures so that I can diagnose correctly.
+
+A4 As a reviewer, I want execution failures due to phase failure to be highly visible so that I don't have to dig into tabs.
+
+A5 As a reviewer, I want original person ID, cloned person ID, and execution status/error state persistently visible so that I maintain context throughout review.
+
+A6 As a reviewer, I want verification results sortable and filterable so that failures can be brought to the top.
+
+A7 As a reviewer, I want each verification row to include full context so that I don't rely on grouping above it.
+
+A8 As a reviewer, I want clearer labeling for expected value, actual value, and operator so that numeric indicators (e.g., 1/0) are not confusing.
+
+A9 As a reviewer, I want flexibility in review order so that I can start with failures or validate execution success first.
+
+A10 As a reviewer, I want fewer hidden/unintuitive tabs and a more guided layout so that execution review is easier to navigate.
+
+A.11 As a reviewer, I want runtime parameters (e.g., plan, as-of date) visible during execution review so that I confirm correct parameters before diagnosing failures.
+
+A12 As a reviewer, I want phase results accessible and clear so that I can see where execution stopped or failed.
+
+A13 As a reviewer, I want the final constructed query used to find the target person available as a copyable artifact so that analysts can troubleshoot complex action-based cases.
+
+A14 As a reviewer, I want review experiences to keep me inside the tool whenever possible so that unnecessary navigation and tab switching are minimized.
+
+A15 As a reviewer, I want visual clarity prioritized so that I can make approval decisions confidently.
+
+
+
+
+Accep
+A1 Sample person ID captured once during setup review and displayed in an accessible place without forcing edit mode.
+
+A2 List surfaces failures first; failed executions visually distinguished (color acceptable).
+
+A3 Phase failures are labeled and differentiated from logical verification failures; treated as execution exceptions.
+
+A4 Phase failure alerts are prominent and visible without navigating into secondary tabs.
+
+A5 Original Person ID, Cloned Person ID, and status/error state are sticky/persistent regardless of where reviewer is in execution review.
+
+A6 Verification results support sorting/filtering; failures can be surfaced to the top.
+
+A7 Each row includes BenId, Option ID, coverage/criteria evaluated, and does not rely on grouped headers.
+
+A8 UI distinguishes expected vs actual vs operator; numeric indicators are clarified via labeling/separation.
+
+A9 UI does not force a rigid sequence; supports alternate review orders.
+
+A10 Top tabs are not the primary mechanism for key review content; layout is more linear/guided with fewer hidden views.
+
+A11 Runtime parameters are visible during execution review.
+
+A12 Phase results are accessible; clearly indicate stop/fail point; phase failures distinguished and surfaced early.
+
+A13 Final constructed query is available and copyable; marked optional but supported.
+
+A14 Review flows minimize navigation outside the tool and reduce tab switching.
+
+A15 UI reduces busyness; prioritizes decision-critical info; sorting/filtering/highlighting (especially failures) are treated as essential requirements.
+

@@ -89,7 +89,7 @@
       .app-shell { max-width: 100%; margin: 0; padding: 18px 14px; height: 100%; overflow-y: auto; }
 
       #screenReview .header-fixed { position: sticky; top: 0; z-index: 100; background: var(--wtw-bg); padding-bottom: 14px; }
-      #reviewLayout { height: calc(100vh - 220px); overflow: hidden; }
+      #reviewLayout { height: calc(100vh - 300px); overflow: hidden; }
 
       .review-grid { display: grid; grid-template-columns: 36% 64%; height: 100%; align-items: stretch; }
       .sidebar-collapsed .review-grid { grid-template-columns: 0 100%; }
@@ -185,6 +185,33 @@
       .history-item { border-left: 3px solid var(--wtw-border); padding-left: 12px; margin-bottom: 12px; }
       .history-item.current { border-left-color: var(--wtw-purple); }
 
+      /* A1/A5: Sticky context bar */
+      .context-bar { background: #fff; border: 1px solid var(--wtw-border); border-radius: 10px; padding: 10px 16px; margin-bottom: 10px; display: none; }
+      .context-bar.show { display: block; }
+      .context-bar .context-item { display: inline-flex; align-items: center; gap: 6px; margin-right: 20px; font-size: 0.82rem; }
+      .context-bar .context-label { font-weight: 600; color: var(--wtw-muted); }
+      .context-bar .context-value { font-weight: 700; color: var(--wtw-ink); }
+      .context-bar .context-value.text-danger { color: var(--wtw-danger) !important; }
+      .context-bar .context-value.text-success { color: var(--wtw-success) !important; }
+      .context-bar .context-value.text-warning { color: var(--wtw-warning) !important; }
+
+      /* A3/A4/A12: Phase failure alert */
+      .phase-failure-alert { background: rgba(180,35,24,0.06); border: 1px solid rgba(180,35,24,0.25); border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; display: none; }
+      .phase-failure-alert.show { display: block; }
+      .phase-failure-alert .alert-title { font-weight: 700; color: var(--wtw-danger); font-size: 0.9rem; }
+      .phase-failure-alert .alert-detail { font-size: 0.82rem; color: var(--wtw-ink); margin-top: 4px; }
+      .phase-failure-alert .phase-badge { background: rgba(180,35,24,0.12); color: var(--wtw-danger); font-weight: 600; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; }
+
+      /* A6: Sortable table headers */
+      .sortable-th { cursor: pointer; user-select: none; }
+      .sortable-th:hover { color: var(--wtw-purple) !important; }
+      .sortable-th .sort-icon { font-size: 0.7rem; margin-left: 4px; opacity: 0.5; }
+      .sortable-th.sorted .sort-icon { opacity: 1; color: var(--wtw-purple); }
+
+      /* A11: Runtime params in context */
+      .runtime-params { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; }
+      .runtime-params .param-chip { background: var(--wtw-bg); border: 1px solid var(--wtw-border); border-radius: 4px; padding: 2px 8px; font-family: monospace; font-size: 0.78rem; }
+
       @media (max-width: 992px) {
         .review-grid { grid-template-columns: 1fr; }
         .sidebar-collapsed .review-grid { grid-template-columns: 1fr; }
@@ -273,6 +300,10 @@
                     <div class="subtle small"># Test Cases</div>
                     <div class="fw-semibold" id="welcomeTotalCount">0</div>
                   </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small"><i class="bi bi-person me-1"></i>Sample Person ID</div>
+                    <div class="fw-semibold" id="welcomeSamplePersonId" style="color:var(--wtw-purple)">—</div>
+                  </div>
                 </div>
                 <div class="d-flex flex-wrap gap-2 mt-4">
                   <button class="btn btn-wtw px-4" id="btnStartReview">
@@ -347,6 +378,10 @@
                   </div>
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-2">
+                  <!-- A11: Runtime Parameters visible during review -->
+                  <div class="runtime-params" id="runtimeParamsBar">
+                    <span class="subtle small me-1">Params:</span>
+                  </div>
                   <span class="badge badge-soft px-3 py-2" id="progressBadge">0 / 0 reviewed</span>
                   <button class="btn btn-sm btn-success btn-signoff" id="btnSignOff" disabled title="Sign off requires all tests passed or overridden">
                     <i class="bi bi-pen me-1"></i>Sign Off
@@ -357,6 +392,37 @@
                   <button class="btn btn-sm btn-light border" id="btnBackToWelcome" title="Back">
                     <i class="bi bi-arrow-left"></i> Back
                   </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- A1/A5: Persistent context bar - Original Person ID, Cloned Person ID, Status -->
+            <div class="context-bar" id="contextBar">
+              <span class="context-item">
+                <span class="context-label">Original Person ID:</span>
+                <span class="context-value" id="ctxOriginalPersonId">—</span>
+              </span>
+              <span class="context-item">
+                <span class="context-label">Cloned Person ID:</span>
+                <span class="context-value" id="ctxClonedPersonId">—</span>
+              </span>
+              <span class="context-item">
+                <span class="context-label">Execution Status:</span>
+                <span class="context-value" id="ctxExecStatus">—</span>
+              </span>
+              <span class="context-item">
+                <span class="context-label">Execution Result:</span>
+                <span class="context-value" id="ctxExecResult">—</span>
+              </span>
+            </div>
+
+            <!-- A3/A4/A12: Phase failure alert - prominent, no tab navigation required -->
+            <div class="phase-failure-alert" id="phaseFailureAlert">
+              <div class="d-flex align-items-start gap-2">
+                <i class="bi bi-exclamation-octagon-fill text-danger" style="font-size:1.1rem;margin-top:1px"></i>
+                <div class="flex-grow-1">
+                  <div class="alert-title"><span class="phase-badge me-2">PHASE FAILURE</span>Execution stopped due to phase error</div>
+                  <div class="alert-detail" id="phaseFailureDetail">—</div>
                 </div>
               </div>
             </div>
@@ -460,30 +526,49 @@
 
                     <!-- Results Tab (non-ActionBased) -->
                     <div class="tab-pane" id="tab-results" style="display:none">
+                      <!-- A6: Filter bar for results -->
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <button class="btn btn-sm btn-light border result-filter-btn active" data-result-filter="all">All</button>
+                        <button class="btn btn-sm btn-light border result-filter-btn" data-result-filter="fail"><i class="bi bi-x-circle text-danger me-1"></i>Failures Only</button>
+                        <span class="subtle small ms-auto" id="resultsCountLabel">—</span>
+                      </div>
                       <div class="table-responsive">
                         <table class="table table-sm table-hover results-table align-middle">
+                          <!-- A8: Clear labeling for Expected, Actual, Operator -->
                           <thead><tr>
-                            <th style="color:var(--wtw-purple);font-weight:700">Name</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Expected Result</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Actual Result</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Remarks</th>
+                            <th class="sortable-th" data-sort="name" style="color:var(--wtw-purple);font-weight:700">Criteria Name <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Expected Value</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Actual Value</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Operator</th>
+                            <th class="sortable-th" data-sort="status" style="color:var(--wtw-purple);font-weight:700">Result <i class="bi bi-arrow-down-up sort-icon"></i></th>
                           </tr></thead>
-                          <tbody id="resultsTbody"><tr><td colspan="4" class="subtle">Select a test case to view results.</td></tr></tbody>
+                          <tbody id="resultsTbody"><tr><td colspan="5" class="subtle">Select a test case to view results.</td></tr></tbody>
                         </table>
                       </div>
                     </div>
 
                     <!-- Verification Results Tab (ActionBased) -->
                     <div class="tab-pane" id="tab-verificationresults" style="display:none">
+                      <!-- A6: Filter bar for verification results -->
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <button class="btn btn-sm btn-light border vresult-filter-btn active" data-vresult-filter="all">All</button>
+                        <button class="btn btn-sm btn-light border vresult-filter-btn" data-vresult-filter="fail"><i class="bi bi-x-circle text-danger me-1"></i>Failures Only</button>
+                        <span class="subtle small ms-auto" id="vResultsCountLabel">—</span>
+                      </div>
                       <div class="table-responsive">
                         <table class="table table-sm table-hover results-table align-middle">
+                          <!-- A7: Full context per row: BenId, OptionId, Coverage/Criteria -->
+                          <!-- A8: Clear labeling for Expected, Actual, Operator -->
                           <thead><tr>
-                            <th style="color:var(--wtw-purple);font-weight:700">Name</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Expected Result</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Actual Result</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Remarks</th>
+                            <th class="sortable-th" data-sort="name" style="color:var(--wtw-purple);font-weight:700">Criteria Name <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th style="color:var(--wtw-purple);font-weight:700">BenId</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Option ID</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Expected Value</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Actual Value</th>
+                            <th style="color:var(--wtw-purple);font-weight:700">Operator</th>
+                            <th class="sortable-th" data-sort="status" style="color:var(--wtw-purple);font-weight:700">Result <i class="bi bi-arrow-down-up sort-icon"></i></th>
                           </tr></thead>
-                          <tbody id="verificationResultsTbody"><tr><td colspan="4" class="subtle">Select a test case to view results.</td></tr></tbody>
+                          <tbody id="verificationResultsTbody"><tr><td colspan="7" class="subtle">Select a test case to view results.</td></tr></tbody>
                         </table>
                       </div>
                     </div>
@@ -1408,6 +1493,19 @@ END;
         document.getElementById("welcomeUVCount").textContent = uv;
         document.getElementById("welcomeTotalCount").textContent = tce.testCaseExecutions.length;
 
+        // A1: Display sample target person ID from setup
+        const actionBased = tce.testCaseExecutions.find(t => t.phases);
+        if (actionBased) {
+          const targetPhase = actionBased.phases.find(p => p.name === "TargetPerson");
+          if (targetPhase && targetPhase.steps) {
+            const findStep = targetPhase.steps.find(s => s.name === "FindPerson");
+            if (findStep) {
+              const personId = findStep.variables?.find(v => v.name === "PersonId")?.value || findStep.message;
+              if (personId) document.getElementById("welcomeSamplePersonId").textContent = personId;
+            }
+          }
+        }
+
         // Test case names list
         const listEl = document.getElementById("testCaseNamesList");
         listEl.innerHTML = tce.testCaseExecutions.map((tc, i) => {
@@ -1699,22 +1797,46 @@ END;
         // Show current tab
         switchTab(currentTab);
 
+        // A1/A5: Update persistent context bar
+        updateContextBar(tc);
+
+        // A3/A4/A12: Update phase failure alert
+        updatePhaseFailureAlert(tc);
+
         renderList();
       }
 
       function populateResults(tc) {
         const tbody = document.getElementById("resultsTbody");
         if (!tc.results || tc.results.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" class="subtle">No result data available.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" class="subtle">No result data available.</td></tr>`;
+          document.getElementById("resultsCountLabel").textContent = "";
           return;
         }
-        tbody.innerHTML = tc.results.map(row => {
-          const remarkClass = row.remarks === "Fail" ? "text-danger" : row.remarks === "Pass" ? "text-success" : "";
-          return `<tr>
+        // A8: Extract operator from name (e.g. "Target > 0" -> operator ">")
+        const parseOperator = (name) => {
+          const ops = ['>=', '<=', '!=', '=', '>', '<'];
+          for (const op of ops) { if (name.includes(` ${op} `)) return op; }
+          return '—';
+        };
+        // A6: Sort failures first by default
+        const sorted = [...tc.results].sort((a, b) => {
+          if (a.remarks === "Fail" && b.remarks !== "Fail") return -1;
+          if (a.remarks !== "Fail" && b.remarks === "Fail") return 1;
+          return 0;
+        });
+        const failCount = sorted.filter(r => r.remarks === "Fail").length;
+        document.getElementById("resultsCountLabel").textContent = failCount > 0 ? `${failCount} failure(s) of ${sorted.length}` : `${sorted.length} results — all passed`;
+        tbody.innerHTML = sorted.map(row => {
+          const remarkClass = row.remarks === "Fail" ? "text-danger fw-semibold" : row.remarks === "Pass" ? "text-success" : "";
+          const rowClass = row.remarks === "Fail" ? 'style="background:rgba(180,35,24,0.04)"' : '';
+          const operator = parseOperator(row.name);
+          return `<tr ${rowClass}>
             <td>${escapeHtml(row.name)}</td>
-            <td>${row.expected}</td>
-            <td>${row.actual}</td>
-            <td class="${remarkClass}">${escapeHtml(row.remarks)}</td>
+            <td><span class="badge bg-light text-dark border">${row.expected}</span></td>
+            <td><span class="badge ${row.remarks === 'Fail' ? 'bg-danger bg-opacity-10 text-danger border-danger' : 'bg-light text-dark border'}">${row.actual}</span></td>
+            <td><code>${escapeHtml(operator)}</code></td>
+            <td class="${remarkClass}">${row.remarks === "Fail" ? '<i class="bi bi-x-circle me-1"></i>' : '<i class="bi bi-check-circle me-1"></i>'}${escapeHtml(row.remarks)}</td>
           </tr>`;
         }).join("");
       }
@@ -1722,16 +1844,37 @@ END;
       function populateVerificationResults(tc) {
         const tbody = document.getElementById("verificationResultsTbody");
         if (!tc.results || tc.results.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" class="subtle">No verification result data available.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" class="subtle">No verification result data available.</td></tr>`;
+          document.getElementById("vResultsCountLabel").textContent = "";
           return;
         }
-        tbody.innerHTML = tc.results.map(row => {
-          const remarkClass = row.remarks === "Fail" ? "text-danger" : row.remarks === "Pass" ? "text-success" : "";
-          return `<tr>
+        // A7: Each row includes BenId, OptionId, coverage/criteria - extract from context
+        // A8: Parse operator from name
+        const parseOperator = (name) => {
+          const ops = ['>=', '<=', '!=', '=', '>', '<'];
+          for (const op of ops) { if (name.includes(` ${op} `)) return op; }
+          return '—';
+        };
+        // A6: Sort failures first
+        const sorted = [...tc.results].sort((a, b) => {
+          if (a.remarks === "Fail" && b.remarks !== "Fail") return -1;
+          if (a.remarks !== "Fail" && b.remarks === "Fail") return 1;
+          return 0;
+        });
+        const failCount = sorted.filter(r => r.remarks === "Fail").length;
+        document.getElementById("vResultsCountLabel").textContent = failCount > 0 ? `${failCount} failure(s) of ${sorted.length}` : `${sorted.length} results — all passed`;
+        tbody.innerHTML = sorted.map(row => {
+          const remarkClass = row.remarks === "Fail" ? "text-danger fw-semibold" : row.remarks === "Pass" ? "text-success" : "";
+          const rowClass = row.remarks === "Fail" ? 'style="background:rgba(180,35,24,0.04)"' : '';
+          const operator = parseOperator(row.name);
+          return `<tr ${rowClass}>
             <td>${escapeHtml(row.name)}</td>
-            <td>${row.expected}</td>
-            <td>${row.actual}</td>
-            <td class="${remarkClass}">${escapeHtml(row.remarks)}</td>
+            <td>${row.benId || '—'}</td>
+            <td>${row.optionId || '—'}</td>
+            <td><span class="badge bg-light text-dark border">${row.expected}</span></td>
+            <td><span class="badge ${row.remarks === 'Fail' ? 'bg-danger bg-opacity-10 text-danger border-danger' : 'bg-light text-dark border'}">${row.actual}</span></td>
+            <td><code>${escapeHtml(operator)}</code></td>
+            <td class="${remarkClass}">${row.remarks === "Fail" ? '<i class="bi bi-x-circle me-1"></i>' : '<i class="bi bi-check-circle me-1"></i>'}${escapeHtml(row.remarks)}</td>
           </tr>`;
         }).join("");
       }
@@ -1773,6 +1916,95 @@ END;
         document.querySelectorAll('.phase-variable-row').forEach(row => {
           row.style.display = show ? '' : 'none';
         });
+      }
+
+      // A1/A5: Populate persistent context bar with Person IDs and status
+      function updateContextBar(tc) {
+        const bar = document.getElementById("contextBar");
+        const ctxOriginal = document.getElementById("ctxOriginalPersonId");
+        const ctxCloned = document.getElementById("ctxClonedPersonId");
+        const ctxStatus = document.getElementById("ctxExecStatus");
+        const ctxResult = document.getElementById("ctxExecResult");
+
+        // Extract Person IDs from phases (ActionBased) or from runtime parameters
+        let originalPersonId = "—";
+        let clonedPersonId = "—";
+
+        if (tc.phases) {
+          // ActionBased: Find TargetPerson phase -> FindPerson step -> PersonId variable
+          const targetPhase = tc.phases.find(p => p.name === "TargetPerson");
+          if (targetPhase && targetPhase.steps) {
+            const findStep = targetPhase.steps.find(s => s.name === "FindPerson");
+            if (findStep) {
+              originalPersonId = findStep.message || "—";
+              // Look for a PersonId variable
+              const pidVar = findStep.variables?.find(v => v.name === "PersonId");
+              if (pidVar && pidVar.value) originalPersonId = pidVar.value;
+            }
+          }
+          // Look for clone info in Precondition phase
+          const prePhase = tc.phases.find(p => p.name === "Precondition");
+          if (prePhase && prePhase.steps) {
+            const cloneStep = prePhase.steps.find(s => s.name === "CreateNewHire" || s.name === "Clone");
+            if (cloneStep && cloneStep.message && cloneStep.status === "Success") {
+              clonedPersonId = cloneStep.message;
+            }
+          }
+        } else {
+          // SQL-based: check runtime parameters for PersonId
+          const personIdParam = tc.parameters?.find(p => (p.Name || p.name) === "PersonId");
+          if (personIdParam) {
+            const val = personIdParam.Value || personIdParam.value;
+            originalPersonId = val === "-1" ? "Auto-selected" : val;
+          }
+        }
+
+        ctxOriginal.textContent = originalPersonId;
+        ctxCloned.textContent = clonedPersonId;
+        ctxStatus.textContent = tc.executionStatus;
+        ctxResult.textContent = tc.executionResult;
+        ctxResult.className = "context-value";
+        if (tc.executionResult === "Failed") ctxResult.classList.add("text-danger");
+        else if (tc.executionResult === "User Validation") ctxResult.classList.add("text-warning");
+        else ctxResult.classList.add("text-success");
+
+        bar.classList.add("show");
+      }
+
+      // A3/A4/A12: Phase failure alert - surface prominently without tabs
+      function updatePhaseFailureAlert(tc) {
+        const alert = document.getElementById("phaseFailureAlert");
+        const detail = document.getElementById("phaseFailureDetail");
+
+        if (!tc.phases) {
+          // SQL-based: check for execution errors (like SQL syntax errors)
+          if (tc.additionalDetails && tc.executionResult === "Failed") {
+            alert.classList.add("show");
+            detail.innerHTML = `<strong>Execution Error:</strong> ${escapeHtml(tc.executionRemarks)}<br><span class="small text-muted">${escapeHtml(tc.additionalDetails.substring(0, 200))}${tc.additionalDetails.length > 200 ? '...' : ''}</span>`;
+          } else {
+            alert.classList.remove("show");
+          }
+          return;
+        }
+
+        // ActionBased: find the failed phase
+        const failedPhase = tc.phases.find(p => p.status === "Failure");
+        if (failedPhase) {
+          alert.classList.add("show");
+          const failedStep = failedPhase.steps?.find(s => s.status === "Failure");
+          const phaseName = failedPhase.displayName || failedPhase.name;
+          const stepName = failedStep?.displayName || failedStep?.name || "";
+          const msg = failedStep?.message || failedPhase.message || "Unknown error";
+          // A3: Differentiate phase failure from verification failure
+          const isVerificationPhase = failedPhase.name === "Verification";
+          if (isVerificationPhase) {
+            detail.innerHTML = `<strong>Verification Failure</strong> at step "<em>${escapeHtml(stepName)}</em>": ${escapeHtml(msg.substring(0, 300))}`;
+          } else {
+            detail.innerHTML = `<strong>Phase "${escapeHtml(phaseName)}"</strong> failed at step "<em>${escapeHtml(stepName)}</em>"<br><span class="small">${escapeHtml(msg.substring(0, 300))}${msg.length > 300 ? '...' : ''}</span><br><span class="small text-muted mt-1 d-block">Subsequent phases (Execution, Verification, Cleanup) were not executed.</span>`;
+          }
+        } else {
+          alert.classList.remove("show");
+        }
       }
 
       function populateUserValidation(tc) {
@@ -1959,6 +2191,16 @@ END;
         screenReview.classList.remove("d-none");
 
         document.getElementById("planTitleTop").textContent = testPlanExecution.name + " (" + testPlanExecution.executionId + ")";
+
+        // A11: Populate runtime parameters bar
+        const paramsBar = document.getElementById("runtimeParamsBar");
+        if (testPlanExecution.runtimeParameters && testPlanExecution.runtimeParameters.length > 0) {
+          paramsBar.innerHTML = '<span class="subtle small me-1"><i class="bi bi-gear me-1"></i></span>' +
+            testPlanExecution.runtimeParameters.map(p =>
+              `<span class="param-chip">${escapeHtml(p.Name)}=${escapeHtml(p.Value)}</span>`
+            ).join("");
+        }
+
         updateTopBadges();
         renderList();
 
@@ -2161,6 +2403,40 @@ END;
         }
       });
 
+      // A6: Result filter buttons (SQL results)
+      document.querySelectorAll('.result-filter-btn').forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll('.result-filter-btn').forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const filter = btn.dataset.resultFilter;
+          const rows = document.querySelectorAll('#resultsTbody tr');
+          rows.forEach(row => {
+            if (filter === "all") { row.style.display = ""; return; }
+            if (filter === "fail") {
+              const hasFailIcon = row.querySelector('.bi-x-circle');
+              row.style.display = hasFailIcon ? "" : "none";
+            }
+          });
+        });
+      });
+
+      // A6: Verification result filter buttons (ActionBased)
+      document.querySelectorAll('.vresult-filter-btn').forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll('.vresult-filter-btn').forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const filter = btn.dataset.vresultFilter;
+          const rows = document.querySelectorAll('#verificationResultsTbody tr');
+          rows.forEach(row => {
+            if (filter === "all") { row.style.display = ""; return; }
+            if (filter === "fail") {
+              const hasFailIcon = row.querySelector('.bi-x-circle');
+              row.style.display = hasFailIcon ? "" : "none";
+            }
+          });
+        });
+      });
+
       // ============================================================
       // UTILITY
       // ============================================================
@@ -2189,11 +2465,15 @@ END;
         document.getElementById("infoExecDate").textContent = "—";
         document.getElementById("infoRemarks").textContent = "—";
         paramTbody.innerHTML = `<tr><td colspan="3" class="subtle">Select a test case to view parameters.</td></tr>`;
-        document.getElementById("resultsTbody").innerHTML = `<tr><td colspan="4" class="subtle">Select a test case to view results.</td></tr>`;
-        document.getElementById("verificationResultsTbody").innerHTML = `<tr><td colspan="4" class="subtle">Select a test case to view results.</td></tr>`;
+        document.getElementById("resultsTbody").innerHTML = `<tr><td colspan="5" class="subtle">Select a test case to view results.</td></tr>`;
+        document.getElementById("verificationResultsTbody").innerHTML = `<tr><td colspan="7" class="subtle">Select a test case to view results.</td></tr>`;
         document.getElementById("phaseResultsTbody").innerHTML = `<tr><td colspan="4" class="subtle">Select a test case to view phase results.</td></tr>`;
         queryTextArea.value = "";
         syncAndHighlightQuery();
+        // A1/A5: Hide context bar
+        document.getElementById("contextBar").classList.remove("show");
+        // A4: Hide phase failure alert
+        document.getElementById("phaseFailureAlert").classList.remove("show");
       }
 
       // PowerApps sidebar toggle
