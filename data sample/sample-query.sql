@@ -14,3 +14,4 @@ SELECT * FROM att_atttestcase
 WHERE att_atttestcaseid IN (SELECT att_testcaseid
 FROM att_atttcexecution
 WHERE att_testplanexecutionreference = 'bc936de7-6444-f111-88b4-6045bdef4434')
+
