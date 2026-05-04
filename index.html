@@ -148,11 +148,17 @@
       .filter-btn.active { background: var(--powerapps-purple) !important; color: white !important; border-color: var(--powerapps-purple) !important; }
       .sort-btn.active { background: var(--powerapps-purple) !important; color: white !important; border-color: var(--powerapps-purple) !important; }
 
-      /* Tabs styling */
-      .detail-tabs .nav-link { font-size: 0.85rem; font-weight: 500; color: var(--wtw-muted); border: none; padding: 8px 16px; }
-      .detail-tabs .nav-link.active { color: var(--wtw-purple); border-bottom: 3px solid var(--wtw-purple); font-weight: 600; background: transparent; }
-      .detail-tabs .nav-link:hover:not(.active) { color: var(--wtw-ink); border-bottom: 2px solid var(--wtw-border); }
-      .detail-tabs { border-bottom: 1px solid var(--wtw-border); }
+      /* Collapsible section styling */
+      .collapsible-section { border: 1px solid var(--wtw-border); border-radius: 10px; margin-bottom: 8px; background: #fff; overflow: hidden; }
+      .collapsible-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; cursor: pointer; user-select: none; background: var(--wtw-bg); border-bottom: 1px solid transparent; transition: background 0.15s ease; }
+      .collapsible-header:hover { background: #edeaf5; }
+      .collapsible-header.active { border-bottom-color: var(--wtw-border); background: #fff; }
+      .collapsible-header .section-label { font-size: 0.85rem; font-weight: 600; color: var(--wtw-ink); display: flex; align-items: center; gap: 8px; }
+      .collapsible-header .section-label i { color: var(--wtw-purple); font-size: 0.9rem; }
+      .collapsible-header .chevron { transition: transform 0.2s ease; color: var(--wtw-muted); font-size: 0.8rem; }
+      .collapsible-header.active .chevron { transform: rotate(180deg); }
+      .collapsible-body { display: none; padding: 14px 16px; }
+      .collapsible-body.show { display: block; }
 
       /* General info grid */
       .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
@@ -481,182 +487,214 @@
                     </div>
                   </div>
 
-                  <!-- Tab Navigation -->
-                  <div class="d-flex align-items-center">
-                    <ul class="nav detail-tabs flex-grow-1" id="detailTabs">
-                      <li class="nav-item"><a class="nav-link active" data-tab="general" href="#">General Information</a></li>
-                      <li class="nav-item tab-sql"><a class="nav-link" data-tab="results" href="#">Results</a></li>
-                      <li class="nav-item tab-action" style="display:none"><a class="nav-link" data-tab="verificationresults" href="#">Verification Results</a></li>
-                      <li class="nav-item tab-action" style="display:none"><a class="nav-link" data-tab="phaseresults" href="#">Phase Results</a></li>
-                      <li class="nav-item tab-sql"><a class="nav-link" data-tab="uservalidation" href="#">User Validation</a></li>
-                      <li class="nav-item"><a class="nav-link" data-tab="parameter" href="#">Parameter</a></li>
-                      <li class="nav-item tab-sql"><a class="nav-link" data-tab="condition" href="#">Condition</a></li>
-                      <li class="nav-item tab-sql"><a class="nav-link" data-tab="query" href="#">Query</a></li>
-                    </ul>
-                    <span class="badge bg-wtw-purple ms-2" id="badgeResolvingFail" style="display:none;font-size:0.8rem">Resolving Fail</span>
-                  </div>
+                  <!-- Collapsible Sections -->
+                  <div id="collapsibleSections">
 
-                  <!-- Tab Content -->
-                  <div class="tab-content mt-3" id="tabContent">
-                    <!-- General Information Tab -->
-                    <div class="tab-pane" id="tab-general" style="display:block">
-                      <div class="info-grid">
-                        <div class="info-left">
-                          <div class="info-row"><span class="info-label">Testcase name</span><span class="info-value" id="infoName">—</span></div>
-                          <div class="info-row"><span class="info-label">Template name</span><span class="info-value" id="infoTemplate">—</span></div>
-                          <div class="info-row"><span class="info-label">Environment</span><span class="info-value" id="infoEnvironment">—</span></div>
-                          <div class="info-row"><span class="info-label">Testcase ID</span><span class="info-value" id="infoTcId">—</span></div>
-                          <div class="info-row"><span class="info-label">Additional details</span><span class="info-value small" id="infoAdditional">—</span></div>
-                        </div>
-                        <div class="info-right">
-                          <div class="info-row"><span class="info-label">Execution status</span><span class="info-value" id="infoExecStatus">—</span></div>
-                          <div class="info-row"><span class="info-label">Execution result</span><span class="info-value" id="infoExecResult">—</span></div>
-                          <div class="info-row"><span class="info-label">Executed by</span><span class="info-value" id="infoExecutedBy">—</span></div>
-                          <div class="info-row"><span class="info-label">Execution date</span><span class="info-value" id="infoExecDate">—</span></div>
-                          <div class="info-row"><span class="info-label">Execution remarks</span><span class="info-value" id="infoRemarks">—</span></div>
-                        </div>
+                    <!-- General Information -->
+                    <div class="collapsible-section">
+                      <div class="collapsible-header active" data-section="general" onclick="toggleSection('general')">
+                        <span class="section-label"><i class="bi bi-info-circle"></i> General Information</span>
+                        <span class="badge bg-wtw-purple ms-2" id="badgeResolvingFail" style="display:none;font-size:0.75rem">Resolving Fail</span>
+                        <i class="bi bi-chevron-down chevron"></i>
                       </div>
-                      <div id="infoAdditionalDetails" style="display:none" class="mt-3">
-                        <div class="alert alert-danger border small mb-0">
-                          <div class="fw-semibold mb-1"><i class="bi bi-exclamation-triangle me-1"></i>Error Details</div>
-                          <pre class="detail-content mb-0" style="white-space:pre-wrap;font-size:0.8rem;max-height:200px;overflow:auto"></pre>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Results Tab (non-ActionBased) -->
-                    <div class="tab-pane" id="tab-results" style="display:none">
-                      <!-- A6: Filter bar for results -->
-                      <div class="d-flex align-items-center gap-2 mb-2">
-                        <button class="btn btn-sm btn-light border result-filter-btn active" data-result-filter="all">All</button>
-                        <button class="btn btn-sm btn-light border result-filter-btn" data-result-filter="fail"><i class="bi bi-x-circle text-danger me-1"></i>Failures Only</button>
-                        <span class="subtle small ms-auto" id="resultsCountLabel">—</span>
-                      </div>
-                      <div class="table-responsive">
-                        <table class="table table-sm table-hover results-table align-middle">
-                          <!-- A8: Clear labeling for Expected, Actual, Operator -->
-                          <thead><tr>
-                            <th class="sortable-th" data-sort="name" style="color:var(--wtw-purple);font-weight:700">Criteria Name <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Expected Value</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Actual Value</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Operator</th>
-                            <th class="sortable-th" data-sort="status" style="color:var(--wtw-purple);font-weight:700">Result <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                          </tr></thead>
-                          <tbody id="resultsTbody"><tr><td colspan="5" class="subtle">Select a test case to view results.</td></tr></tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    <!-- Verification Results Tab (ActionBased) -->
-                    <div class="tab-pane" id="tab-verificationresults" style="display:none">
-                      <!-- A6: Filter bar for verification results -->
-                      <div class="d-flex align-items-center gap-2 mb-2">
-                        <button class="btn btn-sm btn-light border vresult-filter-btn active" data-vresult-filter="all">All</button>
-                        <button class="btn btn-sm btn-light border vresult-filter-btn" data-vresult-filter="fail"><i class="bi bi-x-circle text-danger me-1"></i>Failures Only</button>
-                        <span class="subtle small ms-auto" id="vResultsCountLabel">—</span>
-                      </div>
-                      <div class="table-responsive">
-                        <table class="table table-sm table-hover results-table align-middle">
-                          <!-- A7: Full context per row: BenId, OptionId, Coverage/Criteria -->
-                          <!-- A8: Clear labeling for Expected, Actual, Operator -->
-                          <thead><tr>
-                            <th class="sortable-th" data-sort="name" style="color:var(--wtw-purple);font-weight:700">Criteria Name <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                            <th style="color:var(--wtw-purple);font-weight:700">BenId</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Option ID</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Expected Value</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Actual Value</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Operator</th>
-                            <th class="sortable-th" data-sort="status" style="color:var(--wtw-purple);font-weight:700">Result <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                          </tr></thead>
-                          <tbody id="verificationResultsTbody"><tr><td colspan="7" class="subtle">Select a test case to view results.</td></tr></tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    <!-- Phase Results Tab (ActionBased) -->
-                    <div class="tab-pane" id="tab-phaseresults" style="display:none">
-                      <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="chkShowVariables" checked>
-                        <label class="form-check-label small" for="chkShowVariables">Show Variables</label>
-                      </div>
-                      <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle" id="phaseResultsTable">
-                          <thead><tr>
-                            <th style="color:var(--wtw-purple);font-weight:700">Phase</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Step Name</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Result</th>
-                            <th style="color:var(--wtw-purple);font-weight:700">Remarks</th>
-                          </tr></thead>
-                          <tbody id="phaseResultsTbody"><tr><td colspan="4" class="subtle">Select a test case to view phase results.</td></tr></tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    <!-- User Validation Tab -->
-                    <div class="tab-pane" id="tab-uservalidation" style="display:none">
-                      <div class="row g-3">
-                        <div class="col-12">
-                          <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
-                          <div class="d-flex gap-3">
-                            <div class="form-check">
-                              <input class="form-check-input" type="radio" name="uvStatus" id="uvStatusUV" value="User Validation" checked>
-                              <label class="form-check-label" for="uvStatusUV">User Validation</label>
-                            </div>
-                            <div class="form-check">
-                              <input class="form-check-input" type="radio" name="uvStatus" id="uvStatusPass" value="Pass">
-                              <label class="form-check-label" for="uvStatusPass">Pass</label>
-                            </div>
-                            <div class="form-check">
-                              <input class="form-check-input" type="radio" name="uvStatus" id="uvStatusFail" value="Failed">
-                              <label class="form-check-label" for="uvStatusFail">Failed</label>
-                            </div>
+                      <div class="collapsible-body show" id="section-general">
+                        <div class="info-grid">
+                          <div class="info-left">
+                            <div class="info-row"><span class="info-label">Testcase name</span><span class="info-value" id="infoName">—</span></div>
+                            <div class="info-row"><span class="info-label">Template name</span><span class="info-value" id="infoTemplate">—</span></div>
+                            <div class="info-row"><span class="info-label">Environment</span><span class="info-value" id="infoEnvironment">—</span></div>
+                            <div class="info-row"><span class="info-label">Testcase ID</span><span class="info-value" id="infoTcId">—</span></div>
+                            <div class="info-row"><span class="info-label">Additional details</span><span class="info-value small" id="infoAdditional">—</span></div>
+                          </div>
+                          <div class="info-right">
+                            <div class="info-row"><span class="info-label">Execution status</span><span class="info-value" id="infoExecStatus">—</span></div>
+                            <div class="info-row"><span class="info-label">Execution result</span><span class="info-value" id="infoExecResult">—</span></div>
+                            <div class="info-row"><span class="info-label">Executed by</span><span class="info-value" id="infoExecutedBy">—</span></div>
+                            <div class="info-row"><span class="info-label">Execution date</span><span class="info-value" id="infoExecDate">—</span></div>
+                            <div class="info-row"><span class="info-label">Execution remarks</span><span class="info-value" id="infoRemarks">—</span></div>
                           </div>
                         </div>
-                        <div class="col-12">
-                          <label class="form-label fw-semibold">Comments <span class="text-danger">*</span></label>
-                          <textarea class="form-control" id="uvComments" rows="4" placeholder="Please provide comments"></textarea>
+                        <div id="infoAdditionalDetails" style="display:none" class="mt-3">
+                          <div class="alert alert-danger border small mb-0">
+                            <div class="fw-semibold mb-1"><i class="bi bi-exclamation-triangle me-1"></i>Error Details</div>
+                            <pre class="detail-content mb-0" style="white-space:pre-wrap;font-size:0.8rem;max-height:200px;overflow:auto"></pre>
+                          </div>
                         </div>
-                        <div class="col-12 text-end">
-                          <button class="btn btn-sm btn-wtw" id="btnUVSave"><i class="bi bi-save me-1"></i>Save</button>
+                      </div>
+                    </div>
+
+                    <!-- Results (non-ActionBased) -->
+                    <div class="collapsible-section tab-sql">
+                      <div class="collapsible-header" data-section="results" onclick="toggleSection('results')">
+                        <span class="section-label"><i class="bi bi-table"></i> Results</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                      </div>
+                      <div class="collapsible-body" id="section-results">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                          <button class="btn btn-sm btn-light border result-filter-btn active" data-result-filter="all">All</button>
+                          <button class="btn btn-sm btn-light border result-filter-btn" data-result-filter="fail"><i class="bi bi-x-circle text-danger me-1"></i>Failures Only</button>
+                          <span class="subtle small ms-auto" id="resultsCountLabel">—</span>
+                        </div>
+                        <div class="table-responsive">
+                          <table class="table table-sm table-hover results-table align-middle">
+                            <thead><tr>
+                              <th class="sortable-th" data-sort="name" style="color:var(--wtw-purple);font-weight:700">Criteria Name <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Expected Value</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Actual Value</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Operator</th>
+                              <th class="sortable-th" data-sort="status" style="color:var(--wtw-purple);font-weight:700">Result <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            </tr></thead>
+                            <tbody id="resultsTbody"><tr><td colspan="5" class="subtle">Select a test case to view results.</td></tr></tbody>
+                          </table>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Parameter Tab -->
-                    <div class="tab-pane" id="tab-parameter" style="display:none">
-                      <div class="table-responsive">
-                        <table class="table table-sm align-middle">
-                          <thead>
-                            <tr>
-                              <th style="color:var(--wtw-purple);font-weight:700">Name</th>
-                              <th style="color:var(--wtw-purple);font-weight:700">Data type</th>
-                              <th style="color:var(--wtw-purple);font-weight:700">Value</th>
-                            </tr>
-                          </thead>
-                          <tbody id="paramTbody"><tr><td colspan="3" class="subtle">Select a test case to view parameters.</td></tr></tbody>
-                        </table>
+                    <!-- Verification Results (ActionBased) -->
+                    <div class="collapsible-section tab-action" style="display:none">
+                      <div class="collapsible-header" data-section="verificationresults" onclick="toggleSection('verificationresults')">
+                        <span class="section-label"><i class="bi bi-patch-check"></i> Verification Results</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                      </div>
+                      <div class="collapsible-body" id="section-verificationresults">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                          <button class="btn btn-sm btn-light border vresult-filter-btn active" data-vresult-filter="all">All</button>
+                          <button class="btn btn-sm btn-light border vresult-filter-btn" data-vresult-filter="fail"><i class="bi bi-x-circle text-danger me-1"></i>Failures Only</button>
+                          <span class="subtle small ms-auto" id="vResultsCountLabel">—</span>
+                        </div>
+                        <div class="table-responsive">
+                          <table class="table table-sm table-hover results-table align-middle">
+                            <thead><tr>
+                              <th class="sortable-th" data-sort="name" style="color:var(--wtw-purple);font-weight:700">Criteria Name <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                              <th style="color:var(--wtw-purple);font-weight:700">BenId</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Option ID</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Expected Value</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Actual Value</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Operator</th>
+                              <th class="sortable-th" data-sort="status" style="color:var(--wtw-purple);font-weight:700">Result <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            </tr></thead>
+                            <tbody id="verificationResultsTbody"><tr><td colspan="7" class="subtle">Select a test case to view results.</td></tr></tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
 
-                    <!-- Condition Tab -->
-                    <div class="tab-pane" id="tab-condition" style="display:none">
-                      <div class="subtle text-center py-4">
-                        <i class="bi bi-info-circle me-1"></i>No condition data available for this test case execution.
+                    <!-- Phase Results (ActionBased) -->
+                    <div class="collapsible-section tab-action" style="display:none">
+                      <div class="collapsible-header" data-section="phaseresults" onclick="toggleSection('phaseresults')">
+                        <span class="section-label"><i class="bi bi-diagram-3"></i> Phase Results</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                      </div>
+                      <div class="collapsible-body" id="section-phaseresults">
+                        <div class="form-check mb-2">
+                          <input class="form-check-input" type="checkbox" id="chkShowVariables" checked>
+                          <label class="form-check-label small" for="chkShowVariables">Show Variables</label>
+                        </div>
+                        <div class="table-responsive">
+                          <table class="table table-sm table-hover align-middle" id="phaseResultsTable">
+                            <thead><tr>
+                              <th style="color:var(--wtw-purple);font-weight:700">Phase</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Step Name</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Result</th>
+                              <th style="color:var(--wtw-purple);font-weight:700">Remarks</th>
+                            </tr></thead>
+                            <tbody id="phaseResultsTbody"><tr><td colspan="4" class="subtle">Select a test case to view phase results.</td></tr></tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
 
-                    <!-- Query Tab -->
-                    <div class="tab-pane" id="tab-query" style="display:none">
-                      <div class="d-flex justify-content-end gap-2 mb-2">
-                        <button class="btn btn-sm btn-light border" id="btnCopySQL" disabled><i class="bi bi-clipboard me-1"></i>Copy to Clipboard</button>
-                        <button class="btn btn-sm btn-light border" id="btnMaximizeQuery" disabled><i class="bi bi-arrows-fullscreen"></i></button>
+                    <!-- User Validation (non-ActionBased) -->
+                    <div class="collapsible-section tab-sql">
+                      <div class="collapsible-header" data-section="uservalidation" onclick="toggleSection('uservalidation')">
+                        <span class="section-label"><i class="bi bi-person-check"></i> User Validation</span>
+                        <i class="bi bi-chevron-down chevron"></i>
                       </div>
-                      <div class="code-editor">
-                        <pre id="queryPre"><code id="queryCode" class="language-sql"></code></pre>
-                        <textarea id="queryTextArea" spellcheck="false" aria-label="SQL query" disabled></textarea>
+                      <div class="collapsible-body" id="section-uservalidation">
+                        <div class="row g-3">
+                          <div class="col-12">
+                            <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-3">
+                              <div class="form-check">
+                                <input class="form-check-input" type="radio" name="uvStatus" id="uvStatusUV" value="User Validation" checked>
+                                <label class="form-check-label" for="uvStatusUV">User Validation</label>
+                              </div>
+                              <div class="form-check">
+                                <input class="form-check-input" type="radio" name="uvStatus" id="uvStatusPass" value="Pass">
+                                <label class="form-check-label" for="uvStatusPass">Pass</label>
+                              </div>
+                              <div class="form-check">
+                                <input class="form-check-input" type="radio" name="uvStatus" id="uvStatusFail" value="Failed">
+                                <label class="form-check-label" for="uvStatusFail">Failed</label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-12">
+                            <label class="form-label fw-semibold">Comments <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="uvComments" rows="4" placeholder="Please provide comments"></textarea>
+                          </div>
+                          <div class="col-12 text-end">
+                            <button class="btn btn-sm btn-wtw" id="btnUVSave"><i class="bi bi-save me-1"></i>Save</button>
+                          </div>
+                        </div>
                       </div>
                     </div>
+
+                    <!-- Parameter -->
+                    <div class="collapsible-section">
+                      <div class="collapsible-header" data-section="parameter" onclick="toggleSection('parameter')">
+                        <span class="section-label"><i class="bi bi-sliders"></i> Parameter</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                      </div>
+                      <div class="collapsible-body" id="section-parameter">
+                        <div class="table-responsive">
+                          <table class="table table-sm align-middle">
+                            <thead>
+                              <tr>
+                                <th style="color:var(--wtw-purple);font-weight:700">Name</th>
+                                <th style="color:var(--wtw-purple);font-weight:700">Data type</th>
+                                <th style="color:var(--wtw-purple);font-weight:700">Value</th>
+                              </tr>
+                            </thead>
+                            <tbody id="paramTbody"><tr><td colspan="3" class="subtle">Select a test case to view parameters.</td></tr></tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Condition (non-ActionBased) -->
+                    <div class="collapsible-section tab-sql">
+                      <div class="collapsible-header" data-section="condition" onclick="toggleSection('condition')">
+                        <span class="section-label"><i class="bi bi-funnel"></i> Condition</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                      </div>
+                      <div class="collapsible-body" id="section-condition">
+                        <div class="subtle text-center py-4">
+                          <i class="bi bi-info-circle me-1"></i>No condition data available for this test case execution.
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Query (non-ActionBased) -->
+                    <div class="collapsible-section tab-sql">
+                      <div class="collapsible-header" data-section="query" onclick="toggleSection('query')">
+                        <span class="section-label"><i class="bi bi-code-square"></i> Query</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                      </div>
+                      <div class="collapsible-body" id="section-query">
+                        <div class="d-flex justify-content-end gap-2 mb-2">
+                          <button class="btn btn-sm btn-light border" id="btnCopySQL" disabled><i class="bi bi-clipboard me-1"></i>Copy to Clipboard</button>
+                          <button class="btn btn-sm btn-light border" id="btnMaximizeQuery" disabled><i class="bi bi-arrows-fullscreen"></i></button>
+                        </div>
+                        <div class="code-editor">
+                          <pre id="queryPre"><code id="queryCode" class="language-sql"></code></pre>
+                          <textarea id="queryTextArea" spellcheck="false" aria-label="SQL query" disabled></textarea>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
+                  <!-- /Collapsible Sections -->
 
                   <!-- Actions Section (US5) -->
                   <div class="actions-section" id="actionsSection" style="display:none">
@@ -2037,7 +2075,7 @@ END;
       }
 
       function populateCondition(tc) {
-        const condPane = document.getElementById("tab-condition");
+        const condPane = document.getElementById("section-condition");
         if (!tc.formattedWhereClause && !tc.whereClause && !tc.conditions) {
           condPane.innerHTML = `<div class="subtle text-center py-4"><i class="bi bi-info-circle me-1"></i>No condition data available for this test case execution.</div>`;
           return;
@@ -2121,31 +2159,32 @@ END;
       }
 
       // ============================================================
-      // TAB SWITCHING
+      // COLLAPSIBLE SECTIONS
       // ============================================================
       function configureTabsForTemplate(tc) {
         const isActionBased = tc.templateName === "ActionBased";
-        // Show/hide tab nav items based on template type
         document.querySelectorAll('.tab-sql').forEach(el => el.style.display = isActionBased ? 'none' : '');
         document.querySelectorAll('.tab-action').forEach(el => el.style.display = isActionBased ? '' : 'none');
       }
 
-      function switchTab(tabName) {
-        currentTab = tabName;
-        document.querySelectorAll(".tab-pane").forEach(p => p.style.display = "none");
-        const pane = document.getElementById(`tab-${tabName}`);
-        if (pane) pane.style.display = "block";
-        document.querySelectorAll(".detail-tabs .nav-link").forEach(link => {
-          link.classList.toggle("active", link.dataset.tab === tabName);
-        });
+      function toggleSection(sectionName) {
+        const body = document.getElementById(`section-${sectionName}`);
+        const header = document.querySelector(`.collapsible-header[data-section="${sectionName}"]`);
+        if (!body || !header) return;
+        const isOpen = body.classList.contains('show');
+        body.classList.toggle('show', !isOpen);
+        header.classList.toggle('active', !isOpen);
       }
 
-      document.querySelectorAll(".detail-tabs .nav-link").forEach(link => {
-        link.addEventListener("click", (e) => {
-          e.preventDefault();
-          switchTab(link.dataset.tab);
-        });
-      });
+      function switchTab(tabName) {
+        // Legacy compatibility: open the requested section
+        const body = document.getElementById(`section-${tabName}`);
+        const header = document.querySelector(`.collapsible-header[data-section="${tabName}"]`);
+        if (body && !body.classList.contains('show')) {
+          body.classList.add('show');
+          header?.classList.add('active');
+        }
+      }
 
       // Show Variables checkbox toggle
       document.getElementById("chkShowVariables").addEventListener("change", (e) => {
