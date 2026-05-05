@@ -262,58 +262,57 @@
           <div class="row g-3 align-items-stretch">
             <div class="col-12 col-lg-8">
               <div class="card p-4 h-100">
-                <div class="d-flex align-items-start justify-content-between gap-3">
-                  <div>
-                    <h4 class="mb-1 section-title">Execution Review</h4>
-                    <p class="subtle mb-0">Review the test case executions in this plan execution. Investigate failures, override or re-execute as needed, then sign off.</p>
-                  </div>
+                <div class="mb-1">
+                  <div class="fw-semibold" style="font-size:0.85rem;color:var(--wtw-muted)">Execution Review</div>
+                  <h4 class="section-title mt-1 mb-1" id="welcomePlanName" style="font-size:1.4rem">—</h4>
+                  <p class="subtle mb-0 small">Review the test case executions in this plan execution. Approve or reject each test case with a streamlined flow.</p>
                 </div>
                 <hr class="my-3" />
                 <div class="row g-3">
-                  <div class="col-12">
-                    <div class="subtle small">Test Plan Name</div>
-                    <div class="fw-semibold" id="welcomePlanName">—</div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                    <div class="subtle small">Execution ID</div>
-                    <div class="fw-semibold" id="welcomeExecId">—</div>
-                  </div>
                   <div class="col-6 col-md-3">
                     <div class="subtle small">Executor</div>
                     <div class="fw-semibold" id="welcomeExecutor">—</div>
                   </div>
                   <div class="col-6 col-md-3">
-                    <div class="subtle small">Environment</div>
-                    <div class="fw-semibold" id="welcomeEnvironment">—</div>
+                    <div class="subtle small"># of Test Cases</div>
+                    <div class="fw-semibold" id="welcomeTotalCount">0</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="subtle small">Client</div>
+                    <div class="fw-semibold" id="welcomeClientName">—</div>
                   </div>
                   <div class="col-6 col-md-3">
                     <div class="subtle small">Execution Date</div>
                     <div class="fw-semibold" id="welcomeExecDate">—</div>
                   </div>
                   <div class="col-6 col-md-3">
-                    <div class="subtle small"><i class="bi bi-check-circle text-success me-1"></i>Passed</div>
-                    <div class="fw-semibold text-success" id="welcomePassedCount">0</div>
+                    <div class="subtle small">Execution ID</div>
+                    <div class="fw-semibold" id="welcomeExecId">—</div>
                   </div>
                   <div class="col-6 col-md-3">
-                    <div class="subtle small"><i class="bi bi-x-circle text-danger me-1"></i>Failed</div>
-                    <div class="fw-semibold text-danger" id="welcomeFailedCount">0</div>
+                    <div class="subtle small">Environment</div>
+                    <div class="fw-semibold" id="welcomeEnvironment">—</div>
                   </div>
                   <div class="col-6 col-md-3">
-                    <div class="subtle small"><i class="bi bi-exclamation-circle text-warning me-1"></i>User Validation</div>
-                    <div class="fw-semibold" style="color:var(--wtw-warning)" id="welcomeUVCount">0</div>
+                    <div class="subtle small">Template Type</div>
+                    <div class="fw-semibold" id="welcomeTemplateType">—</div>
                   </div>
                   <div class="col-6 col-md-3">
-                    <div class="subtle small"># Test Cases</div>
-                    <div class="fw-semibold" id="welcomeTotalCount">0</div>
+                    <div class="subtle small">Passed / Failed / User Validation</div>
+                    <div class="fw-semibold">
+                      <span id="welcomePassedCount">0</span> / 
+                      <span id="welcomeFailedCount">0</span> / 
+                      <span id="welcomeUVCount">0</span>
+                    </div>
                   </div>
-                  <div class="col-6 col-md-3">
-                    <div class="subtle small"><i class="bi bi-person me-1"></i>Sample Person ID</div>
-                    <div class="fw-semibold" id="welcomeSamplePersonId" style="color:var(--wtw-purple)">—</div>
+                  <div class="col-12">
+                    <div class="subtle small">Assigned Reviewers</div>
+                    <div class="fw-semibold" id="welcomeReviewer">—</div>
                   </div>
                 </div>
                 <div class="d-flex flex-wrap gap-2 mt-4">
                   <button class="btn btn-wtw px-4" id="btnStartReview">
-                    <i class="bi bi-play-fill me-1"></i>Start Review
+                    <i class="bi bi-arrow-right-circle me-1"></i>Start Review
                   </button>
                 </div>
               </div>
@@ -324,27 +323,21 @@
                   <h5 class="mb-0 section-title">What to expect</h5>
                   <i class="bi bi-shield-check" style="color: var(--wtw-purple); font-size: 1.25rem"></i>
                 </div>
-                <ul class="mt-3 mb-0 subtle small">
-                  <li>Failed test cases are surfaced first for investigation.</li>
-                  <li>View execution results, parameters, and debug SQL inline.</li>
-                  <li>Override failed tests (with mandatory comment) or mark for re-execution.</li>
-                  <li>Bulk approve passed test cases for faster review.</li>
-                  <li>Sign off the execution once all test cases pass or are overridden.</li>
-                  <li>Send to Test Tracker only after successful sign-off.</li>
+                <ul class="mt-3 mb-0 subtle small" style="list-style:disc;padding-left:1.2rem">
+                  <li>Review test cases in a focused list.</li>
+                  <li>See Criteria + Parameters clearly in one place.</li>
+                  <li>Maximize the Criteria, Setup Parameters and Phases view for better visibility.</li>
+                  <li>Approve/Reject moves you to the next test case automatically.</li>
+                  <li>Comments are required only for rejected test cases.</li>
                 </ul>
-                <div class="mt-3">
-                  <div class="small subtle mb-2">Test Case Executions:</div>
-                  <div class="small" style="max-height: 120px; overflow-y: auto" id="testCaseNamesList">
-                    <div class="text-muted">Loading...</div>
-                  </div>
-                </div>
                 <hr class="my-3" />
-                <div class="small subtle">Tips:</div>
-                <ul class="small fw-semibold">
-                  <li>Use the <i class="bi bi-list"></i> button to collapse/expand the list.</li>
-                  <li>Use tabs to navigate between General Info, Results, Parameters, and Query.</li>
-                  <li>Copy SQL to clipboard from the Query tab for external validation.</li>
-                </ul>
+                <div class="small subtle">Tip</div>
+                <div class="small mt-1">
+                  Use the burger button <span class="badge bg-light text-dark border"><i class="bi bi-list"></i></span> to collapse the test case list and focus on details.
+                </div>
+                <div class="small mt-1">
+                  Use the Maximize button <span class="badge bg-light text-dark border"><i class="bi bi-arrows-fullscreen"></i></span> to maximize the window and focus on details.
+                </div>
               </div>
             </div>
           </div>
@@ -356,15 +349,15 @@
           <div class="completion-banner alert" id="completionBanner">
             <div class="d-flex align-items-center justify-content-between gap-3">
               <div class="flex-grow-1">
-                <h4 class="mb-2"><i class="bi bi-check-circle-fill me-2"></i>Ready for Sign-off!</h4>
-                <p class="mb-0">All test case executions have been reviewed. You can now sign off this execution.</p>
+                <h4 class="mb-2"><i class="bi bi-check-circle-fill me-2"></i>Ready for Peer Review!</h4>
+                <p class="mb-0">All test case executions have been reviewed. You can now request peer review for this execution.</p>
                 <div class="small mt-2" id="overriddenSummary" style="display:none">
                   <i class="bi bi-exclamation-triangle me-1"></i><strong>Overridden tests:</strong> <span id="overriddenList"></span>
                 </div>
               </div>
               <div class="d-flex gap-2 flex-shrink-0">
                 <button class="btn btn-light fw-semibold" id="btnSignOffBanner">
-                  <i class="bi bi-pen me-1"></i>Sign Off Execution
+                  <i class="bi bi-send-check me-1"></i>Request Peer Review
                 </button>
               </div>
             </div>
@@ -384,15 +377,12 @@
                   </div>
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-2">
-                  <!-- A11: Runtime Parameters visible during review -->
-                  <div class="runtime-params" id="runtimeParamsBar">
-                    <span class="subtle small me-1">Params:</span>
-                  </div>
+                  <span class="badge badge-soft px-3 py-2" id="envBadge"><i class="bi bi-hdd-network me-1"></i>Execution Environment: —</span>
                   <span class="badge badge-soft px-3 py-2" id="progressBadge">0 / 0 reviewed</span>
-                  <button class="btn btn-sm btn-success btn-signoff" id="btnSignOff" disabled title="Sign off requires all tests passed or overridden">
-                    <i class="bi bi-pen me-1"></i>Sign Off
+                  <button class="btn btn-sm btn-success btn-signoff" id="btnSignOff" disabled title="Request peer review requires all tests reviewed">
+                    <i class="bi bi-send-check me-1"></i>Request Peer Review
                   </button>
-                  <button class="btn btn-sm btn-info text-white" id="btnSendTracker" disabled title="Send to Test Tracker (requires sign-off)">
+                  <button class="btn btn-sm btn-info text-white" id="btnSendTracker" disabled style="display:none" title="Send to Test Tracker (requires peer review approval)">
                     <i class="bi bi-send me-1"></i>Send to Tracker
                   </button>
                   <button class="btn btn-sm btn-light border" id="btnBackToWelcome" title="Back">
@@ -480,9 +470,10 @@
                   <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
                     <div>
                       <div class="subtle small">Selected Test Case Execution</div>
-                      <h5 class="mb-0 section-title" id="tcNameHeading">—</h5>
+                      <h5 class="mb-0 section-title"><span id="tcNameHeading">—</span> <span class="subtle" style="font-size:0.8rem;font-weight:600" id="tcNameTceId"></span></h5>
                     </div>
-                    <div class="d-flex gap-2" id="historyBtnContainer" style="display:none!important">
+                    <div class="d-flex gap-2 align-items-center" id="historyBtnContainer" style="display:none!important">
+                      <span class="badge bg-wtw-purple" id="badgeResolvingFail" style="display:none;font-size:0.75rem">Resolving Fail</span>
                       <button class="btn btn-sm btn-light border" id="btnViewHistory" disabled><i class="bi bi-clock-history me-1"></i>History</button>
                     </div>
                   </div>
@@ -494,7 +485,6 @@
                     <div class="collapsible-section">
                       <div class="collapsible-header active" data-section="general" onclick="toggleSection('general')">
                         <span class="section-label"><i class="bi bi-info-circle"></i> General Information</span>
-                        <span class="badge bg-wtw-purple ms-2" id="badgeResolvingFail" style="display:none;font-size:0.75rem">Resolving Fail</span>
                         <i class="bi bi-chevron-down chevron"></i>
                       </div>
                       <div class="collapsible-body show" id="section-general">
@@ -502,9 +492,8 @@
                           <div class="info-left">
                             <div class="info-row"><span class="info-label">Testcase name</span><span class="info-value" id="infoName">—</span></div>
                             <div class="info-row"><span class="info-label">Template name</span><span class="info-value" id="infoTemplate">—</span></div>
-                            <div class="info-row"><span class="info-label">Environment</span><span class="info-value" id="infoEnvironment">—</span></div>
                             <div class="info-row"><span class="info-label">Testcase ID</span><span class="info-value" id="infoTcId">—</span></div>
-                            <div class="info-row"><span class="info-label">Additional details</span><span class="info-value small" id="infoAdditional">—</span></div>
+                            <div class="info-row"><span class="info-label">Reference ID</span><span class="info-value small" id="infoAdditional">—</span></div>
                           </div>
                           <div class="info-right">
                             <div class="info-row"><span class="info-label">Execution status</span><span class="info-value" id="infoExecStatus">—</span></div>
@@ -523,10 +512,54 @@
                       </div>
                     </div>
 
-                    <!-- Results (non-ActionBased) -->
+                    <!-- Runtime Parameters (non-ActionBased) -->
+                    <div class="collapsible-section tab-sql">
+                      <div class="collapsible-header" data-section="runtimeparams" onclick="toggleSection('runtimeparams')">
+                        <span class="section-label"><i class="bi bi-gear"></i> Runtime Parameters</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                      </div>
+                      <div class="collapsible-body" id="section-runtimeparams">
+                        <div class="table-responsive">
+                          <table class="table table-sm align-middle">
+                            <thead>
+                              <tr>
+                                <th style="color:var(--wtw-purple);font-weight:700">Name</th>
+                                <th style="color:var(--wtw-purple);font-weight:700">Data type</th>
+                                <th style="color:var(--wtw-purple);font-weight:700">Value</th>
+                              </tr>
+                            </thead>
+                            <tbody id="runtimeParamTbody"><tr><td colspan="3" class="subtle">Select a test case to view runtime parameters.</td></tr></tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Setup Parameters (non-ActionBased - moved before Verification Result) -->
+                    <div class="collapsible-section tab-sql" id="setupParamsSection">
+                      <div class="collapsible-header" data-section="parameter" onclick="toggleSection('parameter')">
+                        <span class="section-label"><i class="bi bi-sliders"></i> Setup Parameters</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                      </div>
+                      <div class="collapsible-body" id="section-parameter">
+                        <div class="table-responsive">
+                          <table class="table table-sm align-middle">
+                            <thead>
+                              <tr>
+                                <th style="color:var(--wtw-purple);font-weight:700">Name</th>
+                                <th style="color:var(--wtw-purple);font-weight:700">Data type</th>
+                                <th style="color:var(--wtw-purple);font-weight:700">Value</th>
+                              </tr>
+                            </thead>
+                            <tbody id="paramTbody"><tr><td colspan="3" class="subtle">Select a test case to view parameters.</td></tr></tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Verification Result (non-ActionBased) -->
                     <div class="collapsible-section tab-sql">
                       <div class="collapsible-header" data-section="results" onclick="toggleSection('results')">
-                        <span class="section-label"><i class="bi bi-table"></i> Results</span>
+                        <span class="section-label"><i class="bi bi-table"></i> Verification Result</span>
                         <i class="bi bi-chevron-down chevron"></i>
                       </div>
                       <div class="collapsible-body" id="section-results">
@@ -550,6 +583,19 @@
                       </div>
                     </div>
 
+                    <!-- Manual Verification Instruction (ActionBased) -->
+                    <div class="collapsible-section tab-action" style="display:none">
+                      <div class="collapsible-header" data-section="manualverification" onclick="toggleSection('manualverification')">
+                        <span class="section-label"><i class="bi bi-card-checklist"></i> Manual Verification Instruction</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                      </div>
+                      <div class="collapsible-body" id="section-manualverification">
+                        <div id="manualVerificationContent" class="subtle text-center py-4">
+                          <i class="bi bi-info-circle me-1"></i>No manual verification instructions available.
+                        </div>
+                      </div>
+                    </div>
+
                     <!-- Verification Results (ActionBased) -->
                     <div class="collapsible-section tab-action" style="display:none">
                       <div class="collapsible-header" data-section="verificationresults" onclick="toggleSection('verificationresults')">
@@ -566,14 +612,12 @@
                           <table class="table table-sm table-hover results-table align-middle">
                             <thead><tr>
                               <th class="sortable-th" data-sort="name" style="color:var(--wtw-purple);font-weight:700">Criteria Name <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                              <th style="color:var(--wtw-purple);font-weight:700">BenId</th>
-                              <th style="color:var(--wtw-purple);font-weight:700">Option ID</th>
                               <th style="color:var(--wtw-purple);font-weight:700">Expected Value</th>
                               <th style="color:var(--wtw-purple);font-weight:700">Actual Value</th>
                               <th style="color:var(--wtw-purple);font-weight:700">Operator</th>
                               <th class="sortable-th" data-sort="status" style="color:var(--wtw-purple);font-weight:700">Result <i class="bi bi-arrow-down-up sort-icon"></i></th>
                             </tr></thead>
-                            <tbody id="verificationResultsTbody"><tr><td colspan="7" class="subtle">Select a test case to view results.</td></tr></tbody>
+                            <tbody id="verificationResultsTbody"><tr><td colspan="5" class="subtle">Select a test case to view results.</td></tr></tbody>
                           </table>
                         </div>
                       </div>
@@ -604,8 +648,8 @@
                       </div>
                     </div>
 
-                    <!-- User Validation (non-ActionBased) -->
-                    <div class="collapsible-section tab-sql">
+                    <!-- User Validation (non-ActionBased, Calc Compare only) -->
+                    <div class="collapsible-section tab-sql tab-calccompare">
                       <div class="collapsible-header" data-section="uservalidation" onclick="toggleSection('uservalidation')">
                         <span class="section-label"><i class="bi bi-person-check"></i> User Validation</span>
                         <i class="bi bi-chevron-down chevron"></i>
@@ -636,28 +680,6 @@
                           <div class="col-12 text-end">
                             <button class="btn btn-sm btn-wtw" id="btnUVSave"><i class="bi bi-save me-1"></i>Save</button>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Parameter -->
-                    <div class="collapsible-section">
-                      <div class="collapsible-header" data-section="parameter" onclick="toggleSection('parameter')">
-                        <span class="section-label"><i class="bi bi-sliders"></i> Parameter</span>
-                        <i class="bi bi-chevron-down chevron"></i>
-                      </div>
-                      <div class="collapsible-body" id="section-parameter">
-                        <div class="table-responsive">
-                          <table class="table table-sm align-middle">
-                            <thead>
-                              <tr>
-                                <th style="color:var(--wtw-purple);font-weight:700">Name</th>
-                                <th style="color:var(--wtw-purple);font-weight:700">Data type</th>
-                                <th style="color:var(--wtw-purple);font-weight:700">Value</th>
-                              </tr>
-                            </thead>
-                            <tbody id="paramTbody"><tr><td colspan="3" class="subtle">Select a test case to view parameters.</td></tr></tbody>
-                          </table>
                         </div>
                       </div>
                     </div>
@@ -729,7 +751,7 @@
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="bi bi-pen me-2"></i>Sign Off Execution</h5>
+                <h5 class="modal-title"><i class="bi bi-send-check me-2"></i>Request Peer Review</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
@@ -744,12 +766,12 @@
                   </div>
                 </div>
                 <div class="alert alert-info small">
-                  <i class="bi bi-info-circle me-1"></i>Signing off confirms that all test case executions have been reviewed and the execution is ready for downstream processing.
+                  <i class="bi bi-info-circle me-1"></i>Requesting peer review confirms that all test case executions have been reviewed and the execution is ready for independent validation.
                 </div>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" id="btnConfirmSignOff"><i class="bi bi-pen me-1"></i>Confirm Sign-off</button>
+                <button type="button" class="btn btn-success" id="btnConfirmSignOff"><i class="bi bi-send-check me-1"></i>Confirm Peer Review Request</button>
               </div>
             </div>
           </div>
@@ -794,27 +816,27 @@
     <script>
       // ============================================================
       // DATA MODEL - Test Plan Execution (TPE)
-      // Based on actual entity data from tpe.xml, tce.xml, tc.xml, tc-details.xml
+      // Based on actual Dataverse data: cdfdfff5-6148-f111-bec6-6045bdef4434
       // ============================================================
       const testPlanExecution = {
         name: "Test Plan - 01 - ATT-Automated Testing Tool (H-BC4)",
-        executionId: "TPE-2776",
+        executionId: "TPE-2778",
         testPlanName: "Test Plan - 01 - ATT",
         testPlanId: "f1353891-6444-f111-88b3-7c1e52813c79",
         clientName: "Automated Testing Tool (H-BC4)",
         executor: "Alex Tonog",
-        executionDate: "4/30/2026 7:19 AM",
-        executionStart: "2026-04-30 07:19:27",
-        executionEnd: "2026-04-30 07:22:00",
+        executionDate: "5/5/2026 5:08 PM",
+        executionStart: "2026-05-05 09:08:24",
+        executionEnd: "2026-05-05 09:12:21",
         environment: "QA",
         planYear: 2026,
         templateType: "Multiple",
         executionType: "Test Plan",
-        status: "Completed",
-        totalTestCases: 5,
+        status: "Results Review",
+        totalTestCases: 7,
         totalPassed: 0,
-        totalFailed: 4,
-        totalCompleted: 5,
+        totalFailed: 6,
+        totalCompleted: 7,
         totalAwaitingDecision: 1,
         runtimeParameters: [
           { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" },
@@ -832,287 +854,62 @@
         reviewedBy: null,
         testCaseExecutions: [
           {
-            // TCE row 1 - SQL-based, User Validation
-            name: "test-sql-based-alex-1",
-            testcaseId: "TC-3217",
-            testcaseExecutionId: "TCE-3710",
-            testcaseGuid: "b0ec51b4-9c51-f011-877a-000d3a109097",
-            templateName: "Calc Compare - AE",
-            templateVersion: "",
+            // TCE-3713 - SQL-based, Failed (SQL syntax error)
+            name: "test",
+            testcaseId: "TC-3578",
+            testcaseExecutionId: "TCE-3713",
+            testcaseGuid: "cf22aa48-3d78-f011-b4cc-6045bda6d171",
+            templateName: "Mapping - GroupID",
+            templateVersion: "TMPV-1448",
             environment: "QA",
-            executionResult: "User Validation",
-            executionResultCode: 100,
+            executionResult: "Failed",
+            executionResultCode: 400,
             executedBy: "Alex Tonog",
-            executionDate: "4/30/2026 7:20 AM",
-            executionRemarks: "CalcAnalysis",
+            executionDate: "5/5/2026 5:09 PM",
+            executionRemarks: "Incorrect syntax near ')'.",
             executionStatus: "Pending Review",
             reviewStatus: "PENDING",
             reviewRemarks: "",
             overrideComment: "",
-            resultRef: "e022eced-5111-48ad-a609-8cf6d01cc08d",
+            resultRef: "dee8a310-67e1-4b32-bee6-f0b0ef3a9ce3",
             logReferenceId: "",
-            additionalDetails: "",
+            additionalDetails: "Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near ')'.\r\n   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)\r\n   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)\r\n   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, SqlCommand command, Boolean callerHasConnectionLock, Boolean asyncClose)\r\n   at Att.Core.DataAccess.Repostories.ClientRepository.ExecuteQuery(String query)\r\n   at Att.Core.Engine.ExecutionActions.ExecuteActionQueryV2.Execute()\r\nClientConnectionId:d7ed0e1a-cd4b-478f-9306-8afce9dfcded\r\nError Number:102,State:1,Class:15",
             executionInstance: 1,
             conditions: "",
             formattedWhereClause: "",
             whereClause: "",
-            query: `DECLARE @SpecialGroupId SMALLINT = -1;
-DECLARE @PersonId INT = -1;
-DECLARE @PlanYear SMALLINT = 2026;
-
--- ===========================================================================================================================================
--- Calc Analysis Between PlanYears
--- Test Case: Compare elections between planyears
--- ===========================================================================================================================================
-
------------------------------------------------------------------------------------
--- Parameters
------------------------------------------------------------------------------------
-
-DECLARE @PlanYear1 SMALLINT = @PlanYear - 1;
-DECLARE @PlanYear2 SMALLINT = @PlanYear;
-
------------------------------------------------------------------------------------
-SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
-
------------------------------------------------------------------------------------
--- 0 - Select employees for AE
------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS #group
-
-SELECT TOP 1
-    c1.PersonId, PlanYear1 = c1.PlanYear, CalcId1 = c1.CalcId,
-    EventCode1 = c1.EventCode, PlanYear2 = c2.PlanYear,
-    CalcId2 = c2.CalcId, EventCode2 = c2.EventCode
-INTO
-    #group
-FROM
-    dbo.hw_calcmaster c1 WITH (NOLOCK)
-JOIN
-    dbo.hw_calcmaster c2 WITH (NOLOCK)
-    ON c1.PersonId = c2.PersonId
-     AND c1.PlanYear = @PlanYear1
-     AND c2.PlanYear = @PlanYear2
-     AND c1.RecordStatus = 'A'
-     AND c2.RecordStatus = 'A'
-WHERE
-   dbo.IsInternalTest(c1.PersonId) = 0
-   AND ( @SpecialGroupId = -1 OR c1.PersonId IN (
-       SELECT PersonId FROM cdm_person_select_ids (NOLOCK)
-       WHERE GroupId = @SpecialGroupId ) )
-   AND ( @PersonId = -1 OR c1.PersonId = @PersonId)
-
--- 1 - Gather data sets for comparison
-;WITH CTE_Election_1 AS (
-   SELECT e.*, l.CovAmt, l.CostEffectiveDate, EventCode1 = c.EventCode1
-   FROM hw_election_log e(NOLOCK)
-   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
-     AND e.PlanYear = c.PlanYear1 AND e.CalcId = c.CalcId1
-     AND e.RecordStatus = 'A'
-   LEFT JOIN hw_eligibility l(NOLOCK) ON l.PersonId = e.PersonId
-     AND l.PlanYear = e.PlanYear AND l.CalcId = e.CalcId
-     AND l.BenId = e.BenId AND l.OptionId = e.OptionId AND l.TierId = e.TierId
-),
-CTE_Election_2 AS (
-   SELECT e.*, l.CovAmt, l.CostEffectiveDate, EventCode2 = c.EventCode2
-   FROM hw_election_log e(NOLOCK)
-   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId
-     AND e.PlanYear = c.PlanYear2 AND e.CalcId = c.CalcId2
-     AND e.RecordStatus = 'A'
-   LEFT JOIN hw_eligibility l(NOLOCK) ON l.PersonId = e.PersonId
-     AND l.PlanYear = e.PlanYear AND l.CalcId = e.CalcId
-     AND l.BenId = e.BenId AND l.OptionId = e.OptionId AND l.TierId = e.TierId
-)
-SELECT *
-FROM (
-   SELECT PersonId = ISNULL(e1.PersonId, e2.PersonId),
-     BenId = ISNULL(e1.BenId, e2.BenId),
-     OptionId1 = e1.OptionId, OptionId2 = e2.OptionId,
-     TierId1 = e1.TierId, TierId2 = e2.TierId
-   FROM CTE_Election_1 e1
-   FULL JOIN CTE_Election_2 e2 ON e1.PersonId = e2.PersonId AND e1.BenId = e2.BenId
-) t
-ORDER BY 1, 2, 3;`,
+            query: ` DECLARE @GroupId SMALLINT = 2;\n\n DECLARE @PlanYear SMALLINT = 2025;\n\nDECLARE @Debug BIT = 0;\nDROP TABLE IF EXISTS #group\n\nSELECT TOP 1  PersonId \nINTO #group \nFROM dbo.hw_calcmaster cm WITH (NOLOCK) \nWHERE cm.RecordStatus = 'A' AND cm.PlanYear = @PlanYear    \n    AND dbo.IsInternalTest(personId) = 0\n     AND (\n\n)\n--`,
             parameters: [
-              { Name: "SpecialGroupId", Value: "-1", DataType: "SMALLINT", CanShowTestcaseUI: "No" },
-              { Name: "PersonId", Value: "-1", DataType: "INT", CanShowTestcaseUI: "No" },
+              { Name: "GroupId", Value: "2", DataType: "SMALLINT", CanShowTestcaseUI: "Yes" },
               { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
             ],
-            results: [
-              { name: "Target > 0", expected: 0, actual: 5, remarks: "Pass" },
-              { name: "Positive > 0", expected: 0, actual: 5, remarks: "Pass" },
-              { name: "Target = Positive", expected: 5, actual: 5, remarks: "Pass" },
-              { name: "Negative = 0", expected: 0, actual: 0, remarks: "Pass" },
-              { name: "Fallout = 0", expected: 0, actual: 0, remarks: "Pass" }
-            ],
+            results: [],
             userValidation: { status: "User Validation", comments: "" },
             phases: null,
             history: [
-              { instance: 1, date: "4/30/2026 7:20 AM", result: "User Validation", executor: "Alex Tonog" }
+              { instance: 1, date: "5/5/2026 5:09 PM", result: "Failed", executor: "Alex Tonog" }
             ]
           },
           {
-            // TCE row 2 - SQL-based with conditions, Failed
-            name: "aa_group_mapping_6",
-            testcaseId: "TC-3207",
-            testcaseExecutionId: "TCE-3708",
-            testcaseGuid: "b0dce4fa-2550-f011-877a-6045bddb5c95",
-            templateName: "Mapping - PriceGroup",
-            templateVersion: "TMPV-1450",
-            environment: "QA",
-            executionResult: "Failed",
-            executionResultCode: 400,
-            executedBy: "Alex Tonog",
-            executionDate: "4/30/2026 7:20 AM",
-            executionRemarks: "Fail",
-            executionStatus: "Pending Review",
-            reviewStatus: "PENDING",
-            reviewRemarks: "",
-            overrideComment: "",
-            resultRef: "b137957a-cb01-41ba-8e81-87f7663aef3d",
-            logReferenceId: "",
-            additionalDetails: "",
-            executionInstance: 1,
-            conditions: '{"combinator":"and","rules":[{"id":"dfa7b843-b4f2-4ad3-bb1c-95f894dd31fe","field":"cm.Location","operator":"=","valueSource":"value","value":"a"},{"id":"9da105d1-53e6-4f33-b931-6fe0be162ad1","rules":[{"id":"f1b662ba-ca69-42dd-bded-e891a7e17383","field":"cm.GroupId","operator":"=","valueSource":"value","value":"1"}],"combinator":"and","not":false}]}',
-            formattedWhereClause: "ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)",
-            whereClause: "ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)",
-            query: ` DECLARE @PriceGroupId SMALLINT = 1;
-
- DECLARE @PlanYear SMALLINT = 2025;
-
-DECLARE @Debug BIT = 0;
-DROP TABLE IF EXISTS #group
-
-SELECT TOP 1  PersonId 
-INTO #group 
-FROM dbo.hw_calcmaster cm WITH (NOLOCK) 
-WHERE cm.RecordStatus = 'A' AND cm.PlanYear = @PlanYear    
-    AND dbo.IsInternalTest(personId) = 0
-     AND (
-ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)
-)
---
--------------------------------------
--- 1 - Test population
--------------------------------------
-IF @Debug = 1 BEGIN
-
-     DECLARE @cols NVARCHAR(MAX);
-
-    SELECT @cols = STRING_AGG('cm.' + QUOTENAME(c.COLUMN_NAME), ', ')
-    WITHIN GROUP (ORDER BY c.ORDINAL_POSITION)
-    FROM INFORMATION_SCHEMA.COLUMNS m
-         JOIN INFORMATION_SCHEMA.COLUMNS c
-        ON m.COLUMN_NAME = c.COLUMN_NAME
-    WHERE m.TABLE_NAME = 'pr_pricegroup_mapping'
-                AND c.TABLE_NAME = 'hw_calcmaster';
-
-    SET @cols += ', HasOverride = IIf(ov.PersonId IS NULL, ''N'', ''Y'')'
-
-    DECLARE @sql NVARCHAR(MAX) = '
-    SELECT ''Negative'' AS Type, cm.PersonId, ' + @cols + '
-    FROM dbo.hw_calcmaster cm (NOLOCK)
-        LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
-                ON cm.PersonId = ov.PersonId
-                        AND cm.PlanYear = ov.PlanYear
-                        AND ov.PriceGroupId =  @PriceGroupId 
-            AND ov.Enabled = 1
-    WHERE cm.RecordStatus = ''A''
-        AND cm.PlanYear = @PlanYear
-        AND cm.PriceGroupId = @PriceGroupId
-        AND dbo.IsInternalTest(cm.PersonId) = 0
-        AND cm.PersonId NOT IN (SELECT PersonId FROM #group)
-
-    UNION ALL
-
-    SELECT ''Fallout'' AS Type, cm.PersonId, ' + @cols + '
-    FROM dbo.hw_calcmaster cm (NOLOCK)
-        LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
-                ON cm.PersonId = ov.PersonId
-                        AND cm.PlanYear = ov.PlanYear
-                        AND ov.PriceGroupId IS NOT NULL 
-                        AND ov.PriceGroupId !=  @PriceGroupId
-            AND ov.Enabled = 1 
-    WHERE cm.RecordStatus = ''A''
-        AND cm.PlanYear = @PlanYear
-        AND cm.PriceGroupId != @PriceGroupId
-        AND cm.PersonId IN (SELECT PersonId FROM #group)
-    ORDER By PersonId
-    ';
-
-    EXEC sp_executesql @sql, N'@PlanYear SMALLINT, @PriceGroupId SMALLINT', @PlanYear, @PriceGroupId;
-
-END
-
-ELSE BEGIN
-    SELECT Type = 'Target', Count = COUNT(1)
-    FROM #group
-
-    UNION ALL
-
-    SELECT Type = 'Positive', Count = COUNT(1)
-    FROM dbo.hw_calcmaster WITH (NOLOCK) 
-        WHERE RecordStatus = 'A'    
-            AND PlanYear = @PlanYear  
-            AND PriceGroupId = @PriceGroupId
-            AND PersonId IN (SELECT PersonId FROM #group)
-
-    UNION ALL
-
-    SELECT Type = 'Negative', Count = COUNT(1)
-    FROM dbo.hw_calcmaster WITH (NOLOCK) 
-        WHERE RecordStatus = 'A' 
-            AND PlanYear = @PlanYear
-            AND PriceGroupId = @PriceGroupId
-            AND dbo.IsInternalTest(personId) = 0
-            AND PersonId NOT IN (SELECT PersonId FROM #group)
-
-    UNION ALL
-
-    SELECT Type = 'Fallout', Count = COUNT(1)
-    FROM dbo.hw_calcmaster WITH (NOLOCK) 
-        WHERE RecordStatus = 'A' 
-            AND PlanYear = @PlanYear  
-            AND PriceGroupId != @PriceGroupId
-            AND PersonId IN (SELECT PersonId FROM #group)
-END;
---`,
-            parameters: [
-              { Name: "PriceGroupId", Value: "1", DataType: "SMALLINT", CanShowTestcaseUI: "Yes" },
-              { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
-            ],
-            results: [
-              { name: "Target > 0", expected: 0, actual: 0, remarks: "Fail" },
-              { name: "Positive > 0", expected: 0, actual: 0, remarks: "Fail" },
-              { name: "Target = Positive", expected: 0, actual: 0, remarks: "Pass" },
-              { name: "Negative = 0", expected: 0, actual: 302, remarks: "Fail" },
-              { name: "Fallout = 0", expected: 0, actual: 0, remarks: "Pass" }
-            ],
-            userValidation: { status: "User Validation", comments: "" },
-            phases: null,
-            history: [
-              { instance: 1, date: "4/30/2026 7:20 AM", result: "Failed", executor: "Alex Tonog" }
-            ]
-          },
-          {
-            // TCE row 3 - ActionBased, Failed (has phases/steps data)
+            // TCE-3715 - ActionBased, Failed
             name: "Test-ActionBased-01",
             testcaseId: "TC-3987",
-            testcaseExecutionId: "TCE-3709",
+            testcaseExecutionId: "TCE-3715",
             testcaseGuid: "ae407551-6444-f111-88b3-7c1e52813c79",
             templateName: "ActionBased",
             templateVersion: "",
             environment: "QA",
+            manualVerificationComment: "",
             executionResult: "Failed",
             executionResultCode: 400,
             executedBy: "Alex Tonog",
-            executionDate: "4/30/2026 7:20 AM",
+            executionDate: "5/5/2026 5:09 PM",
             executionRemarks: "Failed",
             executionStatus: "Pending Review",
             reviewStatus: "PENDING",
             reviewRemarks: "",
             overrideComment: "",
-            resultRef: "26b7c38f-4f06-4b30-b957-4c6e61c8df5b",
+            resultRef: "be312d25-21cd-423b-8960-520b699ab845",
             logReferenceId: "",
             additionalDetails: "",
             executionInstance: 1,
@@ -1128,8 +925,8 @@ END;
             userValidation: { status: "User Validation", comments: "" },
             phases: [
               {
-                name: "Parameter", displayName: "Parameter", code: "10", status: "Success", message: "", testStatus: 1,
-                steps: [{ name: "SharedData", displayName: "Shared Data", status: "Success", message: "", testStatus: 1, link: "",
+                name: "Parameter", displayName: "Parameter", code: "10", status: "", message: "", testStatus: -1,
+                steps: [{ name: "SharedData", displayName: "Shared Data", status: "", message: "", testStatus: -1, link: "",
                   variables: [
                     { name: "PlanYear", displayName: "PlanYear", value: "2026", type: "Text", required: true, include: true, description: "PlanYear" },
                     { name: "Clone", displayName: "Clone", value: "true", type: "Boolean", required: true, include: true, description: "" }
@@ -1137,10 +934,9 @@ END;
                 }]
               },
               {
-                name: "TargetPerson", displayName: "TargetPerson", code: "20", status: "Success", message: "", testStatus: 1,
-                steps: [{ name: "FindPerson", displayName: "Find Person", status: "Success", message: "10681", testStatus: 1, link: "",
+                name: "TargetPerson", displayName: "TargetPerson", code: "20", status: "", message: "", testStatus: -1,
+                steps: [{ name: "FindPersonByPersonalInfo", displayName: "Personal Info", status: "", message: "", testStatus: -1, link: "",
                   variables: [
-                    { name: "PersonId", displayName: "PersonId", value: "10681", type: "Integer", required: false, include: true, description: "" },
                     { name: "AgeFrom", displayName: "Age Range From", value: "35", type: "Integer", required: false, include: true, operator: "=", description: "Example: 25" },
                     { name: "AgeTo", displayName: "Age Range To", value: "", type: "Integer", required: false, include: false, description: "Example: 35" },
                     { name: "City", displayName: "City", value: "", type: "Text", required: false, include: false, description: "Example: New York" },
@@ -1149,8 +945,8 @@ END;
                 }]
               },
               {
-                name: "Precondition", displayName: "Precondition", code: "30", status: "Failure", message: "CreateNewHire: Index was outside the bounds of the array.", testStatus: 0,
-                steps: [{ name: "CreateNewHire", displayName: "Create New Hire", status: "Failure", message: "CreateNewHire: Index was outside the bounds of the array. CreateNewHire: System.IndexOutOfRangeException: Index was outside the bounds of the array. at Att.Core.Engine.TestFlow.Actions.PreCondition.CreateNewHire.GetDocumentIdAsync(DocumentServiceSoapClient client, Int32 instanceId) at Att.Core.Engine.TestFlow.Actions.PreCondition.CreateNewHire.ExecuteAsync(ActionContext context) in /home/runner/work/automated-testing-tool/automated-testing-tool/Att.Core.Engine/TestFlow/Actions/PreCondition/CreateNewHire.cs:line 47 at", testStatus: 0, link: "", variables: [] }]
+                name: "Precondition", displayName: "Precondition", code: "30", status: "", message: "", testStatus: -1,
+                steps: [{ name: "CreateNewHire", displayName: "Create New Hire", status: "", message: "", testStatus: -1, link: "", variables: [] }]
               },
               {
                 name: "Execution", displayName: "Execution", code: "40", status: "", message: "", testStatus: -1,
@@ -1172,14 +968,141 @@ END;
               }
             ],
             history: [
-              { instance: 1, date: "4/30/2026 7:20 AM", result: "Failed", executor: "Alex Tonog" }
+              { instance: 1, date: "5/5/2026 5:09 PM", result: "Failed", executor: "Alex Tonog" }
             ]
           },
           {
-            // TCE row 4 - SQL-based, Failed
+            // TCE-3716 - ActionBased, Failed (with manual verification)
+            name: "test-actionbased-alexis-2",
+            testcaseId: "TC-3990",
+            testcaseExecutionId: "TCE-3716",
+            testcaseGuid: "33f94b13-4e48-f111-bec6-6045bdd34ff7",
+            templateName: "ActionBased",
+            templateVersion: "",
+            environment: "QA",
+            manualVerificationComment: "Notes manual verify",
+            executionResult: "Failed",
+            executionResultCode: 400,
+            executedBy: "Alex Tonog",
+            executionDate: "5/5/2026 5:10 PM",
+            executionRemarks: "Failed",
+            executionStatus: "Pending Review",
+            reviewStatus: "PENDING",
+            reviewRemarks: "",
+            overrideComment: "",
+            resultRef: "d9524e96-c554-4528-b841-a68cce23da8f",
+            logReferenceId: "",
+            additionalDetails: "",
+            executionInstance: 1,
+            conditions: "",
+            formattedWhereClause: "",
+            whereClause: "",
+            query: "",
+            parameters: [
+              { Name: "PlanYear", Value: "2026", DataType: "Text", CanShowTestcaseUI: "No" },
+              { Name: "Clone", Value: "true", DataType: "Boolean", CanShowTestcaseUI: "Yes" }
+            ],
+            results: [],
+            userValidation: { status: "User Validation", comments: "" },
+            phases: [
+              {
+                name: "Parameter", displayName: "Parameter", code: "10", status: "", message: "", testStatus: -1,
+                steps: [{ name: "SharedData", displayName: "Shared Data", status: "", message: "", testStatus: -1, link: "",
+                  variables: [
+                    { name: "PlanYear", displayName: "PlanYear", value: "2026", type: "Text", required: true, include: true, description: "PlanYear" },
+                    { name: "Clone", displayName: "Clone", value: "true", type: "Boolean", required: true, include: true, description: "" }
+                  ]
+                }]
+              },
+              {
+                name: "TargetPerson", displayName: "TargetPerson", code: "20", status: "", message: "", testStatus: -1,
+                steps: []
+              },
+              {
+                name: "Precondition", displayName: "Precondition", code: "30", status: "", message: "", testStatus: -1,
+                steps: [{ name: "UpdatePersonData", displayName: "Update Person Data", status: "", message: "", testStatus: -1, link: "",
+                  variables: [
+                    { name: "Gender", displayName: "Gender", value: "Parrot", type: "Text", required: false, include: true, operator: "=", description: "Gender" },
+                    { name: "BenId", displayName: "BenId", value: "3", type: "Text", required: true, include: true, description: "BenId" },
+                    { name: "OptionId", displayName: "OptionId", value: "101", type: "Text", required: true, include: true, description: "OptionId" }
+                  ]
+                }]
+              },
+              {
+                name: "Execution", displayName: "Execution", code: "40", status: "", message: "", testStatus: -1,
+                steps: [{ name: "MakeElection", displayName: "Make Election", status: "", message: "", testStatus: -1, link: "",
+                  variables: [
+                    { name: "BenId", displayName: "BenId", value: "3", type: "Text", required: true, include: true, description: "BenId" },
+                    { name: "OptionId", displayName: "OptionId", value: "101", type: "Text", required: true, include: true, description: "OptionId" }
+                  ]
+                }]
+              },
+              {
+                name: "Verification", displayName: "Verification", code: "50", status: "", message: "", testStatus: -1,
+                steps: []
+              },
+              {
+                name: "Cleanup", displayName: "Cleanup", code: "60", status: "", message: "", testStatus: -1,
+                steps: [{ name: "Rollback", displayName: "Rollback", status: "", message: "", testStatus: -1, link: "",
+                  variables: [
+                    { name: "ModeledEventCode", displayName: "ModeledEventCode", value: "1", type: "Integer", required: false, include: true, operator: "=", description: "ModeledEventCode" }
+                  ]
+                }]
+              }
+            ],
+            history: [
+              { instance: 1, date: "5/5/2026 5:10 PM", result: "Failed", executor: "Alex Tonog" }
+            ]
+          },
+          {
+            // TCE-3717 - SQL-based, User Validation (Calc Compare - AE)
+            name: "test-sql-based-alex-1",
+            testcaseId: "TC-3217",
+            testcaseExecutionId: "TCE-3717",
+            testcaseGuid: "b0ec51b4-9c51-f011-877a-000d3a109097",
+            templateName: "Calc Compare - AE",
+            templateVersion: "",
+            environment: "QA",
+            executionResult: "User Validation",
+            executionResultCode: 100,
+            executedBy: "Alex Tonog",
+            executionDate: "5/5/2026 5:11 PM",
+            executionRemarks: "CalcAnalysis",
+            executionStatus: "Pending Review",
+            reviewStatus: "PENDING",
+            reviewRemarks: "",
+            overrideComment: "",
+            resultRef: "aa8d54bd-feea-4af0-b867-3a77c8fe4d81",
+            logReferenceId: "",
+            additionalDetails: "",
+            executionInstance: 1,
+            conditions: "",
+            formattedWhereClause: "",
+            whereClause: "",
+            query: ` DECLARE @SpecialGroupId SMALLINT = -1;\n DECLARE @PersonId INT = -1;\n DECLARE @PlanYear SMALLINT = 2026;\n\n-- Calc Analysis Between PlanYears\n-- Test Case: Compare elections between planyears\n\nDECLARE @PlanYear1 SMALLINT = @PlanYear - 1;\nDECLARE @PlanYear2 SMALLINT = @PlanYear;\n\nSET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;\n\nDROP TABLE IF EXISTS #group\n\nSELECT TOP 1\n    c1.PersonId, PlanYear1 = c1.PlanYear, CalcId1 = c1.CalcId,\n    EventCode1 = c1.EventCode, PlanYear2 = c2.PlanYear,\n    CalcId2 = c2.CalcId, EventCode2 = c2.EventCode\nINTO\n    #group\nFROM\n    dbo.hw_calcmaster c1 WITH (NOLOCK)\nJOIN\n    dbo.hw_calcmaster c2 WITH (NOLOCK)\n    ON c1.PersonId = c2.PersonId\n     AND c1.PlanYear = @PlanYear1\n     AND c2.PlanYear = @PlanYear2\n     AND c1.RecordStatus = 'A'\n     AND c2.RecordStatus = 'A'\nWHERE\n   dbo.IsInternalTest(c1.PersonId) = 0\n   AND ( @SpecialGroupId = -1 OR c1.PersonId IN (\n       SELECT PersonId FROM cdm_person_select_ids (NOLOCK)\n       WHERE GroupId = @SpecialGroupId ) )\n   AND ( @PersonId = -1 OR c1.PersonId = @PersonId)\n\n;WITH CTE_Election_1 AS (\n   SELECT e.*, l.CovAmt, l.CostEffectiveDate, EventCode1 = c.EventCode1\n   FROM hw_election_log e(NOLOCK)\n   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId\n     AND e.PlanYear = c.PlanYear1 AND e.CalcId = c.CalcId1\n     AND e.RecordStatus = 'A'\n   LEFT JOIN hw_eligibility l(NOLOCK) ON l.PersonId = e.PersonId\n     AND l.PlanYear = e.PlanYear AND l.CalcId = e.CalcId\n     AND l.BenId = e.BenId AND l.OptionId = e.OptionId AND l.TierId = e.TierId\n),\nCTE_Election_2 AS (\n   SELECT e.*, l.CovAmt, l.CostEffectiveDate, EventCode2 = c.EventCode2\n   FROM hw_election_log e(NOLOCK)\n   INNER JOIN #group c(NOLOCK) ON e.PersonId = c.PersonId\n     AND e.PlanYear = c.PlanYear2 AND e.CalcId = c.CalcId2\n     AND e.RecordStatus = 'A'\n   LEFT JOIN hw_eligibility l(NOLOCK) ON l.PersonId = e.PersonId\n     AND l.PlanYear = e.PlanYear AND l.CalcId = e.CalcId\n     AND l.BenId = e.BenId AND l.OptionId = e.OptionId AND l.TierId = e.TierId\n)\nSELECT *\nFROM (\n   SELECT PersonId = ISNULL(e1.PersonId, e2.PersonId),\n     BenId = ISNULL(e1.BenId, e2.BenId),\n     OptionId1 = e1.OptionId, OptionId2 = e2.OptionId,\n     TierId1 = e1.TierId, TierId2 = e2.TierId\n   FROM CTE_Election_1 e1\n   FULL JOIN CTE_Election_2 e2 ON e1.PersonId = e2.PersonId AND e1.BenId = e2.BenId\n) t\nORDER BY 1, 2, 3;`,
+            parameters: [
+              { Name: "SpecialGroupId", Value: "-1", DataType: "SMALLINT", CanShowTestcaseUI: "No" },
+              { Name: "PersonId", Value: "-1", DataType: "INT", CanShowTestcaseUI: "No" },
+              { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
+            ],
+            results: [
+              { name: "Target > 0", expected: 0, actual: 5, remarks: "Pass" },
+              { name: "Positive > 0", expected: 0, actual: 5, remarks: "Pass" },
+              { name: "Target = Positive", expected: 5, actual: 5, remarks: "Pass" },
+              { name: "Negative = 0", expected: 0, actual: 0, remarks: "Pass" },
+              { name: "Fallout = 0", expected: 0, actual: 0, remarks: "Pass" }
+            ],
+            userValidation: { status: "User Validation", comments: "" },
+            phases: null,
+            history: [
+              { instance: 1, date: "5/5/2026 5:11 PM", result: "User Validation", executor: "Alex Tonog" }
+            ]
+          },
+          {
+            // TCE-3712 - SQL-based, Failed
             name: "basic life  - imputed",
             testcaseId: "TC-3442",
-            testcaseExecutionId: "TCE-3706",
+            testcaseExecutionId: "TCE-3712",
             testcaseGuid: "5652e5a1-3566-f011-bec2-6045bda6d171",
             templateName: "Imputed Income - Basic Life",
             templateVersion: "TMPV-1396",
@@ -1187,106 +1110,20 @@ END;
             executionResult: "Failed",
             executionResultCode: 400,
             executedBy: "Alex Tonog",
-            executionDate: "4/30/2026 7:21 AM",
+            executionDate: "5/5/2026 5:11 PM",
             executionRemarks: "Fail",
             executionStatus: "Pending Review",
             reviewStatus: "PENDING",
             reviewRemarks: "",
             overrideComment: "",
-            resultRef: "d010a305-3f34-4ab8-91dc-9d002780ce91",
+            resultRef: "c23bdc22-2a3c-48ee-8264-e7936af752c4",
             logReferenceId: "",
             additionalDetails: "",
             executionInstance: 1,
             conditions: "",
             formattedWhereClause: "",
             whereClause: "",
-            query: ` DECLARE @BenId SMALLINT = 4;
-
- DECLARE @PlanYear SMALLINT = 2025;
-
-SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
-    DECLARE @AmountThreshold  DECIMAL(10, 4) = 50000.00;
-    DECLARE @RatePer  DECIMAL(10, 4) = 1000.00;
-    DECLARE @Debug BIT = 0;
-
-    DECLARE @AgeRates TABLE (
-        AgeFrom INT,
-        AgeTo INT,
-        Rate DECIMAL(10, 4)
-    );
-
-    INSERT INTO @AgeRates(AgeFrom, AgeTo, Rate)
-    VALUES
-        ( 0,  24, 0.0500),
-        (25,  29, 0.0600),
-        (30,  34, 0.0800),
-        (35,  39, 0.0900),
-        (40,  44, 0.1000),
-        (45,  49, 0.1500),
-        (50,  54, 0.2300),
-        (55,  59, 0.4300),
-        (60,  64, 0.6600),
-        (65,  69, 1.2700),
-        (70, 200, 2.0600);
-
-    DROP TABLE IF EXISTS #group;
-
-    SELECT TOP 1  
-        cm.PersonId,
-        cm.PlanYear,
-        cm.CalcId,
-        cm.PriceGroupId, 
-        cm.ImputedAge,
-        elig.BenId,
-        elig.OptionId,
-        rate.Rate,
-        elig.CovAmt,
-        elig.PosTaxPrice,        
-        ExpectedImputed = CONVERT(DECIMAL(18, 4), elig.Imputed),
-        ActualImputed = CONVERT(DECIMAL(18, 4), 
-                                ((elig.CovAmt - @AmountThreshold) / @RatePer * rate.Rate) - PosTaxPrice)
-    INTO #group
-        FROM 
-            hw_calcmaster cm WITH (NOLOCK)
-        JOIN 
-            hw_eligibility elig WITH (NOLOCK)
-                ON elig.PersonId = cm.PersonId 
-                AND elig.PlanYear = cm.PlanYear 
-                AND elig.CalcId = cm.CalcId
-        JOIN 
-            @AgeRates rate 
-                ON cm.ImputedAge BETWEEN rate.AgeFrom AND rate.AgeTo
-        WHERE 
-            cm.PlanYear = @PlanYear 
-            AND cm.RecordStatus = 'A' 
-            AND cm.GroupId > 0
-            AND dbo.IsInternalTest(cm.PersonId) = 0
-            AND elig.BenId = @BenId;
---
-IF @Debug = 1 BEGIN
-        SELECT * FROM #group
-        WHERE ExpectedImputed != ActualImputed;
-    END
-
-    ELSE BEGIN
-        SELECT Type = 'Target', Count = COUNT(1)
-        FROM #group
-
-        UNION ALL
-
-        SELECT Type = 'Positive', Count = COUNT(1)
-        FROM #group WITH (NOLOCK) 
-            WHERE ExpectedImputed = ActualImputed
-        
-        UNION ALL
-
-        SELECT Type = 'Negative', Count = COUNT(1)
-        FROM #group WITH (NOLOCK) 
-            WHERE ExpectedImputed != ActualImputed
-    END;
-
-    DROP TABLE IF EXISTS #group;
---`,
+            query: ` DECLARE @BenId SMALLINT = 4;\n\n DECLARE @PlanYear SMALLINT = 2025;\n\nSET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;\n    DECLARE @AmountThreshold  DECIMAL(10, 4) = 50000.00;\n    DECLARE @RatePer  DECIMAL(10, 4) = 1000.00;\n    DECLARE @Debug BIT = 0;\n\n    DECLARE @AgeRates TABLE (\n        AgeFrom INT,\n        AgeTo INT,\n        Rate DECIMAL(10, 4)\n    );\n\n    INSERT INTO @AgeRates(AgeFrom, AgeTo, Rate)\n    VALUES\n        ( 0,  24, 0.0500),\n        (25,  29, 0.0600),\n        (30,  34, 0.0800),\n        (35,  39, 0.0900),\n        (40,  44, 0.1000),\n        (45,  49, 0.1500),\n        (50,  54, 0.2300),\n        (55,  59, 0.4300),\n        (60,  64, 0.6600),\n        (65,  69, 1.2700),\n        (70, 200, 2.0600);\n\n    DROP TABLE IF EXISTS #group;\n\n    SELECT TOP 1\n        cm.PersonId, cm.PlanYear, cm.CalcId, cm.PriceGroupId,\n        cm.ImputedAge, elig.BenId, elig.OptionId, rate.Rate,\n        elig.CovAmt, elig.PosTaxPrice,\n        ExpectedImputed = CONVERT(DECIMAL(18, 4), elig.Imputed),\n        ActualImputed = CONVERT(DECIMAL(18, 4),\n                                ((elig.CovAmt - @AmountThreshold) / @RatePer * rate.Rate) - PosTaxPrice)\n    INTO #group\n    FROM hw_calcmaster cm WITH (NOLOCK)\n    JOIN hw_eligibility elig WITH (NOLOCK)\n        ON elig.PersonId = cm.PersonId AND elig.PlanYear = cm.PlanYear AND elig.CalcId = cm.CalcId\n    JOIN @AgeRates rate ON cm.ImputedAge BETWEEN rate.AgeFrom AND rate.AgeTo\n    WHERE cm.PlanYear = @PlanYear AND cm.RecordStatus = 'A'\n        AND cm.GroupId > 0 AND dbo.IsInternalTest(cm.PersonId) = 0\n        AND elig.BenId = @BenId;\n\nIF @Debug = 1 BEGIN\n    SELECT * FROM #group WHERE ExpectedImputed != ActualImputed;\nEND\nELSE BEGIN\n    SELECT Type = 'Target', Count = COUNT(1) FROM #group\n    UNION ALL\n    SELECT Type = 'Positive', Count = COUNT(1) FROM #group WITH (NOLOCK) WHERE ExpectedImputed = ActualImputed\n    UNION ALL\n    SELECT Type = 'Negative', Count = COUNT(1) FROM #group WITH (NOLOCK) WHERE ExpectedImputed != ActualImputed\nEND;\n\nDROP TABLE IF EXISTS #group;`,
             parameters: [
               { Name: "BenId", Value: "4", DataType: "SMALLINT", CanShowTestcaseUI: "Yes" },
               { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
@@ -1299,144 +1136,130 @@ IF @Debug = 1 BEGIN
             userValidation: { status: "User Validation", comments: "" },
             phases: null,
             history: [
-              { instance: 1, date: "4/30/2026 7:21 AM", result: "Failed", executor: "Alex Tonog" }
+              { instance: 1, date: "5/5/2026 5:11 PM", result: "Failed", executor: "Alex Tonog" }
             ]
           },
           {
-            // TCE row 5 - SQL-based, Failed with error (SQL syntax error)
-            name: "test",
-            testcaseId: "TC-3578",
-            testcaseExecutionId: "TCE-3707",
-            testcaseGuid: "cf22aa48-3d78-f011-b4cc-6045bda6d171",
-            templateName: "Mapping - GroupID",
-            templateVersion: "TMPV-1448",
+            // TCE-3718 - ActionBased, Failed (with manual verification)
+            name: "test-actionbased-alexis-1",
+            testcaseId: "TC-3989",
+            testcaseExecutionId: "TCE-3718",
+            testcaseGuid: "0d87abb6-c947-f111-bec5-7c1e52813c79",
+            templateName: "ActionBased",
+            templateVersion: "",
             environment: "QA",
+            manualVerificationComment: "manual test",
             executionResult: "Failed",
             executionResultCode: 400,
             executedBy: "Alex Tonog",
-            executionDate: "4/30/2026 7:21 AM",
-            executionRemarks: "Incorrect syntax near ')'.",
+            executionDate: "5/5/2026 5:11 PM",
+            executionRemarks: "Failed",
             executionStatus: "Pending Review",
             reviewStatus: "PENDING",
             reviewRemarks: "",
             overrideComment: "",
-            resultRef: "83102f19-914d-43a6-b7dd-6e0d402e6b5f",
+            resultRef: "2000416b-65b2-4bca-8e00-860b23ce2fba",
             logReferenceId: "",
-            additionalDetails: "Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near ')'.\n   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)\n   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)\n   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, SqlCommand command, Boolean callerHasConnectionLock, Boolean asyncClose)\n   at Att.Core.DataAccess.Repostories.ClientRepository.ExecuteQuery(String query)\n   at Att.Core.Engine.ExecutionActions.ExecuteActionQueryV2.Execute()\nClientConnectionId:881ac69e-dd2f-4c8f-b16e-15271fee5518\nError Number:102,State:1,Class:15",
+            additionalDetails: "",
             executionInstance: 1,
             conditions: "",
             formattedWhereClause: "",
             whereClause: "",
-            query: ` DECLARE @GroupId SMALLINT = 2;
-
- DECLARE @PlanYear SMALLINT = 2025;
-
-DECLARE @Debug BIT = 0;
-DROP TABLE IF EXISTS #group
-
-SELECT TOP 1  PersonId 
-INTO #group 
-FROM dbo.hw_calcmaster cm WITH (NOLOCK) 
-WHERE cm.RecordStatus = 'A' AND cm.PlanYear = @PlanYear    
-    AND dbo.IsInternalTest(personId) = 0
-     AND (
-
-)
---
--------------------------------------
--- 1 - Test population
--------------------------------------
-IF @Debug = 1 BEGIN
-
-     DECLARE @cols NVARCHAR(MAX);
-
-    SELECT @cols = STRING_AGG('cm.' + QUOTENAME(c.COLUMN_NAME), ', ')
-    WITHIN GROUP (ORDER BY c.ORDINAL_POSITION)
-    FROM INFORMATION_SCHEMA.COLUMNS m
-         JOIN INFORMATION_SCHEMA.COLUMNS c
-        ON m.COLUMN_NAME = c.COLUMN_NAME
-    WHERE m.TABLE_NAME = 'pr_group_mapping'
-                AND c.TABLE_NAME = 'hw_calcmaster';
-
-    SET @cols += ', HasOverride = IIf(ov.PersonId IS NULL, ''N'', ''Y'')'
-
-    DECLARE @sql NVARCHAR(MAX) = '
-    SELECT ''Negative'' AS Type, cm.PersonId, ' + @cols + '
-    FROM dbo.hw_calcmaster cm (NOLOCK)
-        LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
-                ON cm.PersonId = ov.PersonId
-                        AND cm.PlanYear = ov.PlanYear
-                        AND ov.GroupId =  @GroupId 
-            AND ov.Enabled = 1
-    WHERE cm.RecordStatus = ''A''
-        AND cm.PlanYear = @PlanYear
-        AND cm.GroupId = @GroupId
-        AND dbo.IsInternalTest(cm.PersonId) = 0
-        AND cm.PersonId NOT IN (SELECT PersonId FROM #group)
-
-    UNION ALL
-
-    SELECT ''Fallout'' AS Type, cm.PersonId, ' + @cols + '
-    FROM dbo.hw_calcmaster cm (NOLOCK)
-        LEFT JOIN  dbo.hw_calcmaster_override ov (NOLOCK)  
-                ON cm.PersonId = ov.PersonId
-                        AND cm.PlanYear = ov.PlanYear
-                        AND ov.GroupId IS NOT NULL 
-                        AND ov.GroupId !=  @GroupId
-            AND ov.Enabled = 1 
-    WHERE cm.RecordStatus = ''A''
-        AND cm.PlanYear = @PlanYear
-        AND cm.GroupId != @GroupId
-        AND cm.PersonId IN (SELECT PersonId FROM #group)
-    ORDER By PersonId
-    ';
-
-    EXEC sp_executesql @sql, N'@PlanYear SMALLINT, @GroupId SMALLINT', @PlanYear, @GroupId;
-
-END
-
-ELSE BEGIN
-    SELECT Type = 'Target', Count = COUNT(1)
-    FROM #group
-
-    UNION ALL
-
-    SELECT Type = 'Positive', Count = COUNT(1)
-    FROM dbo.hw_calcmaster WITH (NOLOCK) 
-        WHERE RecordStatus = 'A'    
-            AND PlanYear = @PlanYear  
-            AND GroupId = @GroupId
-            AND PersonId IN (SELECT PersonId FROM #group)
-
-    UNION ALL
-
-    SELECT Type = 'Negative', Count = COUNT(1)
-    FROM dbo.hw_calcmaster WITH (NOLOCK) 
-        WHERE RecordStatus = 'A' 
-            AND PlanYear = @PlanYear
-            AND GroupId = @GroupId
-            AND dbo.IsInternalTest(personId) = 0
-            AND PersonId NOT IN (SELECT PersonId FROM #group)
-
-    UNION ALL
-
-    SELECT Type = 'Fallout', Count = COUNT(1)
-    FROM dbo.hw_calcmaster WITH (NOLOCK) 
-        WHERE RecordStatus = 'A' 
-            AND PlanYear = @PlanYear  
-            AND GroupId != @GroupId
-            AND PersonId IN (SELECT PersonId FROM #group)
-END;  
---`,
+            query: "",
             parameters: [
-              { Name: "GroupId", Value: "2", DataType: "SMALLINT", CanShowTestcaseUI: "Yes" },
-              { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
+              { Name: "PlanYear", Value: "2026", DataType: "Text", CanShowTestcaseUI: "No" },
+              { Name: "Clone", Value: "true", DataType: "Boolean", CanShowTestcaseUI: "Yes" }
             ],
             results: [],
             userValidation: { status: "User Validation", comments: "" },
+            phases: [
+              {
+                name: "Parameter", displayName: "Parameter", code: "10", status: "", message: "", testStatus: -1,
+                steps: [{ name: "SharedData", displayName: "Shared Data", status: "", message: "", testStatus: -1, link: "",
+                  variables: [
+                    { name: "PlanYear", displayName: "PlanYear", value: "2026", type: "Text", required: true, include: true, description: "PlanYear" },
+                    { name: "Clone", displayName: "Clone", value: "true", type: "Boolean", required: true, include: true, description: "" }
+                  ]
+                }]
+              },
+              {
+                name: "TargetPerson", displayName: "TargetPerson", code: "20", status: "", message: "", testStatus: -1,
+                steps: [{ name: "FindPersonByPersonalInfo", displayName: "Personal Info", status: "", message: "", testStatus: -1, link: "",
+                  variables: [
+                    { name: "AgeFrom", displayName: "Age Range From", value: "35", type: "Integer", required: false, include: true, operator: "=", description: "Example: 25" },
+                    { name: "City", displayName: "City", value: "", type: "Text", required: false, include: false, description: "Example: New York" },
+                    { name: "State", displayName: "State", value: "", type: "Text", required: false, include: false, description: "" }
+                  ]
+                }]
+              },
+              {
+                name: "Precondition", displayName: "Precondition", code: "30", status: "", message: "", testStatus: -1,
+                steps: [{ name: "CreateNewHire", displayName: "Create New Hire", status: "", message: "", testStatus: -1, link: "", variables: [] }]
+              },
+              {
+                name: "Execution", displayName: "Execution", code: "40", status: "", message: "", testStatus: -1,
+                steps: [{ name: "MasterProcessControl", displayName: "Master Process Control", status: "", message: "", testStatus: -1, link: "", variables: [] }]
+              },
+              {
+                name: "Verification", displayName: "Verification", code: "50", status: "", message: "", testStatus: -1,
+                steps: [{ name: "VerifyEoiEligibility", displayName: "Verify Eoi Eligibility", status: "", message: "", testStatus: -1, link: "",
+                  variables: [
+                    { name: "BenId", displayName: "BenId", value: "6", type: "Text", required: true, include: true, description: "BenId" },
+                    { name: "OptionId", displayName: "OptionId Requiring EOI", value: "", type: "Text", required: false, include: false, description: "OptionId" },
+                    { name: "CovAmt", displayName: "CovAmt Requiring EOI", value: "", type: "Decimal", required: false, include: false, operator: ">", description: "CovAmt" }
+                  ]
+                }]
+              },
+              {
+                name: "Cleanup", displayName: "Cleanup", code: "60", status: "", message: "", testStatus: -1,
+                steps: []
+              }
+            ],
+            history: [
+              { instance: 1, date: "5/5/2026 5:11 PM", result: "Failed", executor: "Alex Tonog" }
+            ]
+          },
+          {
+            // TCE-3714 - SQL-based, Failed (with conditions)
+            name: "aa_group_mapping_6",
+            testcaseId: "TC-3207",
+            testcaseExecutionId: "TCE-3714",
+            testcaseGuid: "b0dce4fa-2550-f011-877a-6045bddb5c95",
+            templateName: "Mapping - PriceGroup",
+            templateVersion: "TMPV-1450",
+            environment: "QA",
+            executionResult: "Failed",
+            executionResultCode: 400,
+            executedBy: "Alex Tonog",
+            executionDate: "5/5/2026 5:12 PM",
+            executionRemarks: "Fail",
+            executionStatus: "Pending Review",
+            reviewStatus: "PENDING",
+            reviewRemarks: "",
+            overrideComment: "",
+            resultRef: "e7465f96-0b22-468e-a037-beb7acc39075",
+            logReferenceId: "",
+            additionalDetails: "",
+            executionInstance: 1,
+            conditions: '{"combinator":"and","rules":[{"id":"dfa7b843-b4f2-4ad3-bb1c-95f894dd31fe","field":"cm.Location","operator":"=","valueSource":"value","value":"a"},{"id":"9da105d1-53e6-4f33-b931-6fe0be162ad1","rules":[{"id":"f1b662ba-ca69-42dd-bded-e891a7e17383","field":"cm.GroupId","operator":"=","valueSource":"value","value":"1"}],"combinator":"and","not":false}]}',
+            formattedWhereClause: "ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)",
+            whereClause: "ISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)",
+            query: ` DECLARE @PriceGroupId SMALLINT = 1;\n\n DECLARE @PlanYear SMALLINT = 2025;\n\nDECLARE @Debug BIT = 0;\nDROP TABLE IF EXISTS #group\n\nSELECT TOP 1  PersonId\nINTO #group\nFROM dbo.hw_calcmaster cm WITH (NOLOCK)\nWHERE cm.RecordStatus = 'A' AND cm.PlanYear = @PlanYear\n    AND dbo.IsInternalTest(personId) = 0\n     AND (\nISNULL(cm.Location, '') = 'a' AND (cm.GroupId = 1)\n)\n\nIF @Debug = 1 BEGIN\n    -- debug output\n    SELECT * FROM #group\nEND\nELSE BEGIN\n    SELECT Type = 'Target', Count = COUNT(1) FROM #group\n    UNION ALL\n    SELECT Type = 'Positive', Count = COUNT(1)\n    FROM dbo.hw_calcmaster WITH (NOLOCK)\n    WHERE RecordStatus = 'A' AND PlanYear = @PlanYear\n        AND PriceGroupId = @PriceGroupId\n        AND PersonId IN (SELECT PersonId FROM #group)\n    UNION ALL\n    SELECT Type = 'Negative', Count = COUNT(1)\n    FROM dbo.hw_calcmaster WITH (NOLOCK)\n    WHERE RecordStatus = 'A' AND PlanYear = @PlanYear\n        AND PriceGroupId = @PriceGroupId\n        AND dbo.IsInternalTest(personId) = 0\n        AND PersonId NOT IN (SELECT PersonId FROM #group)\n    UNION ALL\n    SELECT Type = 'Fallout', Count = COUNT(1)\n    FROM dbo.hw_calcmaster WITH (NOLOCK)\n    WHERE RecordStatus = 'A' AND PlanYear = @PlanYear\n        AND PriceGroupId != @PriceGroupId\n        AND PersonId IN (SELECT PersonId FROM #group)\nEND;`,
+            parameters: [
+              { Name: "PriceGroupId", Value: "1", DataType: "SMALLINT", CanShowTestcaseUI: "Yes" },
+              { Name: "PlanYear", Value: "2026", DataType: "SMALLINT", CanShowTestcaseUI: "No" }
+            ],
+            results: [
+              { name: "Target > 0", expected: 0, actual: 0, remarks: "Fail" },
+              { name: "Positive > 0", expected: 0, actual: 0, remarks: "Fail" },
+              { name: "Target = Positive", expected: 0, actual: 0, remarks: "Pass" },
+              { name: "Negative = 0", expected: 0, actual: 302, remarks: "Fail" },
+              { name: "Fallout = 0", expected: 0, actual: 0, remarks: "Pass" }
+            ],
+            userValidation: { status: "User Validation", comments: "" },
             phases: null,
             history: [
-              { instance: 1, date: "4/30/2026 7:21 AM", result: "Failed", executor: "Alex Tonog" }
+              { instance: 1, date: "5/5/2026 5:12 PM", result: "Failed", executor: "Alex Tonog" }
             ]
           }
         ]
@@ -1530,26 +1353,11 @@ END;
         document.getElementById("welcomeFailedCount").textContent = failed;
         document.getElementById("welcomeUVCount").textContent = uv;
         document.getElementById("welcomeTotalCount").textContent = tce.testCaseExecutions.length;
+        document.getElementById("welcomeClientName").textContent = tce.clientName || "—";
+        document.getElementById("welcomeTemplateType").textContent = tce.templateType || "—";
+        document.getElementById("welcomeReviewer").textContent = tce.signOffReviewer || "—";
 
-        // A1: Display sample target person ID from setup
-        const actionBased = tce.testCaseExecutions.find(t => t.phases);
-        if (actionBased) {
-          const targetPhase = actionBased.phases.find(p => p.name === "TargetPerson");
-          if (targetPhase && targetPhase.steps) {
-            const findStep = targetPhase.steps.find(s => s.name === "FindPerson");
-            if (findStep) {
-              const personId = findStep.variables?.find(v => v.name === "PersonId")?.value || findStep.message;
-              if (personId) document.getElementById("welcomeSamplePersonId").textContent = personId;
-            }
-          }
-        }
 
-        // Test case names list
-        const listEl = document.getElementById("testCaseNamesList");
-        listEl.innerHTML = tce.testCaseExecutions.map((tc, i) => {
-          const resultColor = tc.executionResult === "Passed" ? "text-success" : tc.executionResult === "Failed" ? "text-danger" : "text-warning";
-          return `<div class="text-truncate" title="${escapeHtml(tc.name)}">${i+1}. ${escapeHtml(tc.name)} <span class="${resultColor} small">(${tc.executionResult})</span></div>`;
-        }).join("");
 
         updateStartReviewButton();
       }
@@ -1558,7 +1366,7 @@ END;
         const reviewed = testPlanExecution.testCaseExecutions.filter(t => t.reviewStatus !== "PENDING").length;
         btnStartReview.innerHTML = reviewed > 0
           ? '<i class="bi bi-arrow-right-circle me-1"></i>Continue Review'
-          : '<i class="bi bi-play-fill me-1"></i>Start Review';
+          : '<i class="bi bi-arrow-right-circle me-1"></i>Start Review';
       }
 
       initWelcome();
@@ -1632,9 +1440,10 @@ END;
         }
 
         if (testPlanExecution.signedOff) {
-          btnSignOff.innerHTML = '<i class="bi bi-check-lg me-1"></i>Signed Off';
+          btnSignOff.innerHTML = '<i class="bi bi-check-lg me-1"></i>Peer Review Requested';
           btnSignOff.classList.remove("btn-success");
           btnSignOff.classList.add("btn-outline-success");
+          btnSendTracker.style.display = '';
           btnSendTracker.disabled = false;
         }
       }
@@ -1747,6 +1556,7 @@ END;
         const tc = testPlanExecution.testCaseExecutions[idx];
 
         tcNameHeading.textContent = tc.name;
+        document.getElementById("tcNameTceId").textContent = `(${tc.testcaseExecutionId})`;
         historyBtnContainer.style.cssText = "";
         btnViewHistory.disabled = false;
         btnCopySQL.disabled = false;
@@ -1754,13 +1564,11 @@ END;
 
         // Populate General Information
         document.getElementById("infoName").innerHTML = `<a href="#" style="color:var(--wtw-purple);text-decoration:underline">${escapeHtml(tc.name)}</a>`;
-        document.getElementById("infoTemplate").textContent = tc.templateName + (tc.templateVersion ? ` (${tc.templateVersion})` : '');
-        document.getElementById("infoEnvironment").textContent = tc.environment;
+        document.getElementById("infoTemplate").textContent = tc.templateName;
         document.getElementById("infoTcId").textContent = tc.testcaseId;
 
-        let additionalHtml = `Testplan execution Id: ${testPlanExecution.executionId}<br>Testcase execution Id: ${tc.testcaseExecutionId}`;
-        if (tc.resultRef) additionalHtml += `<br>Result reference Id: ${tc.resultRef}`;
-        document.getElementById("infoAdditional").innerHTML = additionalHtml;
+        let refHtml = tc.resultRef || '—';
+        document.getElementById("infoAdditional").textContent = refHtml;
 
         document.getElementById("infoExecStatus").textContent = tc.executionStatus;
         const resultEl = document.getElementById("infoExecResult");
@@ -1789,12 +1597,21 @@ END;
         const isActionBased = tc.templateName === "ActionBased";
         configureTabsForTemplate(tc);
 
+        // Populate Environment badge in header
+        document.getElementById("envBadge").innerHTML = `<i class="bi bi-hdd-network me-1"></i>Execution Environment: ${escapeHtml(tc.environment || testPlanExecution.environment || '—')}`;
+
+        // Populate Runtime Parameters (non-ActionBased) - all TCE parameters
+        if (!isActionBased) {
+          populateRuntimeParams(tc.parameters);
+        }
+
         // Show "Resolving Fail" badge for failed test cases
         const resolvingBadge = document.getElementById("badgeResolvingFail");
         resolvingBadge.style.display = tc.executionResult === "Failed" ? "" : "none";
 
         if (isActionBased) {
-          // ActionBased: populate Phase Results and Verification Results
+          // ActionBased: populate Manual Verification, Phase Results, and Verification Results
+          populateManualVerification(tc);
           populatePhaseResults(tc);
           populateVerificationResults(tc);
           // If current tab is SQL-only, reset to general
@@ -1805,7 +1622,7 @@ END;
           // SQL-based: populate Results
           populateResults(tc);
           // If current tab is ActionBased-only, reset to general
-          if (['verificationresults', 'phaseresults'].includes(currentTab)) {
+          if (['verificationresults', 'phaseresults', 'manualverification'].includes(currentTab)) {
             currentTab = 'general';
           }
         }
@@ -1879,10 +1696,21 @@ END;
         }).join("");
       }
 
+      function populateManualVerification(tc) {
+        const content = document.getElementById("manualVerificationContent");
+        if (tc.manualVerificationComment) {
+          content.innerHTML = `<div class="p-2" style="white-space:pre-wrap;font-size:0.9rem">${escapeHtml(tc.manualVerificationComment)}</div>`;
+          content.classList.remove('subtle', 'text-center', 'py-4');
+        } else {
+          content.innerHTML = `<div class="subtle text-center py-4"><i class="bi bi-info-circle me-1"></i>No manual verification instructions available.</div>`;
+          content.classList.add('subtle', 'text-center', 'py-4');
+        }
+      }
+
       function populateVerificationResults(tc) {
         const tbody = document.getElementById("verificationResultsTbody");
         if (!tc.results || tc.results.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" class="subtle">No verification result data available.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" class="subtle">No verification result data available.</td></tr>`;
           document.getElementById("vResultsCountLabel").textContent = "";
           return;
         }
@@ -2015,13 +1843,8 @@ END;
         const detail = document.getElementById("phaseFailureDetail");
 
         if (!tc.phases) {
-          // SQL-based: check for execution errors (like SQL syntax errors)
-          if (tc.additionalDetails && tc.executionResult === "Failed") {
-            alert.classList.add("show");
-            detail.innerHTML = `<strong>Execution Error:</strong> ${escapeHtml(tc.executionRemarks)}<br><span class="small text-muted">${escapeHtml(tc.additionalDetails.substring(0, 200))}${tc.additionalDetails.length > 200 ? '...' : ''}</span>`;
-          } else {
-            alert.classList.remove("show");
-          }
+          // SQL-based: no phase failure alert (only for ActionBased)
+          alert.classList.remove("show");
           return;
         }
 
@@ -2053,15 +1876,44 @@ END;
         document.getElementById("uvComments").value = uv.comments || "";
       }
 
-      function populateParams(params) {
-        paramTbody.innerHTML = "";
+      function populateRuntimeParams(params) {
+        const tbody = document.getElementById("runtimeParamTbody");
+        tbody.innerHTML = "";
         if (!params || params.length === 0) {
-          paramTbody.innerHTML = `<tr><td colspan="3" class="subtle">No parameters.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="3" class="subtle">No runtime parameters.</td></tr>`;
           return;
         }
         params.forEach(p => {
           const tr = document.createElement("tr");
-          // Support both old format (name/type/value) and new format (Name/DataType/Value)
+          const pName = p.Name || p.name || '';
+          const pType = p.DataType || p.type || '';
+          const pValue = p.Value || p.value || '';
+          tr.innerHTML = `
+            <td>${escapeHtml(pName)}</td>
+            <td>${escapeHtml(pType)}</td>
+            <td>${escapeHtml(pValue)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      function populateParams(params) {
+        paramTbody.innerHTML = "";
+        if (!params || params.length === 0) {
+          paramTbody.innerHTML = `<tr><td colspan="3" class="subtle">No setup parameters.</td></tr>`;
+          return;
+        }
+        // Only show parameters where CanShowTestcaseUI is not "No"
+        const visible = params.filter(p => {
+          const canShow = p.CanShowTestcaseUI || p.canShowTestcaseUI || '';
+          return canShow.toLowerCase() !== 'no';
+        });
+        if (visible.length === 0) {
+          paramTbody.innerHTML = `<tr><td colspan="3" class="subtle">No setup parameters.</td></tr>`;
+          return;
+        }
+        visible.forEach(p => {
+          const tr = document.createElement("tr");
           const pName = p.Name || p.name || '';
           const pType = p.DataType || p.type || '';
           const pValue = p.Value || p.value || '';
@@ -2163,8 +2015,10 @@ END;
       // ============================================================
       function configureTabsForTemplate(tc) {
         const isActionBased = tc.templateName === "ActionBased";
+        const isCalcCompare = tc.templateName.toLowerCase().includes("calc compare");
         document.querySelectorAll('.tab-sql').forEach(el => el.style.display = isActionBased ? 'none' : '');
         document.querySelectorAll('.tab-action').forEach(el => el.style.display = isActionBased ? '' : 'none');
+        document.querySelectorAll('.tab-calccompare').forEach(el => el.style.display = (!isActionBased && isCalcCompare) ? '' : 'none');
       }
 
       function toggleSection(sectionName) {
@@ -2230,15 +2084,6 @@ END;
         screenReview.classList.remove("d-none");
 
         document.getElementById("planTitleTop").textContent = testPlanExecution.name + " (" + testPlanExecution.executionId + ")";
-
-        // A11: Populate runtime parameters bar
-        const paramsBar = document.getElementById("runtimeParamsBar");
-        if (testPlanExecution.runtimeParameters && testPlanExecution.runtimeParameters.length > 0) {
-          paramsBar.innerHTML = '<span class="subtle small me-1"><i class="bi bi-gear me-1"></i></span>' +
-            testPlanExecution.runtimeParameters.map(p =>
-              `<span class="param-chip">${escapeHtml(p.Name)}=${escapeHtml(p.Value)}</span>`
-            ).join("");
-        }
 
         updateTopBadges();
         renderList();
@@ -2409,7 +2254,7 @@ END;
 
         signOffModal.hide();
         checkSignOffEligibility();
-        alert(`✅ Execution signed off by ${reviewer} at ${testPlanExecution.signOffTimestamp}`);
+        alert(`✅ Peer review requested by ${reviewer} at ${testPlanExecution.signOffTimestamp}`);
       });
 
       // Send to Tracker (US8.3)
@@ -2489,13 +2334,13 @@ END;
 
       function clearDetails() {
         tcNameHeading.textContent = "—";
+        document.getElementById("tcNameTceId").textContent = "";
         actionsSection.style.display = "none";
         btnCopySQL.disabled = true;
         btnMaximizeQuery.disabled = true;
         btnViewHistory.disabled = true;
         document.getElementById("infoName").textContent = "—";
         document.getElementById("infoTemplate").textContent = "—";
-        document.getElementById("infoEnvironment").textContent = "—";
         document.getElementById("infoTcId").textContent = "—";
         document.getElementById("infoAdditional").textContent = "—";
         document.getElementById("infoExecStatus").textContent = "—";
@@ -2503,9 +2348,11 @@ END;
         document.getElementById("infoExecutedBy").textContent = "—";
         document.getElementById("infoExecDate").textContent = "—";
         document.getElementById("infoRemarks").textContent = "—";
+        document.getElementById("runtimeParamTbody").innerHTML = `<tr><td colspan="3" class="subtle">Select a test case to view runtime parameters.</td></tr>`;
+        document.getElementById("envBadge").innerHTML = '<i class="bi bi-hdd-network me-1"></i>Execution Environment: —';
         paramTbody.innerHTML = `<tr><td colspan="3" class="subtle">Select a test case to view parameters.</td></tr>`;
         document.getElementById("resultsTbody").innerHTML = `<tr><td colspan="5" class="subtle">Select a test case to view results.</td></tr>`;
-        document.getElementById("verificationResultsTbody").innerHTML = `<tr><td colspan="7" class="subtle">Select a test case to view results.</td></tr>`;
+        document.getElementById("verificationResultsTbody").innerHTML = `<tr><td colspan="5" class="subtle">Select a test case to view results.</td></tr>`;
         document.getElementById("phaseResultsTbody").innerHTML = `<tr><td colspan="4" class="subtle">Select a test case to view phase results.</td></tr>`;
         queryTextArea.value = "";
         syncAndHighlightQuery();

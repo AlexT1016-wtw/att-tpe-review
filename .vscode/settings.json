@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^powershell -Command \"\\(Select-String -Path 'c:\\\\PersonalProjects\\\\att-tpe-review\\\\index\\.html' -Pattern '</html>' \\| Measure-Object\\)\\.Count\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
